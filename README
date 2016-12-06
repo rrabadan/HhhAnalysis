@@ -1,0 +1,11 @@
+Installing the Package:
+   mkdir myFolder
+   cmsrel CMSSW_8_0_19
+   cd CMSSW_8_0_19/src
+   git clone https://github.com/lpernie/HhhAnalysis.git (Fork it if you want to make a Pull Request)
+   cd HhhAnalysis
+   scram b -j 12
+
+Running on data:
+    DataFormats/scripts/patifyData_Run2016/
+    python multicrab3.py
