@@ -1,0 +1,86 @@
+
+############### Gen-SIM
+
+cmsDriver.py  DiHiggs_Run2_cfi\
+	-s GEN,SIM --mc --datatier GEN-SIM --beamspot Realistic25ns13TeV2016Collision \
+	--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+	--eventcontent RAWSIM \
+	--era Run2_2016 \
+	--filetype LHE \
+	--filein file:/eos/uscms/store/user/tahuang/DiHiggs/HH-bbWW-B3-13TeV-100.hepmc \
+	--fileout file:out_sim.root \
+	-n 10 \
+	--no_exec
+
+then : 
+remove :
+process.source = cms.Source("LHESource",
+	    dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
+		inputCommands = cms.untracked.vstring('keep *',
+			        'drop LHEXMLStringProduct_*_*_*')
+	)
+
+add following lines: 
+process.source = cms.Source("MCFileSource",
+
+add these lines in bottom:
+
+def MassReplaceInputTag(aProcess,oldT="rawDataCollector",newT="rawDataRepacker"):
+	from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+	for s in aProcess.paths_().keys():
+		massSearchReplaceAnyInputTag(getattr(aProcess,s),oldT,newT)
+MassReplaceInputTag(process, "generator", "source")
+process.VtxSmeared.src = "source"
+
+
+############### DIGI-L1-Digi2RAW-HLT
+without PU
+cmsDriver.py DiHiggs_Run2_cfi \
+-s DIGI,L1,DIGI2RAW,HLT:@frozen2016 \
+--datatier RAW-HLT \
+--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+--eventcontent RAWSIM \
+--era Run2_2016 \
+--filein file:out_sim.root \
+--fileout file:out_raw.root \
+-n 10 \
+--no_exec
+
+with PU (to check --pileup tag)
+cmsDriver.py DiHiggs_Run2_cfi \
+-s DIGI,L1,DIGI2RAW,HLT:@frozen2016 \
+--datatier RAW-HLT \
+--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+--customise=MuJetAnalysis/GenProduction/addPileup.addPileup \
+--pileup 2016_25ns_Moriond17MC_PoissonOOTPU \
+--eventcontent RAWSIM \
+--era Run2_2016 \
+--filein file:out_sim.root \
+--fileout file:out_raw.root \
+-n 10 \
+--no_exec
+
+
+############### RAW2DIGI-L1Reco-RECO
+cmsDriver.py DiHiggs_Run2_cfi \
+-s RAW2DIGI,L1Reco,RECO \
+--datatier RECO \
+--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+--eventcontent AODSIM \
+--era Run2_2016 \
+--filein file:out_raw.root \
+--fileout file:out_reco.root \
+-n 10 \
+--no_exec
+
+############### PAT
+cmsDriver.py DiHiggs_Run2_cfi \
+	--runUnscheduled \
+	-s PAT \
+	--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+	--eventcontent MINIAODSIM \
+	--era Run2_2016 \
+	--filein file:out_reco.root \
+	--fileout file:out_miniaod.root \
+	-n 10 \
+	--no_exec
