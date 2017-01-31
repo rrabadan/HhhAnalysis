@@ -36,6 +36,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -112,16 +113,18 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       edm::ParameterSet cfg_;
       edm::ParameterSet mmcset_;
       // Labels to access
-      edm::EDGetTokenT<reco::GenParticleCollection> m_genParticles;
-      edm::EDGetTokenT<pat::MuonCollection> m_muons;        // reconstructed muons
-      edm::EDGetTokenT<reco::BeamSpot> m_beamSpot;
-      edm::EDGetTokenT<pat::TriggerEvent> m_triggerEvent;
-      edm::EDGetTokenT<reco::TrackCollection> m_tracks;
-      edm::EDGetTokenT<edm::TriggerResults> m_trigRes;
-      edm::EDGetTokenT<reco::TrackCollection> m_trackRef;
-      edm::EDGetTokenT< std::vector<Trajectory> > m_traj;
-      edm::EDGetTokenT<reco::VertexCollection> m_primaryVertices;
-      edm::EDGetTokenT<std::vector<pat::Jet> > m_PATJet;
+      edm::EDGetTokenT<reco::GenParticleCollection> genParticlesToken_;
+      edm::EDGetTokenT<pat::MuonCollection> muonToken_;        // reconstructed muons
+      edm::EDGetTokenT<pat::ElectronCollection> electronToken_;        // reconstructed electron
+      edm::EDGetTokenT<pat::JetCollection> jetToken_;
+      edm::EDGetTokenT<pat::METCollection> metToken_;
+      edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
+      edm::EDGetTokenT<pat::TriggerEvent> triggerEventToken_;
+      edm::EDGetTokenT<reco::TrackCollection> tracksToken_;
+      edm::EDGetTokenT<edm::TriggerResults> trigResToken_;
+      edm::EDGetTokenT<reco::TrackCollection> trackRefToken_;
+      edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
+      edm::EDGetTokenT<reco::VertexCollection> primaryVerticesToken_;
       //configuration
       //data: 0 
       //or MC:signal(B1-B12)+background
@@ -186,6 +189,10 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       void printallAncestors(const reco::Candidate* );
       void checkGenParticlesSingal(edm::Handle<reco::GenParticleCollection> genParticleColl);
       void checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl);
+      void matchMuon2Gen();//match pat:::Muon to gen muon 
+      void matchBjets2Gen();//match genjet to gen b and then match pat::Jet to genjet
+
+
     private:
       // ---------- Candidates in signal channel ---------------------------
       const reco::Candidate* mu1_W1_cand;
@@ -453,7 +460,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
   //****************************************************************************
   //                 SET GEN LEVEL VARIABLES AND MATCHING                      
   //****************************************************************************
-    m_genParticles    = consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticles"));
+    genParticlesToken_    = consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticles"));
     jetsDeltaR_ = iConfig.getUntrackedParameter<double>("jetsDeltaR",0.4);
     leptonsDeltaR_ = iConfig.getUntrackedParameter<double>("leptonsDeltaR",0.1);
 
@@ -461,15 +468,18 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
   //                 SET RECO LEVEL VARIABLES AND COUNTERS                       
   //****************************************************************************
 	
-    m_muons           = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
-    m_beamSpot        = consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"));
-    m_triggerEvent    = consumes<pat::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerEvent"));
-    m_tracks          = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"));
-    m_trigRes         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"));
-    m_trackRef        = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("TrackRefitter"));
-    m_traj            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
-    m_primaryVertices = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"));
-    m_PATJet          = consumes<std::vector<pat::Jet> >(iConfig.getParameter<edm::InputTag>("PATJet"));
+    muonToken_           = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
+    electronToken_       = consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"));
+    jetToken_          = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"));
+    metToken_          = consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets"));
+
+    beamSpotToken_        = consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"));
+    triggerEventToken_    = consumes<pat::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerEvent"));
+    tracksToken_          = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"));
+    trigResToken_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"));
+    trackRefToken_        = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("TrackRefitter"));
+    trajToken_            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
+    primaryVerticesToken_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"));
 
   //****************************************************************************
   //                 CLEAR_UP CUTS                       
@@ -590,6 +600,7 @@ weightfromonshellnupt_hist_ = iConfig.getParameter<bool>("weightfromonshellnupt_
     htoWW = false;
     virtualW_lowM = 25;
     virtualW_highM = 45;
+    findAllGenParticles = false;
 
      /* 
       mu1_lorentz = new TLorentzVector();
@@ -687,10 +698,8 @@ DiHiggsWWBBAnalyzer::~DiHiggsWWBBAnalyzer()
 void
 DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-	using namespace edm;
 
-
-
+    using namespace edm;
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
    iEvent.getByLabel("example",pIn);
@@ -702,14 +711,54 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 #endif
 //   if(iEvent.isRealData()) std::cout << " Not a real Data " << std::endl;
     
-   std::cout << "event  " << iEvent.id().event() << std::endl;
-   ievent = iEvent.id().event();
-   edm::Handle<reco::GenParticleCollection> genParticleColl;
-   iEvent.getByToken(m_genParticles, genParticleColl);
-   if (sampleType_<=12 and sampleType_>0)
-   	checkGenParticlesSingal(genParticleColl);
-   else if (sampleType_==13)
-   	checkGenParticlesTTbar(genParticleColl);
+    std::cout << "event  " << iEvent.id().event() << std::endl;
+    ievent = iEvent.id().event();
+    edm::Handle<reco::GenParticleCollection> genParticleColl;
+    iEvent.getByToken(genParticlesToken_, genParticleColl);
+    if (sampleType_<=12 and sampleType_>0)
+	checkGenParticlesSingal(genParticleColl);
+    else if (sampleType_==13)
+	checkGenParticlesTTbar(genParticleColl);
+
+  // Cut on primary vertex in event
+    edm::Handle<reco::VertexCollection> primaryVertices;
+    iEvent.getByToken(primaryVerticesToken_, primaryVertices);
+    if (primaryVertices->empty()) return; // skip the event if no PV found
+    const reco::Vertex &PV = primaryVertices->front();
+   
+    edm::Handle<pat::MuonCollection> muons;
+    iEvent.getByToken(muonToken_, muons);
+    edm::Handle<pat::ElectronCollection> electrons;
+    iEvent.getByToken(electronToken_, electrons);
+    std::vector<const reco::Candidate *> leptons;
+    for (const pat::Muon &mu : *muons) {
+	leptons.push_back(&mu);
+	printf("muon with pt %4.1f, dz(PV) %+5.3f, POG loose id %d, tight id %d\n",
+		mu.pt(), mu.muonBestTrack()->dz(PV.position()), mu.isLooseMuon(), mu.isTightMuon(PV));
+    }
+    for (const pat::Electron &el : *electrons) leptons.push_back(&el);
+    for (const reco::Candidate *lep : leptons) {
+	if (lep->pt() < 5) continue;
+	printf("lepton: pt %5.1f, eta %+4.2f \n", lep->pt(), lep->eta());
+    }
+
+    //for (pat::MuonCollection::const_iterator iMuon = muons->begin();  iMuon != muons->end();  ++iMuon) {
+    //or for (const pat::Muon &mu : *muons) {
+      
+    edm::Handle<pat::JetCollection> jets;
+    iEvent.getByToken(jetToken_, jets);
+    for (const pat::Jet &j : *jets) {
+	if (j.pt() < 30 || fabs(j.eta()) > 2.4) continue;
+	printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
+		j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
+    }
+
+
+    edm::Handle<pat::METCollection> mets;
+    iEvent.getByToken(metToken_, mets);
+    const pat::MET &met = mets->front();
+    printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
+   	 met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
    /* 
    //if (h2tohh && runMMC_) runMMC();
    if (h2tohh && runMMC_){
@@ -1059,13 +1108,6 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
               }
     }
     std::cout <<"tColl size " << tColl.size() <<" tbarColl " << tbarColl.size() << std::endl;
-     /*for (unsigned int i = 0; i<tColl.size(); i++){
-	std::cout <<" t1cand " ; printCandidate(tColl.at(i));
-	}
-     for (unsigned int j = 0; j<tbarColl.size(); j++){
-	std::cout <<" t2cand " ; printCandidate(tbarColl.at(j));
-	}*/
-
     //bool ttbar =false;
     if (tColl.size()==1 and tbarColl.size() ==1){
 	//ttbar = true;
@@ -1078,11 +1120,8 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
 	w1cand = finddecendant(t1cand, 24, false);
 	b2cand = finddecendant(t2cand, -5, false);
 	w2cand = finddecendant(t2cand, -24, false);   
-   	for (unsigned int i=0; i < b1cand->numberOfDaughters(); i++)
-   	   std::cout <<"candidate id "<< b1cand->pdgId()<<" daughter i "<< i <<" id "<<(b1cand->daughter(i))->pdgId()<< std::endl;
-   	for (unsigned int i=0; i < w1cand->numberOfDaughters(); i++)
-   	   std::cout <<"candidate id "<< w1cand->pdgId()<<" daughter i "<< i <<" id "<<(w1cand->daughter(i))->pdgId()<< std::endl;
-
+   	//for (unsigned int i=0; i < b1cand->numberOfDaughters(); i++)
+   	   //std::cout <<"candidate id "<< b1cand->pdgId()<<" daughter i "<< i <<" id "<<(b1cand->daughter(i))->pdgId()<< std::endl;
 	if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)){
 	    mu1cand = findmudaughter(w1cand);
 	    nu1cand = findnudaughter(w1cand);
@@ -1110,7 +1149,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
         std::cout <<" w2 " ; printCandidate(w2cand);
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
-		//fillbranches();
+	//fillbranches();
         //evtree->Fill();
     }
 
