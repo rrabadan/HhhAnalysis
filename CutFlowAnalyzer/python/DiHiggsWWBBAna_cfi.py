@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
+print "Deprecated"
 DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
 	verbose = cms.untracked.int32(0),
         #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background

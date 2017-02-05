@@ -15,13 +15,14 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
-	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	#'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	 'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
     )
 )
 
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(-1) 
+    input = cms.untracked.int32(10000) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 
@@ -32,17 +33,20 @@ process.MessageLogger = cms.Service("MessageLogger",
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
     #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
-    SampleType = cms.untracked.int32(13),
+    SampleType = cms.untracked.int32(3),
     #genParticles = cms.InputTag("genParticles"),
     genParticles = cms.InputTag("prunedGenParticles"),#minAOD
-    muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
+    #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
+    muons = cms.InputTag("slimmedMuons"),
+    electrons = cms.InputTag("slimmedElectrons"),
+    jets = cms.InputTag("slimmedJets"),
+    mets = cms.InputTag("slimmedMETs"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
     triggerEvent = cms.InputTag("patTriggerEvent"),
     tracks = cms.InputTag("generalTracks"),
     TriggerResults = cms.InputTag("TriggerResults","","RECO"),
     TrackRefitter = cms.InputTag("TrackRefitter"),
-    primaryVertices = cms.InputTag("offlinePrimaryVertices"),
-    PATJet = cms.InputTag("patJets"),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     Traj = cms.InputTag("TrackRefitter"),
     finalStates = cms.bool(False),
     simulation = cms.bool(True),
