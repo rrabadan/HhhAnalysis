@@ -123,6 +123,10 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float jet2_eta_;
       float jet1_pt_;
       float jet2_pt_;
+      std::string bjetDiscrName_;
+      float bjetDiscrCut_loose_;
+      float bjetDiscrCut_medium_;
+      float bjetDiscrCut_tight_;
       float met_;
       float jetleptonDeltaR_;
       float leptonIso_;
@@ -406,6 +410,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float b1jet_energy;
       float b1jet_mass;
       unsigned int b1jet_btag;
+      float b1jet_bDiscVar;
       float b2jet_px;
       float b2jet_py;
       float b2jet_pz;
@@ -415,6 +420,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float b2jet_energy;
       float b2jet_mass;
       unsigned int b2jet_btag;
+      float b2jet_bDiscVar;
       bool hasb1jet;
       bool hasb2jet;
 
@@ -506,6 +512,10 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
     jet2_eta_ = iConfig.getUntrackedParameter<double>("jet2_eta",2.5);
     jet1_pt_ = iConfig.getUntrackedParameter<double>("jet1_pt",20);
     jet2_pt_ = iConfig.getUntrackedParameter<double>("jet2_pt",20);
+    bjetDiscrName_ = iConfig.getUntrackedParameter<std::string>("bjetDiscrName","pfCombinedMVAV2BJetTags");
+    bjetDiscrCut_loose_ = iConfig.getUntrackedParameter<double>("bjetDiscrCut_loose",0.5);
+    bjetDiscrCut_medium_ = iConfig.getUntrackedParameter<double>("bjetDiscrCut_medium",0.7);
+    bjetDiscrCut_tight_ = iConfig.getUntrackedParameter<double>("bjetDiscrCut_tight",0.9);
 	//mmcset_ = iConfig.getParameter<edm::ParameterSet>("mmcset"); 
     sampleType_ = iConfig.getUntrackedParameter<int>("SampleType",0);
     finalStates_ = iConfig.getParameter<bool>("finalStates");
@@ -727,6 +737,7 @@ DiHiggsWWBBAnalyzer::initBranches(){
     b1jet_pt= -1;
     b1jet_energy=-1;
     b1jet_btag = 0;
+    b1jet_bDiscVar = 0;
     b2jet_px=0;
     b2jet_py=0;
     b2jet_pz=0;
@@ -735,6 +746,7 @@ DiHiggsWWBBAnalyzer::initBranches(){
     b2jet_pt=-1;
     b2jet_energy=-1;
     b2jet_btag = 0;
+    b2jet_bDiscVar = 0;
     hasb1jet=false;
     hasb2jet=false;
 
@@ -838,29 +850,147 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     iEvent.getByToken(muonToken_, muons);
     edm::Handle<pat::ElectronCollection> electrons;
     iEvent.getByToken(electronToken_, electrons);
-    std::vector<const reco::Candidate *> leptons;
-    for (const pat::Muon &mu : *muons) {
-	leptons.push_back(&mu);
-	printf("muon with pt %4.1f, dz(PV) %+5.3f, POG loose id %d, tight id %d\n",
-		mu.pt(), mu.muonBestTrack()->dz(PV.position()), mu.isLooseMuon(), mu.isTightMuon(PV));
-    }
-    for (const pat::Electron &el : *electrons) leptons.push_back(&el);
-    for (const reco::Candidate *lep : leptons) {
-	if (lep->pt() < 5) continue;
-	printf("lepton: pt %5.1f, eta %+4.2f \n", lep->pt(), lep->eta());
-    }
+    std::vector<const reco::Candidate *> pleptons;
+    std::vector<const reco::Candidate *> nleptons;
 
+    
+  //****************************************************************************
+  //                Triggering matching 
+  //****************************************************************************
+
+  //****************************************************************************
+  //                di-Leptons selection
+  //****************************************************************************
     //for (pat::MuonCollection::const_iterator iMuon = muons->begin();  iMuon != muons->end();  ++iMuon) {
     //or for (const pat::Muon &mu : *muons) {
+    for (const pat::Muon &mu : *muons) {
+	const MuonPFIsolation& muonIso = mu.pfIsolationR03();
+	float isoVar = (muonIso.sumChargedHadronPt + muonIso.sumNeutralHadronEt + muonIso.sumPhotonEt)/mu.pt();
+	if (fabs(mu.eta())<2.4 and mu.pt()>10 and fabs(mu.muonBestTrack()->dz(PV.position()))<0.1 and 
+		((mu.pt()>20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.02) or 
+		(mu.pt()<20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.01)) and isoVar<0.15){
+	   if (mu.charge()>0) pleptons.push_back(&mu);
+	   else if (mu.charge()<0) nleptons.push_back(&mu);
+	   std::cout <<"get one muon passed selection eta "<< mu.eta() <<" pt "<< mu.pt()<<" isovar "<< isoVar <<" charge "<< mu.charge()<< std::endl;
+	}
+	printf("muon with pt %4.1f, charge %d, IsoVar %5.3f, dz(PV) %+5.3f, dxy(PV)%+5.3f, POG loose id %d, tight id %d\n",
+		mu.pt(), mu.charge(), isoVar, mu.muonBestTrack()->dz(PV.position()), fabs(mu.muonBestTrack()->dxy(PV.position())),mu.isLooseMuon(), mu.isTightMuon(PV));
+    }
+    //ignore electron now
+    for (const pat::Electron &el : *electrons) {
+	if (el.pt()>1000000) continue;
+    	
+    }
+    const reco::Candidate * selectedPlep = NULL;
+    const reco::Candidate * selectedNlep = NULL;
+    TLorentzVector dilep_p4;
+    float sumPt=0.0;
+    for (const reco::Candidate *plep : pleptons) {
+	for (const reco::Candidate *nlep : nleptons){
+	    //select lepton pairs with larger sumPt
+	    dilep_p4.SetPxPyPzE(plep->px()+nlep->px(), plep->py()+nlep->py(), plep->pz()+nlep->pz(), plep->energy()+nlep->energy());
+	    if(((plep->pt()>10 and nlep->pt()>20) or (nlep->pt()>10 and plep->pt()>20))and dilep_p4.M()>12 and (plep->pt()+nlep->pt())>sumPt){
+		selectedPlep = plep;
+		selectedNlep = nlep;
+		sumPt = plep->pt()+nlep->pt();
+	    }
+	}
+    }
+    bool hastwomuons = false;
+    if (sumPt>=30){
+	//muon1, mu1: positive charge
+	muon1_px = selectedPlep->px(); muon1_py = selectedPlep->py(); muon1_pz = selectedPlep->pz(); muon1_energy = selectedPlep->energy();
+	muon1_pt = selectedPlep->pt(); muon1_eta = selectedPlep->eta(); muon1_phi = selectedPlep->phi();
+	muon2_px = selectedNlep->px(); muon2_py = selectedNlep->py(); muon2_pz = selectedNlep->pz(); muon2_energy = selectedNlep->energy();
+	muon2_pt = selectedNlep->pt(); muon2_eta = selectedNlep->eta(); muon2_phi = selectedNlep->phi();
+	hastwomuons = true;
+    	std::cout <<"Found two leptons " << std::endl;
+	printf("plepton: pt %5.1f, eta %+4.2f \n", selectedPlep->pt(), selectedPlep->eta());
+	printf("nlepton: pt %5.1f, eta %+4.2f \n", selectedNlep->pt(), selectedNlep->eta());
+    }
       
+  //****************************************************************************
+  //                di-Jets selection
+  //****************************************************************************
     edm::Handle<pat::JetCollection> jets;
     iEvent.getByToken(jetToken_, jets);
+    std::vector<pat::Jet> allbjets;
     for (const pat::Jet &j : *jets) {
-	if (j.pt() < 30 || fabs(j.eta()) > 2.4) continue;
+	if (j.pt() < 20 or fabs(j.eta()) > 2.5) continue;
+  	if (hastwomuons){
+	    TLorentzVector jet_p4(j.px(), j.py(), j.pz(), j.energy());    
+	    float dR1 = jet_p4.DeltaR(TLorentzVector(selectedPlep->px(), selectedPlep->py(), selectedPlep->pz(), selectedPlep->energy()));
+	    float dR2 = jet_p4.DeltaR(TLorentzVector(selectedNlep->px(), selectedNlep->py(), selectedNlep->pz(), selectedNlep->energy()));
+	    if (dR1 < 0.3 or dR2 < .03) continue;
+	}	
+	float bDiscVar = j.bDiscriminator(bjetDiscrName_);
+	if (bDiscVar < bjetDiscrCut_medium_)  continue;
+	allbjets.push_back(j);
 	printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
 		j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
     }
 
+    // sort jets by pt
+    std::sort(allbjets.begin(), allbjets.end(), [](pat::Jet& jet1, pat::Jet& jet2) { return jet1.pt() > jet2.pt(); });
+    std::cout <<"allbjets size "<< allbjets.size() << std::endl;
+    unsigned int jet1=0, jet2=0;
+    float diff_higgsmass = 9999;
+    for (unsigned int i=0; i<allbjets.size(); i++){
+    	for (unsigned int j=i+1; j<allbjets.size(); j++){
+	    TLorentzVector dijet_p4(allbjets[i].px()+allbjets[j].px(), allbjets[i].py()+allbjets[j].py(), 
+		    allbjets[i].pz()+allbjets[j].pz(),allbjets[i].energy()+allbjets[j].energy());
+	    if (fabs(dijet_p4.M()-125)<diff_higgsmass){
+	       jet1 = i;
+	       jet2 = j;
+	       diff_higgsmass = fabs(dijet_p4.M()-125); 
+	    }
+	}
+    }
+    bool hastwobjets = false;
+    if (allbjets.size()>2){
+	std::cout <<"found two bjets "<< std::endl;
+	b1jet_px = allbjets[jet1].px(); b1jet_py = allbjets[jet1].py(); b1jet_pz = allbjets[jet1].pz(); b1jet_energy = allbjets[jet1].energy();
+	b1jet_pt = allbjets[jet1].pt(); b1jet_eta = allbjets[jet1].eta(); b1jet_phi = allbjets[jet1].phi();
+	b1jet_bDiscVar = allbjets[jet1].bDiscriminator(bjetDiscrName_);
+	b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet1].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
+	b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet1].eta(); b2jet_phi = allbjets[jet2].phi();
+	b2jet_bDiscVar = allbjets[jet2].bDiscriminator(bjetDiscrName_);
+	hastwobjets = true;
+    }
+
+   if (hastwomuons and hastwobjets){
+          TLorentzVector Muon1_p4(muon1_px, muon1_py, muon1_pz, muon1_energy); 
+          TLorentzVector Muon2_p4(muon2_px, muon2_py, muon2_pz, muon2_energy); 
+          TLorentzVector b1jet_p4(b1jet_px, b1jet_py, b1jet_pz, b1jet_energy); 
+          TLorentzVector b2jet_p4(b2jet_px, b2jet_py, b2jet_pz, b2jet_energy); 
+	  dR_bl   = (b1jet_p4.Pt()>b2jet_p4.Pt()) ? (b1jet_p4.DeltaR( (Muon1_p4.Pt()>Muon2_p4.Pt()) ? Muon1_p4 : Muon2_p4 )) : (b2jet_p4.DeltaR( (Muon1_p4.Pt()>Muon2_p4.Pt()) ? Muon1_p4 : Muon2_p4 ));
+	  dR_b1l1 = b1jet_p4.DeltaR(Muon1_p4);
+	  dR_b1l2 = b1jet_p4.DeltaR(Muon2_p4);
+	  dR_b2l1 = b2jet_p4.DeltaR(Muon1_p4);
+	  dR_b2l2 = b2jet_p4.DeltaR(Muon2_p4);
+	  dR_b1b2 = b1jet_p4.DeltaR(b2jet_p4);
+	  dR_l1l2 = Muon1_p4.DeltaR(Muon2_p4);
+	  dR_l1l2b1b2 = (Muon1_p4+Muon2_p4).DeltaR(b1jet_p4+b2jet_p4);
+	  dphi_l1l2b1b2 = fabs(TVector2::Phi_mpi_pi( (Muon1_p4+Muon2_p4).Phi()-(b1jet_p4+b2jet_p4).Phi() ));
+	  TLorentzVector ll_p4 = Muon1_p4+Muon2_p4;
+	  TLorentzVector bjets_p4 = b1jet_p4+b2jet_p4;
+	  dR_minbl = std::min(std::min(dR_b1l1,dR_b1l2),std::min(dR_b2l1,dR_b2l2));
+	  dphi_llbb = TVector2::Phi_mpi_pi(ll_p4.Phi()-bjets_p4.Phi());
+	  dphi_llmet = TVector2::Phi_mpi_pi(ll_p4.Phi()-met_phi);
+	  mass_l1l2 = ll_p4.M(); energy_l1l2 = ll_p4.Energy(); pt_l1l2 = ll_p4.Pt(); eta_l1l2 = ll_p4.Eta(); phi_l1l2 = ll_p4.Phi();
+	  mass_b1b2 = bjets_p4.M(); energy_b1b2 = bjets_p4.Energy(); pt_b1b2 = bjets_p4.Pt(); eta_b1b2 = bjets_p4.Eta(); phi_b1b2 = bjets_p4.Phi();
+	  mass_trans = sqrt(2*ll_p4.Pt()*met_pt*(1-cos(dphi_llmet)));
+	  //if (dR_b1l1 > jetleptonDeltaR_ and dR_b1l2 > jetleptonDeltaR_ and dR_b2l1 > jetleptonDeltaR_ and dR_b2l2 > jetleptonDeltaR_) hasdRljet =true;
+	  //MINdR_bl = dR_b1l1*(dR_b1l1<dR_b1l2 && dR_b1l1<dR_b2l1 && dR_b1l1<dR_b2l2) + dR_b2l1*(dR_b2l1<dR_b2l2 && dR_b2l1<dR_b1l1 && dR_b2l1<dR_b1l2) + dR_b1l2*(dR_b1l2<dR_b1l1 && dR_b1l2<dR_b2l1 && dR_b1l2<dR_b2l2) + dR_b2l2*(dR_b2l2<dR_b1l1 && dR_b2l2<dR_b1l2 && dR_b2l2<dR_b2l1);
+     
+	  //MT2: In order to construct MT2 for either the t tbar -> bW bW system or our signal H -> h h -> bb WW,
+	  //we group each pair b_jet-lepton into an object: we then get "Particle A" and "Particle B" (each one given by a b_jet-lepton object),
+	  //whose Kinematics is to be fed into the MT2 variable.
+	  //There are two possible Lepton-Bquark pairings. We compute MT2 for both and pick the smallest value.
+   
+   }
+
+   if (findAllGenParticles) evtree->Fill();
 
 }
 
@@ -1053,6 +1183,7 @@ DiHiggsWWBBAnalyzer::beginJob()
     evtree->Branch("b1jet_energy",&b1jet_energy, "b1jet_energy/F");
     evtree->Branch("b1jet_mass",&b1jet_mass, "b1jet_mass/F");
     evtree->Branch("b1jet_btag",&b1jet_btag, "b1jet_btag/i");//unsigned int
+    evtree->Branch("b1jet_bDiscVar",&b1jet_bDiscVar, "b1jet_bDiscVar/F");
     evtree->Branch("b2jet_px",&b2jet_px, "b2jet_px/F");
     evtree->Branch("b2jet_py",&b2jet_py, "b2jet_py/F");
     evtree->Branch("b2jet_pz",&b2jet_pz, "b2jet_pz/F");
@@ -1062,6 +1193,7 @@ DiHiggsWWBBAnalyzer::beginJob()
     evtree->Branch("b2jet_energy",&b2jet_energy, "b2jet_energy/F");
     evtree->Branch("b2jet_mass",&b2jet_mass, "b2jet_mass/F");
     evtree->Branch("b2jet_btag",&b2jet_btag, "b2jet_btag/i");
+    evtree->Branch("b2jet_bDiscVar",&b2jet_bDiscVar, "b2jet_bDiscVar/F");
     evtree->Branch("dR_b1jet", &dR_b1jet,"dR_b1jet/F");  
     evtree->Branch("dR_b2jet", &dR_b2jet,"dR_b2jet/F");  
     evtree->Branch("hasb1jet",&hasb1jet, "hasb1jet/B");
@@ -1250,8 +1382,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesSingal(edm::Handle<reco::GenParticleCollec
         std::cout <<" w2 " ; printCandidate(w2cand);
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
-		//fillbranches();
-        //evtree->Fill();
+	fillbranches();
     }
 
 }
@@ -1368,8 +1499,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
         std::cout <<" w2 " ; printCandidate(w2cand);
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
-	//fillbranches();
-        //evtree->Fill();
+	fillbranches();
     }
 
 }
