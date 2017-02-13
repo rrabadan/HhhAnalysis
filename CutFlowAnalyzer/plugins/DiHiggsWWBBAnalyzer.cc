@@ -188,7 +188,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       void printCandidate(const reco::Candidate* );
       void printallDecendants(const reco::Candidate* );
       void printallAncestors(const reco::Candidate* );
-      void checkGenParticlesSingal(edm::Handle<reco::GenParticleCollection> genParticleColl);
+      void checkGenParticlesSignal(edm::Handle<reco::GenParticleCollection> genParticleColl);
       void checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl);
       void matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> genjetColl);
       void matchmuon2Gen();//match pat:::Muon to gen muon 
@@ -872,12 +872,14 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     edm::Handle<std::vector<reco::GenJet>> genjetColl;
     iEvent.getByToken(genjetToken_, genjetColl);
     if (sampleType_<=12 and sampleType_>0)
-	checkGenParticlesSingal(genParticleColl);
+	checkGenParticlesSignal(genParticleColl);
     else if (sampleType_==13)
 	checkGenParticlesTTbar(genParticleColl);
-    if (sampleType_>0) matchGenJet2Parton( genjetColl );
+    if (sampleType_>0 and findAllGenParticles) matchGenJet2Parton( genjetColl );
+    if (findAllGenParticles) 
+	fillbranches();//fill Gen info into tree
 
-   
+   /*
   //****************************************************************************
   //                RECO LEVEL
   //****************************************************************************
@@ -1318,7 +1320,7 @@ DiHiggsWWBBAnalyzer::endJob()
 
 // ------------ method called to check singal genParticles   ------------
 void 
-DiHiggsWWBBAnalyzer::checkGenParticlesSingal(edm::Handle<reco::GenParticleCollection> genParticleColl){
+DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleCollection> genParticleColl){
 
     std::vector<reco::GenParticle*> b1Coll; 
     std::vector<reco::GenParticle*> b2Coll;
@@ -1327,7 +1329,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesSingal(edm::Handle<reco::GenParticleCollec
     std::vector<const reco::Candidate*> htoWWColl;
     std::vector<const reco::Candidate*> htoBBColl;
 
-    std::cout <<"*********** start to check GenParticles for Singal sample ***********"<< std::endl;
+    std::cout <<"*********** start to check GenParticles for Signal sample ***********"<< std::endl;
     bool h2tohh = false;
     for (reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
     //particle id, (electron12)(muon13),(b5),(W+24),(SM higgs25)
@@ -1443,7 +1445,6 @@ DiHiggsWWBBAnalyzer::checkGenParticlesSingal(edm::Handle<reco::GenParticleCollec
         std::cout <<" w2 " ; printCandidate(w2cand);
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
-	fillbranches();
     }
 
 }
@@ -1560,7 +1561,6 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
         std::cout <<" w2 " ; printCandidate(w2cand);
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
-	fillbranches();
     }
 
 }
@@ -1578,6 +1578,7 @@ DiHiggsWWBBAnalyzer::matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> g
 	TLorentzVector genjet_p4(genjet.px(), genjet.py(), genjet.pz(), genjet.energy());
 	float dR_b1 = genjet_p4.DeltaR(b1_p4);
 	float dR_b2 = genjet_p4.DeltaR(b2_p4);
+	//std::cout <<"dR_b1 "<<dR_b1 <<" dR_b2 "<< dR_b2 <<" genjet px "<< genjet.px() << " py "<< genjet.py()<<" pz "<< genjet.pz()<<" E "<<genjet.energy() <<std::endl;
 	if (dR_b1 < dR_b2 and dR_b1 < dR_b1genjet){
 	    b1genjet = &genjet;
 	    dR_b1genjet = dR_b1;
@@ -1590,7 +1591,9 @@ DiHiggsWWBBAnalyzer::matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> g
     }
     if (hasb1genjet and hasb2genjet){
     	hastwogenjets = true;
-
+	std::cout <<" b1genjet: genparticle components " << std::endl;
+	for (auto genp : b1genjet->getGenConstituents())
+		std::cout <<"genp id "<< genp->pdgId()<<" px "<< genp->px()<<" py "<< genp->py()<<" pt "<< genp->pt() << std::endl;
     }
 
 }
