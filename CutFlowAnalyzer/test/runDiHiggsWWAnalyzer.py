@@ -15,14 +15,14 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
-	#'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
-	 'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
+	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	 #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
     )
 )
 
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(10000) 
+    input = cms.untracked.int32(100000) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 

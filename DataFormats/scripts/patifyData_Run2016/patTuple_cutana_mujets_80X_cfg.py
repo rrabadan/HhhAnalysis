@@ -21,7 +21,8 @@ process.load("HhhAnalysis.CutFlowAnalyzer.CutFlowAnalyzer_cff")
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'file:022B1BC6-A789-E611-808B-B499BAAB427C.root'
+        #'file:022B1BC6-A789-E611-808B-B499BAAB427C.root'
+	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
     )
 )
 
@@ -37,8 +38,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.p = cms.Path(
 #    process.patifyMC *
-    process.patifyData *
-    process.cutFlowAnalyzers
+    process.patifyData 
+#   * process.cutFlowAnalyzers
 )
 
 process.outpath = cms.EndPath(process.out)

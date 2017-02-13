@@ -26,14 +26,15 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 # Input source
 process.source = cms.Source("MCFileSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     #fileNames = cms.untracked.vstring('file:output_from_herwig.hepmc')
-    fileNames = cms.untracked.vstring('file:/eos/uscms/store/user/tahuang/DiHiggs/HH-bbWW-B3-13TeV-100.hepmc')
+    #fileNames = cms.untracked.vstring('file:/eos/uscms/store/user/tahuang/DiHiggs/HH-bbWW-B3-13TeV-100.hepmc')
+    fileNames = cms.untracked.vstring('file:HH-bbWW-B3-13TeV-leptonW-1k.hepmc')
 )
 
 process.options = cms.untracked.PSet(
@@ -58,7 +59,7 @@ process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:out_sim_1.root'),
+    fileName = cms.untracked.string('file:out_sim.root'),
     outputCommands = process.RAWSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
