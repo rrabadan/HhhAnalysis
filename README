@@ -1,11 +1,23 @@
 Installing the Package:
-   mkdir myFolder
-   cmsrel CMSSW_8_0_19
-   cd CMSSW_8_0_19/src
-   git clone https://github.com/lpernie/HhhAnalysis.git (Fork it if you want to make a Pull Request)
-   cd HhhAnalysis
-   scram b -j 12
+=============
+
+0. mkdir myFolder
+0. cmsrel CMSSW_8_0_19
+0. cd CMSSW_8_0_19/src
+0. git clone https://github.com/lpernie/HhhAnalysis.git (Fork it if you want to make a Pull Request)
+0. cd HhhAnalysis
+0. scram b -j 12
 
 Running on data:
     DataFormats/scripts/patifyData_Run2016/
     python multicrab3.py
+
+Physics objects from Muon POG:
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
+
+MC MINIAOD to llok for in DAS:
+/TT_TuneCUETP8M1_13TeV-powheg-pythia8/*
+/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8*
+/DYBJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8*
+/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8
+/DYBBJetsToLL_M-10To70_TuneCUETP8M1_13TeV-madgraphMLM-pythia8*
