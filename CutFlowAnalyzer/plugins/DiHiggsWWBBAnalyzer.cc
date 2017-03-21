@@ -879,7 +879,6 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     if (findAllGenParticles) 
 	fillbranches();//fill Gen info into tree
 
-   /*
   //****************************************************************************
   //                RECO LEVEL
   //****************************************************************************
