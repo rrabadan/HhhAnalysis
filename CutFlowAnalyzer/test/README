@@ -1,6 +1,5 @@
 1.- List of files for each sample in python directory:
 
-    i.e. CMSSW_7_4_1_patch1/src/HhhAnalysis/CutFlowAnalyzer/python/DarkSUSY_mH_125_mGammaD_0250_13TeV_cT_000_RAW2DIGI_L1Reco_RECO_v1_cff.py
 
 2.- Put the list of MC samples in a text file  (i.e.  mc.txt)
 
@@ -10,8 +9,8 @@
 
 4.- Go to SBATCH_JOBS directory and submit the the jobs
 
-    sbatch DarkSUSY_mH_125_mGammaD_0250_13TeV_cT_000_RAW2DIGI_L1Reco_RECO_v1.slrm
 
+    sbatch job.slrm
 5.- Check the status of the jobs:
 
     squeue -u username
@@ -22,7 +21,12 @@
     
 
     
+Instrcutions to run DiHiggsWWBBAnalyzer.cc
+this analyzer is targeted to run on DiHiggs, TTbar, DY samples
+Sampletype is used to mark which sample it is running on 
+if you are using data, set Sampletype=0 and analyzer will skip gen-level selection 
+if you are using signal sample, e.g. B6, you can set Sampletype=0, or Sampletype=6 which will check gen-level information
+if you are using TTbar, you can set Sampletype=0, or Sampletype=13 which will check gen-level information
+if you are using DY sample, you can set Sampletype=0, or Sampletype=14 which will check gen-level information( not implemented yet)
 
-
-
-
+The event will be saved only if it pass preselection at reco levle but we also sometimes keep track of gen-level information  
