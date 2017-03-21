@@ -1047,7 +1047,7 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  //whose Kinematics is to be fed into the MT2 variable.
 	  //There are two possible Lepton-Bquark pairings. We compute MT2 for both and pick the smallest value.
    
-   }*/
+   }
 
    if (findAllGenParticles) evtree->Fill();
 
@@ -1447,6 +1447,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleCollec
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
     }
+    std::cout <<"*********** end in checking GenParticles for Signal sample ***********"<< std::endl;
 
 }
 
@@ -1563,6 +1564,7 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
         std::cout <<" b1 " ; printCandidate(b1cand);
         std::cout <<" b2 " ; printCandidate(b2cand);
     }
+    std::cout <<"*********** end in checking GenParticles for TTbar sample ***********"<< std::endl;
 
 }
 
@@ -1592,9 +1594,10 @@ DiHiggsWWBBAnalyzer::matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> g
     }
     if (hasb1genjet and hasb2genjet){
     	hastwogenjets = true;
-	std::cout <<" b1genjet: genparticle components " << std::endl;
-	for (auto genp : b1genjet->getGenConstituents())
-		std::cout <<"genp id "<< genp->pdgId()<<" px "<< genp->px()<<" py "<< genp->py()<<" pt "<< genp->pt() << std::endl;
+	std::cout <<"dR_b1genjet "<< dR_b1genjet<< " dR_b2genjet "<< dR_b2genjet <<" genjet b1 pt  "<< b1genjet->pt() << " b2 pt "<< b2genjet->pt()<< std::endl;
+	std::cout <<" b1genjet: genparticle components num: "<< b1genjet->numberOfDaughters() << std::endl;
+	//for (auto genp : b1genjet->getGenConstituents())
+	  //  std::cout <<"genp id "<< genp->pdgId()<<" px "<< genp->px()<<" py "<< genp->py()<<" pt "<< genp->pt() << std::endl;
     }
 
 }
