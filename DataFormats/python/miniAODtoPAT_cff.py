@@ -8,6 +8,9 @@ from PhysicsTools.PatAlgos.triggerLayer1.triggerEventProducer_cfi import *
 from PhysicsTools.PatAlgos.slimming.unpackedPatTrigger_cfi import unpackedPatTrigger
 from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
 
+######################
+## patify Muon
+######################
 muonMatch = muonMatch.clone(
     src = cms.InputTag("slimmedMuons"),
     resolveByMatchQuality = cms.bool(True),
@@ -155,11 +158,12 @@ patifyPFMuon = cms.Sequence(
     cleanPFMuonTriggerMatchHLTTrkMu17DoubleTrkMu8 *
     cleanPatPFMuonsTriggerMatch
 )
+
 patifyData = cms.Sequence(
     unpackedTracksAndVertices *
     unpackedPatTrigger *
     patifyTrackerMuon * 
-    patifyPFMuon
+    patifyPFMuon 
 )
 patifyMC = cms.Sequence(
     muonMatch * 
