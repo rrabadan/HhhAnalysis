@@ -855,6 +855,7 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     initBranches(); 
     ievent++;
     std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
+    /*
     edm::Handle<pat::METCollection> mets;
     iEvent.getByToken(metToken_, mets);
     const pat::MET &met = mets->front();
@@ -863,6 +864,7 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
    	 met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
     met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
+	*/
 
   //****************************************************************************
   //                GENERATOR LEVEL                       
@@ -1045,7 +1047,7 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  //whose Kinematics is to be fed into the MT2 variable.
 	  //There are two possible Lepton-Bquark pairings. We compute MT2 for both and pick the smallest value.
    
-   }
+   }*/
 
    if (findAllGenParticles) evtree->Fill();
 
