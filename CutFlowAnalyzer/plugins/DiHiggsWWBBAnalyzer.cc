@@ -1,23 +1,10 @@
-// -*- C++ -*-
-//
 // Package:    DiHiggsWWBBAnalyzer
 // Class:      DiHiggsWWBBAnalyzer
-// 
 /**\class DiHiggsWWBBAnalyzer DiHiggsWWBBAnalyzer.cc DiHiggsWW/DiHiggsWWBBAnalyzer/plugins/DiHiggsWWBBAnalyzer.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
 */
-//
 // Original Author:  tao huang
 //         Created:  Wed, 26 Nov 2014 17:58:07 GMT
-// $Id$
 //
-//
-
-
 // system include files
 #include <memory>
 #include <iostream>
@@ -26,15 +13,14 @@
 #include <string>
 #include <vector>
 #include "math.h"
-
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Lepton.h"
@@ -43,13 +29,9 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
-
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "HhhAnalysis/CutFlowAnalyzer/interface/CrossSections_and_BR.h"
 //headers from root lib
 #include "TTree.h"
 #include "TFile.h"
@@ -60,14 +42,12 @@
 #include "TF1.h"
 #include "TH1F.h"
 
-
-
-//#include "HhhAnalysis/CutFlowAnalyzer/src/MMC.h"
+typedef std::pair<float, float> EtaPhi;
+using namespace reco;
 
 float dxy(const reco::Candidate *cand, const reco::Vertex *point){
     return (-(cand->vx()-point->x())*cand->py()+(cand->vy()+point->y())*cand->px())/cand->pt();
 };
-
 float dz(const reco::Candidate *cand, const reco::Vertex *point){
     return ((cand->vz() - point->z()) - ((cand->vx() - point->x()) * cand->px() + (cand->vy() - point->y()) * cand->py()) /cand->pt()) * cand->pz() /cand->pt();
 };
@@ -75,33 +55,19 @@ float dz(const reco::Candidate *cand, const reco::Vertex *point){
 class MMC;
 //#define WMass 80.385   // W mass
 //#define SMHMass 125.03 // SM module higgs mass
-
-
-//
-// class declaration
-//
-
-using namespace reco;
-
-typedef std::pair<float, float> EtaPhi;
-
 class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
    public:
       explicit DiHiggsWWBBAnalyzer(const edm::ParameterSet&);
       ~DiHiggsWWBBAnalyzer();
-
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-
    private:
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
-    
-   private:
       edm::ParameterSet cfg_;
       edm::ParameterSet mmcset_;
       // Labels to access
+      int sampleName_; //B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
       edm::EDGetTokenT<reco::GenParticleCollection> genParticlesToken_;
       edm::EDGetTokenT<pat::MuonCollection> muonToken_;        // reconstructed muons
       edm::EDGetTokenT<pat::ElectronCollection> electronToken_;        // reconstructed electron
@@ -118,7 +84,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       //configuration
       //data: 0 
       //or MC:signal(B1-B12)+background
-      enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
+      enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets};//add other background
       int sampleType_;
       //bool runMCMatch;//select physics objects by matching them to gen information
       int jetSelectionAlgo_;
@@ -222,11 +188,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       const reco::Candidate* t2cand;
       const reco::GenJet* b1genjet;
       const reco::GenJet* b2genjet;
-
-
-
     private:
-      
       TLorentzVector mu1_lorentz;
       TLorentzVector mu2_lorentz;
       TLorentzVector bbar_lorentz;
@@ -235,12 +197,9 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       TLorentzVector met_lorentz;
       TLorentzVector bjet_lorentz;
       TLorentzVector bbarjet_lorentz;
-
-    private:
       TLorentzVector stableDecendantsLorentz(const reco::Candidate* cand); 
       TLorentzVector calculateMET(); 
-
-    private:
+      float XsecBr;
       //gen particles
       bool findAllGenParticles;
       float mu1_energy;
@@ -344,7 +303,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float dR_b2genjet;
       bool hastwogenjets;
 
-
       float genmet_pt;
       float genmet_phi;
       float genmet_px;
@@ -355,7 +313,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float h2tohh_py;
       float h2tohh_pz;
       float h2tohh_mass;
-
       //for ttbar
       float t1_energy;
       float t1_px;
@@ -367,7 +324,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float t2_py;
       float t2_pz;
       float t2_mass;
-
 
       float dR_genbl;
       float dR_genb1l1;
@@ -392,7 +348,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float dphi_genllbb;
       float dphi_genllmet;
       float mass_gentrans;
-
       //reco leve
       float numberOfmuon1;
       float numberOfmuon2;
@@ -479,8 +434,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
       float dphi_llbb;
       float dphi_llmet;
       float mass_trans;
-
-     
     private:
       bool runMMC_;
       bool simulation_;
@@ -488,19 +441,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
      // MMC tree branches
 };
 
-    //
-// constants, enums and typedefs
-//
-
-//
-// static data member definitions
-//
-
-//
-// constructors and destructor
-//
-DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
-{
+DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   //****************************************************************************
   //                 SET GEN LEVEL VARIABLES AND MATCHING                      
   //****************************************************************************
@@ -511,12 +452,11 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
   //****************************************************************************
   //                 SET RECO LEVEL VARIABLES AND COUNTERS                       
   //****************************************************************************
-	
-    muonToken_           = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
-    electronToken_       = consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"));
-    jetToken_          = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"));
+    muonToken_            = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
+    electronToken_        = consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"));
+    jetToken_             = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"));
     genjetToken_          = consumes<std::vector<reco::GenJet>>(iConfig.getParameter<edm::InputTag>("genjets"));
-    metToken_          = consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets"));
+    metToken_             = consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets"));
 
     beamSpotToken_        = consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"));
     triggerEventToken_    = consumes<pat::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerEvent"));
@@ -553,6 +493,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
     
 	//mmcset_ = iConfig.getParameter<edm::ParameterSet>("mmcset"); 
     sampleType_ = iConfig.getUntrackedParameter<int>("SampleType",0);
+    sampleName_ = iConfig.getUntrackedParameter<int>("sampleName",1);
     finalStates_ = iConfig.getParameter<bool>("finalStates");
     runMMC_ = iConfig.getParameter<bool>("runMMC");
     simulation_ = iConfig.getParameter<bool>("simulation");
@@ -574,14 +515,11 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig)
     b1_htobb_cand = NULL;
     b2_htobb_cand = NULL;
     h2tohh_cand = NULL;
-    //  
 }
 
 
-void 
-DiHiggsWWBBAnalyzer::initBranches(){
-
-
+void DiHiggsWWBBAnalyzer::initBranches(){
+    XsecBr=-1;
     findAllGenParticles = false;
     mu1cand = NULL;
     nu1cand = NULL;
@@ -821,26 +759,14 @@ DiHiggsWWBBAnalyzer::initBranches(){
 }
 
 
-DiHiggsWWBBAnalyzer::~DiHiggsWWBBAnalyzer()
-{
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
+DiHiggsWWBBAnalyzer::~DiHiggsWWBBAnalyzer(){
 }
 
-
-//
-// member functions
-//
 //step 1 find gen particles if it is MC sample
 //step 2 select pat objects: matched by gen or not, and apply clear-up cuts at the same time 
 //step 3 run MMC on selected objects: gen level or reco level
 // ------------ method called for each event  ------------
-void
-DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
-
+void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     using namespace edm;
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
@@ -855,6 +781,10 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     initBranches(); 
     ievent++;
     std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
+    //Compute weight
+    //CrossSections_and_BR *my_br = new CrossSections_and_BR();
+    //XsecBr = my_br->GetWeight(sampleName_);
+
     /*
     edm::Handle<pat::METCollection> mets;
     iEvent.getByToken(metToken_, mets);
@@ -896,12 +826,9 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     iEvent.getByToken(electronToken_, electrons);
     std::vector<const reco::Candidate *> pleptons;
     std::vector<const reco::Candidate *> nleptons;
-
-    
   //****************************************************************************
   //                Triggering matching 
   //****************************************************************************
-
   //****************************************************************************
   //                di-Leptons selection
   //****************************************************************************
@@ -1048,23 +975,17 @@ DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  //There are two possible Lepton-Bquark pairings. We compute MT2 for both and pick the smallest value.
    
    }
-
    if (findAllGenParticles) evtree->Fill();
-
 }
 
-
-// ------------ method called once each job just before starting event loop  ------------
-void 
-DiHiggsWWBBAnalyzer::beginJob()
-{
+void DiHiggsWWBBAnalyzer::beginJob(){
     evtree = fs->make<TTree>("evtree", "evtree");
- //  output = new TFile("output.root","recreate");
-      // output->cd();
+    //output = new TFile("output.root","recreate");
+    // output->cd();
     evtree->Branch("ievent",&ievent);
- //  evtree = new TTree("evtree","event tree");
- 
-   //evtree->Branch("h2tohh",&findAllGenParticles);
+    //evtree = new TTree("evtree","event tree");
+    //evtree->Branch("h2tohh",&findAllGenParticles);
+    evtree->Branch("XsecBr",&XsecBr, "XsecBr/F");
     evtree->Branch("mu1_px",&mu1_px, "mu1_px/F");
     evtree->Branch("mu1_py",&mu1_py, "mu1_py/F");
     evtree->Branch("mu1_pz",&mu1_pz, "mu1_pz/F");
@@ -1204,8 +1125,6 @@ DiHiggsWWBBAnalyzer::beginJob()
     evtree->Branch("dphi_genllbb",&dphi_genllbb, "dphi_genllbb/F");
     evtree->Branch("dphi_genllmet",&dphi_genllmet, "dphi_genllmet/F");
     evtree->Branch("mass_gentrans",&mass_gentrans, "mass_gentrans/F");
-
-
     //reco level
     evtree->Branch("muon1_px",&muon1_px, "muon1_px/F");
     evtree->Branch("muon1_py",&muon1_py, "muon1_py/F");
@@ -1292,15 +1211,12 @@ DiHiggsWWBBAnalyzer::beginJob()
     evtree->Branch("eta_l1l2",&eta_l1l2, "eta_l1l2/F");
     evtree->Branch("dphi_llbb",&dphi_llbb, "dphi_llbb/F");
     evtree->Branch("dphi_llmet",&dphi_llmet, "dphi_llmet/F");
-    evtree->Branch("mass_trans",&mass_trans, "mass_trans/F");
-
-    
+    evtree->Branch("mass_trans",&mass_trans, "mass_trans/F");   
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-DiHiggsWWBBAnalyzer::endJob() 
-{
+DiHiggsWWBBAnalyzer::endJob() {
 //   std::cout << "endJob, ievent  " << ievent << std::endl;
     //output->Write();
    // output->Close();
@@ -1318,10 +1234,8 @@ DiHiggsWWBBAnalyzer::endJob()
    //delete jets_lorentz;
 }
 
-
 // ------------ method called to check singal genParticles   ------------
-void 
-DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleCollection> genParticleColl){
+void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleCollection> genParticleColl){
 
     std::vector<reco::GenParticle*> b1Coll; 
     std::vector<reco::GenParticle*> b2Coll;
@@ -1448,14 +1362,10 @@ DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleCollec
         std::cout <<" b2 " ; printCandidate(b2cand);
     }
     std::cout <<"*********** end in checking GenParticles for Signal sample ***********"<< std::endl;
-
 }
 
-
-
 // ------------ method called to check ttbar genParticles   ------------
-void 
-DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl){
+void DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl){
 
     std::vector<reco::GenParticle*> b1Coll; 
     std::vector<reco::GenParticle*> b2Coll;
@@ -1463,7 +1373,6 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
     std::vector<reco::GenParticle*> W2Coll;
     std::vector<const reco::Candidate*> tColl;
     std::vector<const reco::Candidate*> tbarColl;
-
     std::cout <<"*********** start to check GenParticles for TTbar sample ***********"<< std::endl;
     for (reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
     //particle id, (electron12)(muon13),(b5),(W+24),(SM higgs25)
@@ -1506,7 +1415,6 @@ DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollect
 		    }
               }
     }
-
      //tbar->bbarW- -6->-5,-24
     if (W2Coll.size() && b2Coll.size()){
          for(auto W2_cand : W2Coll)

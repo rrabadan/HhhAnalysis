@@ -37,8 +37,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
-    #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
-    SampleType = cms.untracked.int32(3),
+    SampleType = cms.untracked.int32(3), #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
+    sampleName = cms.untracked.int32(1), #B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
     #genParticles = cms.InputTag("genParticles"),
     genParticles = cms.InputTag("prunedGenParticles"),#minAOD
     #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),

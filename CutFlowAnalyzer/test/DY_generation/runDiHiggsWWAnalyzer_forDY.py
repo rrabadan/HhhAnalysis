@@ -63,6 +63,6 @@ process.pDiHiggsWWBBAna = cms.Path(
     process.DiHiggsWWBBAna
 )
 
-process.pdump = cms.Path(process.dump)	
+process.pdump = cms.Path(process.dump)
 
 process.schedule = cms.Schedule(process.pDiHiggsWWBBAna)
