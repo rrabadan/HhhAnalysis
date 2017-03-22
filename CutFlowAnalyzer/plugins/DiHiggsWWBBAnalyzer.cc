@@ -386,6 +386,26 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float b1jet_mass;
     unsigned int b1jet_btag;
     float b1jet_bDiscVar;
+    float b1jet_mt;
+    float b1jet_leadTrackPt;
+    float b1jet_leptonPdgId;
+    float b1jet_leptonPhi;
+    float b1jet_leptonEta;
+    float b1jet_leptonPtRel;
+    float b1jet_leptonPt;
+    float b1jet_leptonDeltaR;
+    float b1jet_neHEF;//neutralHardonEfraction
+    float b1jet_neEmEF;//neutralEmEnergyFraction
+    float b1jet_vtxMass;
+    float b1jet_vtxNtracks;
+    float b1jet_vtxPx;
+    float b1jet_vtxPy;
+    float b1jet_vtxPt;
+    float b1jet_vtx3DSig;
+    float b1jet_vtx3DVal;
+    float b1jet_vtxPosX;
+    float b1jet_vtxPosY;
+    float b1jet_vtxPosZ;
     float b2jet_px;
     float b2jet_py;
     float b2jet_pz;
@@ -396,6 +416,26 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float b2jet_mass;
     unsigned int b2jet_btag;
     float b2jet_bDiscVar;
+    float b2jet_mt;
+    float b2jet_leadTrackPt;
+    float b2jet_leptonPdgId;
+    float b2jet_leptonPhi;
+    float b2jet_leptonEta;
+    float b2jet_leptonPtRel;
+    float b2jet_leptonPt;
+    float b2jet_leptonDeltaR;
+    float b2jet_neHEF;//neutralHardonEfraction
+    float b2jet_neEmEF;//neutralEmEnergyFraction
+    float b2jet_vtxMass;
+    float b2jet_vtxNtracks;
+    float b2jet_vtxPx;
+    float b2jet_vtxPy;
+    float b2jet_vtxPt;
+    float b2jet_vtx3DSig;
+    float b2jet_vtx3DVal;
+    float b2jet_vtxPosX;
+    float b2jet_vtxPosY;
+    float b2jet_vtxPosZ;
     bool hastwojets;
     bool hasb1jet;
     bool hasb2jet;
@@ -404,6 +444,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float met_phi;
     float met_px;
     float met_py;
+
+    float HT;
 
     float minMass;
     float MINdR_bl;
@@ -704,6 +746,27 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   b1jet_energy=-1;
   b1jet_btag = 0;
   b1jet_bDiscVar = 0;
+  b1jet_leadTrackPt = 0;
+  b1jet_mt  =0;
+  b1jet_leptonPdgId = 0;
+  b1jet_leptonPhi = 0;
+  b1jet_leptonEta = 0;
+  b1jet_leptonPtRel = 0;
+  b1jet_leptonPt = 0;
+  b1jet_leptonDeltaR = 0;
+  b1jet_neHEF = 0;//neutralHardonEfraction
+  b1jet_neEmEF = 0;//neutralEmEnergyFraction
+  b1jet_vtxMass = 0;
+  b1jet_vtxNtracks = 0;
+  b1jet_vtxPx = 0;
+  b1jet_vtxPy = 0;
+  b1jet_vtxPt = 0;
+  b1jet_vtx3DSig = 0;
+  b1jet_vtx3DVal = 0;
+  b1jet_vtxPosX =0;
+  b1jet_vtxPosY = 0;
+  b1jet_vtxPosZ = 0;
+
   b2jet_px=0;
   b2jet_py=0;
   b2jet_pz=0;
@@ -713,6 +776,26 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   b2jet_energy=-1;
   b2jet_btag = 0;
   b2jet_bDiscVar = 0;
+  b2jet_leadTrackPt = 0;
+  b2jet_mt  =0;
+  b2jet_leptonPdgId = 0;
+  b2jet_leptonPhi = 0;
+  b2jet_leptonEta = 0;
+  b2jet_leptonPtRel = 0;
+  b2jet_leptonPt = 0;
+  b2jet_leptonDeltaR = 0;
+  b2jet_neHEF = 0;//neutralHardonEfraction
+  b2jet_neEmEF = 0;//neutralEmEnergyFraction
+  b2jet_vtxMass = 0;
+  b2jet_vtxNtracks = 0;
+  b2jet_vtxPx = 0;
+  b2jet_vtxPy = 0;
+  b2jet_vtxPt = 0;
+  b2jet_vtx3DSig = 0;
+  b2jet_vtx3DVal = 0;
+  b2jet_vtxPosX =0;
+  b2jet_vtxPosY = 0;
+  b2jet_vtxPosZ = 0;
   hastwojets = false;
   hasb1jet=false;
   hasb2jet=false;
@@ -721,6 +804,8 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   met_phi = -999.;
   met_px = -999.;
   met_py = -999.;
+
+  HT = 0;
 
   minMass=999.;
   dR_bl=-1.0;
@@ -898,6 +983,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   iEvent.getByToken(jetToken_, jets);
   std::vector<pat::Jet> allbjets;
   for (const pat::Jet &j : *jets) {
+    HT +=  j.pt();//scalar sum of all jet pt 
     if (j.pt() < jet_trailingpt_ or fabs(j.eta()) > jet_eta_) continue;
     if (hastwomuons){
 	TLorentzVector jet_p4(j.px(), j.py(), j.pz(), j.energy());    
@@ -906,10 +992,12 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	if (dR1 < jetleptonDeltaR_ or dR2 < jetleptonDeltaR_) continue;
     }	
     float bDiscVar = j.bDiscriminator(bjetDiscrName_);
-    if (bDiscVar < bjetDiscrCut_medium_)  continue;
+    if (bDiscVar < bjetDiscrCut_loose_)  continue;
     allbjets.push_back(j);
+    
     printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
 	  j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
+    printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
     const reco::GenParticle * genp = j.genParticle();
     if (genp)
 	std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
@@ -936,9 +1024,31 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b1jet_px = allbjets[jet1].px(); b1jet_py = allbjets[jet1].py(); b1jet_pz = allbjets[jet1].pz(); b1jet_energy = allbjets[jet1].energy();
     b1jet_pt = allbjets[jet1].pt(); b1jet_eta = allbjets[jet1].eta(); b1jet_phi = allbjets[jet1].phi();
     b1jet_bDiscVar = allbjets[jet1].bDiscriminator(bjetDiscrName_);
-    b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet1].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
-    b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet1].eta(); b2jet_phi = allbjets[jet2].phi();
+    //b1jet_leadTrackPt = allbjets[jet1].leadTrackPt(); b1jet_mt  = allbjets[jet1].mt();//ptcorrection?
+    //b1jet_leptonPdgId = allbjets[jet1].leptons[0].pdgId(); b1jet_leptonPhi = allbjets[jet1].leptons[0].phi(); b1jet_leptonEta = allbjets[jet1].leptons[0].eta();
+    //b1jet_leptonPtRel = 0; b1jet_leptonPt = allbjets[jet1].leptons[0].pt();
+    //b1jet_leptonDeltaR = deltaR(b1jet_leptonEta, b1jet_leptonPhi, b1jet_eta, b1jet_phi);
+    //b1jet_neHEF = allbjets[jet1].neutralHadronEnergy()/(allbjets[jet1].p4()*allbjets[jet1].rawFactor()).energy();//neutralHardonEfraction
+    //b1jet_neEmEF = allbjets[jet1].neutralEmEnergy()/(allbjets[jet1].p4()*allbjets[jet1].rawFactor()).energy();//neutralEmEnergyFraction
+    b1jet_vtxMass = allbjets[jet1].userFloat("vtxMass"); b1jet_vtxNtracks = allbjets[jet1].userFloat("vtxNtracks"); 
+    b1jet_vtxPx = allbjets[jet1].userFloat("vtxPx"); b1jet_vtxPy = allbjets[jet1].userFloat("vtxPy");
+    b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
+    b1jet_vtx3DSig = allbjets[jet1].userFloat("vtx3DSig"); b1jet_vtx3DVal = allbjets[jet1].userFloat("vtx3DVal");
+    b1jet_vtxPosX = allbjets[jet1].userFloat("vtxPosX"); b1jet_vtxPosY = allbjets[jet1].userFloat("vtxPosY"); b1jet_vtxPosZ = allbjets[jet1].userFloat("vtxPosZ");
+    b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet2].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
+    b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet2].eta(); b2jet_phi = allbjets[jet2].phi();
     b2jet_bDiscVar = allbjets[jet2].bDiscriminator(bjetDiscrName_);
+    //b2jet_leadTrackPt = allbjets[jet2].leadTrackPt(); b2jet_mt  = allbjets[jet2].mt();//ptcorrection?
+    //b2jet_leptonPdgId = allbjets[jet2].leptons[0].pdgId(); b2jet_leptonPhi = allbjets[jet2].leptons[0].phi(); b2jet_leptonEta = allbjets[jet2].leptons[0].eta();
+    //b2jet_leptonPtRel = 0; b2jet_leptonPt = allbjets[jet2].leptons[0].pt();
+    //b2jet_leptonDeltaR = deltaR(b2jet_leptonEta, b2jet_leptonPhi, b2jet_eta, b2jet_phi);
+    //b2jet_neHEF = allbjets[jet2].neutralHadronEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralHardonEfraction
+    //b2jet_neEmEF = allbjets[jet2].neutralEmEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralEmEnergyFraction
+    b2jet_vtxMass = allbjets[jet2].userFloat("vtxMass"); b2jet_vtxNtracks = allbjets[jet2].userFloat("vtxNtracks"); 
+    b2jet_vtxPx = allbjets[jet2].userFloat("vtxPx"); b2jet_vtxPy = allbjets[jet2].userFloat("vtxPy");
+    b2jet_vtxPt = sqrt(b2jet_vtxPx*b2jet_vtxPx + b2jet_vtxPy*b2jet_vtxPy);
+    b2jet_vtx3DSig = allbjets[jet2].userFloat("vtx3DSig"); b2jet_vtx3DVal = allbjets[jet2].userFloat("vtx3DVal");
+    b2jet_vtxPosX = allbjets[jet2].userFloat("vtxPosX"); b2jet_vtxPosY = allbjets[jet2].userFloat("vtxPosY"); b2jet_vtxPosZ = allbjets[jet2].userFloat("vtxPosZ");
     hastwojets = true;
   }
 
@@ -1164,6 +1274,26 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b1jet_mass",&b1jet_mass, "b1jet_mass/F");
   evtree->Branch("b1jet_btag",&b1jet_btag, "b1jet_btag/i");//unsigned int
   evtree->Branch("b1jet_bDiscVar",&b1jet_bDiscVar, "b1jet_bDiscVar/F");
+  evtree->Branch("b1jet_mt",&b1jet_mt, "b1jet_mt/F");
+  evtree->Branch("b1jet_leptonPdgId",&b1jet_leptonPdgId, "b1jet_leptonPdgId/F");
+  evtree->Branch("b1jet_leptonPhi",&b1jet_leptonPhi, "b1jet_leptonPhi/F");
+  evtree->Branch("b1jet_leptonEta",&b1jet_leptonEta, "b1jet_leptonEta/F");
+  evtree->Branch("b1jet_leptonPt",&b1jet_leptonPt, "b1jet_leptonPt/F");
+  evtree->Branch("b1jet_leptonPtRel",&b1jet_leptonPtRel, "b1jet_leptonPtRel/F");
+  evtree->Branch("b1jet_leptonDeltaR",&b1jet_leptonDeltaR, "b1jet_leptonDeltaR/F");
+  evtree->Branch("b1jet_neHEF",&b1jet_neHEF, "b1jet_neHEF/F");
+  evtree->Branch("b1jet_neEmEF",&b1jet_neEmEF, "b1jet_neEmEF/F");
+  evtree->Branch("b1jet_vtxMass",&b1jet_vtxMass, "b1jet_vtxMass/F");
+  evtree->Branch("b1jet_vtxNtracks",&b1jet_vtxNtracks, "b1jet_vtxNtracks/F");
+  evtree->Branch("b1jet_vtxPx",&b1jet_vtxPx, "b1jet_vtxPx/F");
+  evtree->Branch("b1jet_vtxPy",&b1jet_vtxPy, "b1jet_vtxPy/F");
+  evtree->Branch("b1jet_vtxPt",&b1jet_vtxPt, "b1jet_vtxPt/F");
+  evtree->Branch("b1jet_vtx3DSig",&b1jet_vtx3DSig, "b1jet_vtx3DSig/F");
+  evtree->Branch("b1jet_vtx3DVal",&b1jet_vtx3DVal, "b1jet_vtx3DVal/F");
+  evtree->Branch("b1jet_vtxPosX",&b1jet_vtxPosX, "b1jet_vtxPosX/F");
+  evtree->Branch("b1jet_vtxPosY",&b1jet_vtxPosY, "b1jet_vtxPosY/F");
+  evtree->Branch("b1jet_vtxPosZ",&b1jet_vtxPosZ, "b1jet_vtxPosZ/F");
+
   evtree->Branch("b2jet_px",&b2jet_px, "b2jet_px/F");
   evtree->Branch("b2jet_py",&b2jet_py, "b2jet_py/F");
   evtree->Branch("b2jet_pz",&b2jet_pz, "b2jet_pz/F");
@@ -1174,6 +1304,26 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b2jet_mass",&b2jet_mass, "b2jet_mass/F");
   evtree->Branch("b2jet_btag",&b2jet_btag, "b2jet_btag/i");
   evtree->Branch("b2jet_bDiscVar",&b2jet_bDiscVar, "b2jet_bDiscVar/F");
+  evtree->Branch("b2jet_mt",&b2jet_mt, "b2jet_mt/F");
+  evtree->Branch("b2jet_leptonPdgId",&b2jet_leptonPdgId, "b2jet_leptonPdgId/F");
+  evtree->Branch("b2jet_leptonPhi",&b2jet_leptonPhi, "b2jet_leptonPhi/F");
+  evtree->Branch("b2jet_leptonEta",&b2jet_leptonEta, "b2jet_leptonEta/F");
+  evtree->Branch("b2jet_leptonPt",&b2jet_leptonPt, "b2jet_leptonPt/F");
+  evtree->Branch("b2jet_leptonPtRel",&b2jet_leptonPtRel, "b2jet_leptonPtRel/F");
+  evtree->Branch("b2jet_leptonDeltaR",&b2jet_leptonDeltaR, "b2jet_leptonDeltaR/F");
+  evtree->Branch("b2jet_neHEF",&b2jet_neHEF, "b2jet_neHEF/F");
+  evtree->Branch("b2jet_neEmEF",&b2jet_neEmEF, "b2jet_neEmEF/F");
+  evtree->Branch("b2jet_vtxMass",&b2jet_vtxMass, "b2jet_vtxMass/F");
+  evtree->Branch("b2jet_vtxNtracks",&b2jet_vtxNtracks, "b2jet_vtxNtracks/F");
+  evtree->Branch("b2jet_vtxPx",&b2jet_vtxPx, "b2jet_vtxPx/F");
+  evtree->Branch("b2jet_vtxPy",&b2jet_vtxPy, "b2jet_vtxPy/F");
+  evtree->Branch("b2jet_vtxPt",&b2jet_vtxPt, "b2jet_vtxPt/F");
+  evtree->Branch("b2jet_vtx3DSig",&b2jet_vtx3DSig, "b2jet_vtx3DSig/F");
+  evtree->Branch("b2jet_vtx3DVal",&b2jet_vtx3DVal, "b2jet_vtx3DVal/F");
+  evtree->Branch("b2jet_vtxPosX",&b2jet_vtxPosX, "b2jet_vtxPosX/F");
+  evtree->Branch("b2jet_vtxPosY",&b2jet_vtxPosY, "b2jet_vtxPosY/F");
+  evtree->Branch("b2jet_vtxPosZ",&b2jet_vtxPosZ, "b2jet_vtxPosZ/F");
+
   evtree->Branch("dR_b1jet", &dR_b1jet,"dR_b1jet/F");  
   evtree->Branch("dR_b2jet", &dR_b2jet,"dR_b2jet/F");  
   evtree->Branch("hastwojets",&hastwojets, "hastwojets/B");
@@ -1184,6 +1334,8 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("met_phi",&met_phi,"met_phi/F");
   evtree->Branch("met_px",&met_px,"met_px/F");
   evtree->Branch("met_py",&met_py,"met_py/F");
+
+  evtree->Branch("HT",&HT,"HT/F");
 
   evtree->Branch("dR_bl",&dR_bl, "dR_bl/F");
   evtree->Branch("dR_b1l1",&dR_b1l1, "dR_b1l1/F");
@@ -1481,14 +1633,16 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
   std::vector<reco::GenParticle*> bJet2Coll;
   std::cout <<"*********** start to check GenParticles for DY sample ***********"<< std::endl;
   for(reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
-    if( debug_ ){ 
-	std::cout<<"ID: "<<it->pdgId()<<" ->mothers: "<<it->numberOfMothers()<<std::endl;
+    if( debug_ and abs(it->pdgId()) == 13){ 
+	std::cout<<"ID: "<<it->pdgId()<<" ->numOfmothers: "<<it->numberOfMothers()<<std::endl;
 	if( it->numberOfMothers()==0 ) std::cout<<"  DY: NO MOTHER!"<<std::endl;
 	if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
 	if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
+	if( it->numberOfMothers()==1  and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))
+	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId() << std::endl;
     }
-    if( it->pdgId() == -13 )      lept1Coll.push_back(it->clone());
-    if( it->pdgId() == 13 )       lept2Coll.push_back(it->clone());
+    if( it->pdgId() == -13 and it->status() == 1)      lept1Coll.push_back(it->clone());
+    if( it->pdgId() == 13 and it->status() == 1)       lept2Coll.push_back(it->clone());
     if( fabs(it->pdgId()) == 5 )  bJet1Coll.push_back(it->clone());
     if( fabs(it->pdgId()) == -5 ) bJet2Coll.push_back(it->clone());
   }// all Gen particles
