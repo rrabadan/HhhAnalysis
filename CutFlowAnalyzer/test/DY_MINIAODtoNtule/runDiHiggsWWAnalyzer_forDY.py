@@ -14,10 +14,9 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
-	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
     )
 )
-
 
 process.maxEvents = cms.untracked.PSet( 
     input = cms.untracked.int32(100000) 
@@ -30,8 +29,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
-    #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
-    SampleType = cms.untracked.int32(0),
+    #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets};//add other background
+    SampleType = cms.untracked.int32(14),
     #genParticles = cms.InputTag("genParticles"),
     genParticles = cms.InputTag("prunedGenParticles"),#minAOD
     #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),

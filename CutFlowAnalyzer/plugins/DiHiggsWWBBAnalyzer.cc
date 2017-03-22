@@ -1475,102 +1475,71 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCo
 // ------------ method called to check DY genParticles   ------------
 void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleCollection> genParticleColl){
 
-  std::vector<reco::GenParticle*> ZColl;
-  std::vector<const reco::Candidate*> Jet1Coll;
-  std::vector<const reco::Candidate*> Jet2Coll;
-  std::vector<const reco::Candidate*> tColl;
-  std::vector<const reco::Candidate*> tbarColl;
+  std::vector<reco::GenParticle*> lept1Coll;
+  std::vector<reco::GenParticle*> lept2Coll;
+  std::vector<reco::GenParticle*> bJet1Coll;
+  std::vector<reco::GenParticle*> bJet2Coll;
   std::cout <<"*********** start to check GenParticles for DY sample ***********"<< std::endl;
-  bool Second=true;
-  for (reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
-    if ( fabs(it->pdgId()) == 23 ){
-	const reco::Candidate* tmpZ = it->mother();
-	if ( fabs(tmpZ->pdgId()) == 13 )  ZColl.push_back(it->clone());
+  for(reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
+    if( debug_ ){ 
+	std::cout<<"ID: "<<it->pdgId()<<" ->mothers: "<<it->numberOfMothers()<<std::endl;
+	if( it->numberOfMothers()==0 ) std::cout<<"  DY: NO MOTHER!"<<std::endl;
+	if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
+	if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
     }
-    else if ((it->pdgId() == 1 or it->pdgId()==2 or it->pdgId()==3 or it->pdgId()==4 or it->pdgId()==5 or it->pdgId()==6) and it->mother()->pdgId()==1 ){
-	if (it->numberOfMothers() != 1) std::cout << "bquark has more than one mother particle" << std::endl;
-	Jet1Coll.push_back(it->clone());
-	Second=true;
-    }
-    else if (Second and ((it->pdgId() == 1 or it->pdgId()==2 or it->pdgId()==3 or it->pdgId()==4 or it->pdgId()==5 or it->pdgId()==6) and it->mother()->pdgId()==1) ){
-	if (it->numberOfMothers() != 1) std::cout << "bquark has more than one mother particle" << std::endl;
-	Jet2Coll.push_back(it->clone());
-    }
+    if( it->pdgId() == -13 )      lept1Coll.push_back(it->clone());
+    if( it->pdgId() == 13 )       lept2Coll.push_back(it->clone());
+    if( fabs(it->pdgId()) == 5 )  bJet1Coll.push_back(it->clone());
+    if( fabs(it->pdgId()) == -5 ) bJet2Coll.push_back(it->clone());
   }// all Gen particles
-
-//  if(debug_) std::cout <<"size ZColl "<< ZColl.size() <<" Jet1Coll "<< Jet1Coll.size()<<" Jet2Coll "<<Jet2Coll.size()<< std::endl;
-//  //t->bW+ 6->5,24
-//  if (ZColl.size()){
-//    for (auto Z_cand : W1Coll)
-//	for (auto b1_cand : b1Coll){
-//	  const reco::Candidate* b1_mother = b1_cand->mother();
-//	  const reco::Candidate* W1_mother = W1_cand->mother();
-//	  //        while (W1_mother->pdgId() == 24) W1_mother = W1_mother->mother();
-//	  if (W1_mother == b1_mother && W1_mother->pdgId() == 6) {
-//	    tColl.push_back(W1_mother);
-//	    //std::cout <<" find t->bW+" << std::endl;
-//	    break;
-//	  }
-//	}
-//  }
-//  //tbar->bbarW- -6->-5,-24
-//  if (W2Coll.size() && b2Coll.size()){
-//    for(auto W2_cand : W2Coll)
-//	for (auto b2_cand : b2Coll) {
-//	  const reco::Candidate* W2_mother = W2_cand->mother();
-//	  const reco::Candidate* b2_mother = b2_cand->mother();
-//	  //   while (W2_mother->pdgId() == -24) W2_mother = W2_mother->mother();
-//	  if (W2_mother == b2_mother && W2_mother->pdgId() == -6) {
-//	    tbarColl.push_back(W2_mother);
-//	    //std::cout <<" find tbar->bbarW- " << std::endl;
-//	    break;
-//	  }
-//	}
-//  }
-//  std::cout <<"tColl size " << tColl.size() <<" tbarColl " << tbarColl.size() << std::endl;
-//  //bool ttbar =false;
-//  if (tColl.size()==1 and tbarColl.size() ==1){
-//    //ttbar = true;
-//    t1cand = tColl.at(0);
-//    t2cand = tbarColl.at(0);
-//    //while (t1cand->numberOfMothers()==1 and (t1cand->mother())->pdgId()==6) t1cand = t1cand->mother();
-//    //while (t2cand->numberOfMothers()==1 and (t2cand->mother())->pdgId()==-6) t2cand = t2cand->mother();
-//    std::cout << "find t and tbar candidate " << std::endl;
-//    b1cand = finddecendant(t1cand, 5, false);
-//    w1cand = finddecendant(t1cand, 24, false);
-//    b2cand = finddecendant(t2cand, -5, false);
-//    w2cand = finddecendant(t2cand, -24, false);   
-//    //for (unsigned int i=0; i < b1cand->numberOfDaughters(); i++)
-//    //std::cout <<"candidate id "<< b1cand->pdgId()<<" daughter i "<< i <<" id "<<(b1cand->daughter(i))->pdgId()<< std::endl;
-//    if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)){
-//	mu1cand = findmudaughter(w1cand);
-//	nu1cand = findnudaughter(w1cand);
-//	mu2cand = findmudaughter(w2cand);
-//	nu2cand = findnudaughter(w2cand);
-//	//make sure all candiates are in same frame
-//	while (mu1cand->numberOfDaughters()==1 and  mu1cand->daughter(0)->pdgId()==mu1cand->pdgId())
-//	  mu1cand = mu1cand->daughter(0);
-//	while (nu1cand->numberOfDaughters()==1 and  nu1cand->daughter(0)->pdgId()==nu1cand->pdgId())
-//	  nu1cand = nu1cand->daughter(0);
-//	while (mu2cand->numberOfDaughters()==1 and  mu2cand->daughter(0)->pdgId()==mu2cand->pdgId())
-//	  mu2cand = mu2cand->daughter(0);
-//	while (nu2cand->numberOfDaughters()==1 and  nu2cand->daughter(0)->pdgId()==nu2cand->pdgId())
-//	  nu2cand = nu2cand->daughter(0);
-//	findAllGenParticles = true;
-//	std::cout <<" mu1 " ; printCandidate(mu1cand);
-//	std::cout <<" nu1 " ; printCandidate(nu1cand);
-//	std::cout <<" mu2 " ; printCandidate(mu2cand);
-//	std::cout <<" nu2 " ; printCandidate(nu2cand);
-//    }else{
-//	findAllGenParticles = false;
-//	std::cout <<"failed to two leptons from  W decays "<< std::endl;
-//    }
-//    std::cout <<" w1 " ; printCandidate(w1cand);
-//    std::cout <<" w2 " ; printCandidate(w2cand);
-//    std::cout <<" b1 " ; printCandidate(b1cand);
-//    std::cout <<" b2 " ; printCandidate(b2cand);
-//  }
-//  std::cout <<"*********** end in checking GenParticles for TTbar sample ***********"<< std::endl;
+  //Fill Final quantites
+  if(lept1Coll.size()>0){
+    float minPT=-1;
+    for (auto lept1Cand : lept1Coll){
+	const reco::Candidate *tmpcand = lept1Cand;
+	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
+	if(part.Pt()>minPT){
+	  mu1cand = tmpcand;
+	  minPT = part.Pt();
+	}
+    }
+  }
+  if(lept2Coll.size()>0){
+    float minPT=-1;
+    for (auto lept2Cand : lept2Coll){
+	const reco::Candidate *tmpcand = lept2Cand;
+	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
+	if(part.Pt()>minPT){
+	  mu2cand = tmpcand;
+	  minPT = part.Pt();
+	}
+    }
+  }
+  if(bJet1Coll.size()>0){
+    float minPT=-1;
+    for (auto bJet1Cand : bJet1Coll){
+	const reco::Candidate *tmpcand = bJet1Cand;
+	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
+	if(part.Pt()>minPT){
+	  b1cand = tmpcand;
+	  minPT = part.Pt();
+	}
+    }
+  }
+  if(bJet2Coll.size()>0){
+    float minPT=-1;
+    for (auto bJet2Cand : bJet2Coll){
+	const reco::Candidate *tmpcand = bJet2Cand;
+	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
+	if(part.Pt()>minPT){
+	  b2cand = tmpcand;
+	  minPT = part.Pt();
+	}
+    }
+  }
+  if(debug_) if(lept1Coll.size()>0 and lept2Coll.size()>0 and bJet1Coll.size()>0 and bJet2Coll.size()>0) findAllGenParticles=true;
+  std::cout <<"size lept1Coll "<< lept1Coll.size()<<" size lept2Coll "<< lept2Coll.size()<<" bJet1Coll "<< bJet1Coll.size()<<" bJet2Coll "<< bJet2Coll.size()<<" -> "<<findAllGenParticles<< std::endl;
+  std::cout <<"*********** end in checking GenParticles for DY sample ***********"<< std::endl;
 }
 
 void DiHiggsWWBBAnalyzer::matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> genjetColl){
