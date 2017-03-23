@@ -8,5 +8,5 @@ MVA_Studies/files/
 DataFormats/scripts/*.root
 PlottingTools/HADD*/*
 PlottingTools/Plots*/*
-PlottingTools/CutFlowAnalyzer/test/*/crab_projects
-PlottingTools/CutFlowAnalyzer/test/*/*.pyc
+CutFlowAnalyzer/*/*/crab_projects
+CutFlowAnalyzer/*/*/*.pyc

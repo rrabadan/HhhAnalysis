@@ -5,29 +5,55 @@ import os
 execfile("start.py")
 execfile("functions.py")
 
-#Creating folders
-TT_ch = ROOT.TChain("DiHiggsWWBBAna/evtree") 
+#Creating folders and parameters
+tree_name="DiHiggsWWBBAna/evtree"
 os.system("mkdir -p Plots")
 os.system("mkdir -p HADD")
+Lumi=40#fb-1
 #TChains
-os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/TTTo2L2Nu_powheg_miniAODv2_v0_ext1_01/170322_221256 | grep root > HADD/TT0.txt")
+TT_ch = ROOT.TChain(tree_name)
+os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/TTTo2L2Nu_powheg_miniAODv2_v0_ext1_01/170322_221256 | grep root | grep -v failed > HADD/TT0.txt")
 with open('HADD/TT0.txt','r') as f:
   for line in f:
     if not line.isspace():
       TT_ch.Add(str(line[:-1]))
 print "TT has", TT_ch.GetEntries(), "entries."
-filelist = [TT_ch]
+#
+DY_ch = ROOT.TChain(tree_name)
+os.system("find /fdata/hepx/store/user/lpernie/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170323_021221 | grep root | grep -v failed > HADD/DY0.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_0J_13TeV-amcatnloFXFX-pythia8/170323_021233 | grep root | grep -v failed >> HADD/DY0.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_1J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_1J_13TeV-amcatnloFXFX-pythia8/170323_021246 | grep root | grep -v failed >> HADD/DY0.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8/170323_021258 | grep root | grep -v failed >> HADD/DY0.txt")
+with open('HADD/DY0.txt','r') as f:
+  for line in f:
+    if not line.isspace():
+      DY_ch.Add(str(line[:-1]))
+print "DY has", DY_ch.GetEntries(), "entries."
+
+filelist = [TT_ch,DY_ch]
 #Cuts and Ordering
-cut = "mu1_pt>10 && mu2_pt>10 && fabs(mu1_eta)<2.4 && fabs(mu2_eta)<2.4"
+#cut = "mu1_pt>10 && mu2_pt>10 && fabs(mu1_eta)<2.4 && fabs(mu2_eta)<2.4"
+cut = ""
 benchmarks = ["TTbar","DY"]
 
 #---Starting to plot histos here-------------------------------------------------------------------------------------------------------------------------------------
 pic_name = "dR_l1l2"
 todraw   = "dR_l1l2"
 x_bins   = "(50,0.0,5)"
-x_title   = "#Delta R(l,l)"
-draw1D(filelist,todraw,x_bins,x_title,cut,benchmarks,pic_name)
+x_title  = "#Delta R(l,l)"
+draw1D(filelist, todraw, x_bins, x_title, cut, benchmarks, pic_name, Lumi, "unity")
 
+pic_name = "mass_l1l2"
+todraw   = "mass_l1l2"
+x_bins   = "(36,10,150)"
+x_title  = "m(l,l)"
+draw1D(filelist, todraw, x_bins, x_title, cut, benchmarks, pic_name, Lumi, "unity")
+
+pic_name = "mass_b1b2"
+todraw   = "mass_b1b2"
+x_bins   = "(36,10,150)"
+x_title  = "m(j,j)"
+draw1D(filelist, todraw, x_bins, x_title, cut, benchmarks, pic_name, Lumi, "unity")
 
 pic_name = "MMC_h2mass"
 x_title = "Most Probable mass"

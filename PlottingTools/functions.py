@@ -1,9 +1,13 @@
-def hist1D(tree, todraw, xbins, cut, B):
-  xBins = int(x_bins[1:-1].split(',')[0])
+def hist1D(tree, todraw, xbins, cut, B, Lumi):
+  if cut=="" or cut==" ": cut="1"
+  Lumi    = Lumi * 1000 # Convert from fb-1 to pb-1
+  xBins   = int(x_bins[1:-1].split(',')[0])
   xminBin = float(x_bins[1:-1].split(',')[1])
   xmaxBin = float(x_bins[1:-1].split(',')[2])
-  b1 = ROOT.TH1F("%s"%B,"%s"%B,xBins,xminBin,xmaxBin)
-  tree.Draw("%s>>%s"%(todraw,B),cut)
+  b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
+  Ntot           = int(tree.GetMaximum("ievent"))
+  cut_and_weight = str(Lumi) + "*(XsecBr/" + str(Ntot) + ")*(" + str(cut) + ")"
+  tree.Draw("%s>>%s_%s"%(todraw,B,todraw), cut_and_weight)
   ROOT.SetOwnership(b1, False)
   return b1
 
@@ -128,7 +132,7 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
   c1.cd()
   c1.SaveAs("Hhh_PDFvalidation_%s_combined.png"%pic_name)
     
-def draw1D(filelist,todraw,x_bins,x_title,cut,benchmarks, pic_name):
+def draw1D(filelist,todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm):
   c1 = ROOT.TCanvas()
   c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
   color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan]
@@ -138,15 +142,19 @@ def draw1D(filelist,todraw,x_bins,x_title,cut,benchmarks, pic_name):
   hists = []
   for nfile in range(len(filelist)):
     B = benchmarks[nfile]
-    hist = hist1D(filelist[nfile], todraw, x_bins, cut, B)
+    hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi)
     hist.SetLineColor(color[nfile])
     hist.SetLineWidth(3)
     hist.SetMarkerColor(color[nfile])
     hist.SetMarkerStyle(marker[nfile])
-    hist.Scale(1.0/hist.GetEntries())
-    hs.Add(hist)
-    legend.AddEntry(hist, "%s"%B, "l")
-    hists.append(hist)
+    if(hist.GetEntries()>0):
+      if(Norm=="unity"): hist.Scale(1./hist.Integral())
+      hs.Add(hist)
+      legend.AddEntry(hist, "%s"%B, "l")
+      hists.append(hist)
+    else:
+      print "-> NO events for",B,"using the selection:"
+      print "   ",cut
   hs.Draw("nostack")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
   hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
