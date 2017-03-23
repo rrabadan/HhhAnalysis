@@ -7,26 +7,27 @@ config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'patTuple_cutana_mujets_80X_cfg.py'
+#config.JobType.psetName = 'runDiHiggsWWAnalyzer_forDY.py'
 config.JobType.outputFiles = ['out_ana.root']
 
 config.section_("Data")
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob = 10
-config.Data.lumiMask = 'Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
-#config.Data.outLFNDirBase = '/store/group/alca_muonalign/lpernie/DoubleMuonRun2015D_PromptReco_AOD246908-258750_7412p4_patch1_patTuple_cutana_mujets'
-#config.Data.outLFNDirBase = '/store/group/lpcdarksusy/'
-config.Data.outLFNDirBase = '/store/user/lpernie/'
+config.Data.splitting = 'FileBased'
+config.Data.unitsPerJob = 1
+config.Data.outLFNDirBase =  '/store/user/lpernie/'
 config.Data.publication = False
-#config.Data.outputDatasetTag = 'DoubleMuon_2016BC_AOD_808_patana_01'
 
 config.section_("Site")
-config.Site.storageSite = 'T3_US_TAMU' #'T2_CH_CERN', 'T3_US_FNALLPC'
+config.Site.storageSite = 'T3_US_TAMU'
 
+
+psetName=['runDiHiggsWWAnalyzer_forDYJetsToLL.py','runDiHiggsWWAnalyzer_forDY0J.py','runDiHiggsWWAnalyzer_forDY1J.py','runDiHiggsWWAnalyzer_forDY2J.py']
+i=0
 if __name__ == '__main__':
     from CRABAPI.RawCommand import crabCommand
-    for dataset in ['/DoubleMuon/Run2016B-23Sep2016-v1/MINIAOD','/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD','/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD']:
+    for dataset in ['/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM','/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM','/DYToLL_1J_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM','/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM']:
+        config.JobType.psetName = psetName[i]
         config.Data.inputDataset = dataset
-        config.General.requestName = dataset.split('/')[2]
+        config.General.requestName = dataset.split('/')[1]
         crabCommand('submit', config = config)
+        i=i+1
