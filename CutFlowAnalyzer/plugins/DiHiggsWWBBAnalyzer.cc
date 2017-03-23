@@ -835,7 +835,6 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   mass_trans = -1;
 }
 
-
 DiHiggsWWBBAnalyzer::~DiHiggsWWBBAnalyzer(){
 }
 
@@ -871,16 +870,15 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   else if(sampleType_==16) XsecBr = 929.1;
   else if(sampleType_==17) XsecBr = 337.1;
   /*
-     edm::Handle<pat::METCollection> mets;
-     iEvent.getByToken(metToken_, mets);
-     const pat::MET &met = mets->front();
-     const reco::GenMET *genmet = met.genMET();
-     genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
-     printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
-     met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
-     met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
+  edm::Handle<pat::METCollection> mets;
+  iEvent.getByToken(metToken_, mets);
+  const pat::MET &met = mets->front();
+  const reco::GenMET *genmet = met.genMET();
+  genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
+  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
+  met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
+  met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
    */
-
   //****************************************************************************
   //                GENERATOR LEVEL                       
   //****************************************************************************
@@ -897,7 +895,6 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //****************************************************************************
   //                RECO LEVEL
   //****************************************************************************
-  // Cut on primary vertex in event
   edm::Handle<reco::VertexCollection> primaryVertices;
   iEvent.getByToken(primaryVerticesToken_, primaryVertices);
   if (primaryVertices->empty()) return; // skip the event if no PV found
@@ -913,10 +910,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //                Triggering matching 
   //****************************************************************************
   //****************************************************************************
-  //                di-Leptons selection
+  //                Di-Leptons selection
   //****************************************************************************
-  //for (pat::MuonCollection::const_iterator iMuon = muons->begin();  iMuon != muons->end();  ++iMuon) {
-  //or for (const pat::Muon &mu : *muons) {
   for (const pat::Muon &mu : *muons) {
     const MuonPFIsolation& muonIso = mu.pfIsolationR03();
     float isoVar = (muonIso.sumChargedHadronPt + muonIso.sumNeutralHadronEt + muonIso.sumPhotonEt)/mu.pt();
@@ -930,13 +925,12 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	if (genp)
 	  std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
     }
-    printf("muon with pt %4.1f, charge %d, IsoVar %5.3f, dz(PV) %+5.3f, dxy(PV)%+5.3f, POG loose id %d, tight id %d\n",
+    if(debug_) printf("muon with pt %4.1f, charge %d, IsoVar %5.3f, dz(PV) %+5.3f, dxy(PV)%+5.3f, POG loose id %d, tight id %d\n",
 	  mu.pt(), mu.charge(), isoVar, mu.muonBestTrack()->dz(PV.position()), fabs(mu.muonBestTrack()->dxy(PV.position())),mu.isLooseMuon(), mu.isTightMuon(PV));
   }
-  //ignore electron now
+  //Ignore electron now
   for (const pat::Electron &el : *electrons) {
     if (el.pt()>1000000) continue;
-
   }
   const reco::Candidate * selectedPlep = NULL;
   const reco::Candidate * selectedNlep = NULL;
@@ -977,7 +971,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   }
 
   //****************************************************************************
-  //                di-Jets selection
+  //                Di-Jets selection
   //****************************************************************************
   edm::Handle<pat::JetCollection> jets;
   iEvent.getByToken(jetToken_, jets);

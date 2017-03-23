@@ -1,4 +1,4 @@
-def hist1D(tree, todraw, xbins, cut, B, Lumi):
+def hist1D(tree, todraw, x_bins, cut, B, Lumi):
   if cut=="" or cut==" ": cut="1"
   Lumi    = Lumi * 1000 # Convert from fb-1 to pb-1
   xBins   = int(x_bins[1:-1].split(',')[0])
@@ -132,7 +132,7 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
   c1.cd()
   c1.SaveAs("Hhh_PDFvalidation_%s_combined.png"%pic_name)
     
-def draw1D(filelist,todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm):
+def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm):
   c1 = ROOT.TCanvas()
   c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
   color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan]
@@ -159,4 +159,4 @@ def draw1D(filelist,todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Nor
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
   hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
   legend.Draw("same")
-  c1.SaveAs("Plots/h_hasdRljet_%s.pdf"%pic_name)
+  c1.SaveAs("Plots/"+pic_name)
