@@ -6,3 +6,7 @@ MVA_Studies/weights*
 MVA_Studies/*.root
 MVA_Studies/files/
 DataFormats/scripts/*.root
+PlottingTools/HADD*/*
+PlottingTools/Plots*/*
+PlottingTools/CutFlowAnalyzer/test/*/crab_projects
+PlottingTools/CutFlowAnalyzer/test/*/*.pyc
