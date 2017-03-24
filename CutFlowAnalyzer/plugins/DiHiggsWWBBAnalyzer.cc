@@ -79,7 +79,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
     edm::EDGetTokenT<reco::VertexCollection> primaryVerticesToken_;
     bool debug_;
-    enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets};//add other background
+    enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
     int sampleType_;
     //bool runMCMatch;//select physics objects by matching them to gen information
     int jetSelectionAlgo_;
@@ -155,7 +155,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     void matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> genjetColl);
     void matchmuon2Gen();//match pat:::Muon to gen muon 
     void matchBjets2Gen();//match genjet to gen b and then match pat::Jet to genjet
-
 
   private:
     // ---------- Candidates in signal channel ---------------------------
@@ -852,23 +851,49 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   float BR_W_lnu  = 0.3257;
   float BR_final = pow(BR_h_bb,2) + pow(BR_h_WW,2)*pow(BR_W_lnu,4) + 2*BR_h_bb*BR_h_WW*pow(BR_W_lnu,2);
   XsecBr=-1;
-  if(sampleType_==1)       XsecBr = 1.1948649279633416   * 0.5035043253778491  * BR_final;
-  else if(sampleType_==2)  XsecBr = 0.5900264559172156   * 0.7401476862292035  * BR_final;
-  else if(sampleType_==3)  XsecBr = 0.4431392872406074   * 0.7550948295752251  * BR_final;
-  else if(sampleType_==4)  XsecBr = 0.3629024495635394   * 0.3271838865481416  * BR_final;
-  else if(sampleType_==5)  XsecBr = 0.26198989157860825  * 0.30714428242103997 * BR_final;
-  else if(sampleType_==6)  XsecBr = 0.1505457803080438   * 0.23554145150771982 * BR_final;
-  else if(sampleType_==7)  XsecBr = 0.08778859336272271  * 0.23284593958553115 * BR_final;
-  else if(sampleType_==8)  XsecBr = 0.044958592682492124 * 0.30234102603499013 * BR_final;
-  else if(sampleType_==9)  XsecBr = 0.02330230741512451  * 0.3283405583212012  * BR_final;
-  else if(sampleType_==10) XsecBr = 0.016878791231549145 * 0.19895423048929178 * BR_final;
-  else if(sampleType_==11) XsecBr = 0.008205926642337763 * 0.22349301758113208 * BR_final;
-  else if(sampleType_==12) XsecBr = 0.006805317561386914 * 0.07869395182066141 * BR_final;
-  else if(sampleType_==13) XsecBr = 87.31; //L=e, mu only?
-  else if(sampleType_==14) XsecBr = 18610; //L=e, mu only?
-  else if(sampleType_==15) XsecBr = 4758.9;
-  else if(sampleType_==16) XsecBr = 929.1;
-  else if(sampleType_==17) XsecBr = 337.1;
+  if(sampleType_==B1)                            XsecBr = 1.1948649279633416   * 0.5035043253778491  * BR_final;
+  else if(sampleType_==B2)                       XsecBr = 0.5900264559172156   * 0.7401476862292035  * BR_final;
+  else if(sampleType_==B3)                       XsecBr = 0.4431392872406074   * 0.7550948295752251  * BR_final;
+  else if(sampleType_==B4)                       XsecBr = 0.3629024495635394   * 0.3271838865481416  * BR_final;
+  else if(sampleType_==B5)                       XsecBr = 0.26198989157860825  * 0.30714428242103997 * BR_final;
+  else if(sampleType_==B6)                       XsecBr = 0.1505457803080438   * 0.23554145150771982 * BR_final;
+  else if(sampleType_==B7)                       XsecBr = 0.08778859336272271  * 0.23284593958553115 * BR_final;
+  else if(sampleType_==B8)                       XsecBr = 0.044958592682492124 * 0.30234102603499013 * BR_final;
+  else if(sampleType_==B9)                       XsecBr = 0.02330230741512451  * 0.3283405583212012  * BR_final;
+  else if(sampleType_==B10)                      XsecBr = 0.016878791231549145 * 0.19895423048929178 * BR_final;
+  else if(sampleType_==B11)                      XsecBr = 0.008205926642337763 * 0.22349301758113208 * BR_final;
+  else if(sampleType_==B12)                      XsecBr = 0.006805317561386914 * 0.07869395182066141 * BR_final;
+  else if(sampleType_==TTbar)                    XsecBr = 87.31; 
+  else if(sampleType_==DYJets)                   XsecBr = 18610;
+  else if(sampleType_==DY0Jets)                  XsecBr = 4758.9;
+  else if(sampleType_==DY1Jets)                  XsecBr = 929.1;
+  else if(sampleType_==DY2Jets)                  XsecBr = 337.1;
+  else if(sampleType_==ZZTo2L2Q)                 XsecBr = 3.22;
+  else if(sampleType_==ZZTo2L2Nu)                XsecBr = 0.564;
+  else if(sampleType_==ZZTo4L)                   XsecBr = 1.256;
+  else if(sampleType_==WWToLNuQQ)                XsecBr = 49.997;
+  else if(sampleType_==WWTo2L2Nu)                XsecBr = 12.178;
+  else if(sampleType_==WZTo2L2Q)                 XsecBr = 5.595;
+  else if(sampleType_==WZTo1L3Nu)                XsecBr = 3.033;
+  else if(sampleType_==WZTo1L1Nu2Q)              XsecBr = 10.71;
+  else if(sampleType_==WZTo3LNu)                 XsecBr = 4.42965;
+  else if(sampleType_==ST_tchannel_top)         XsecBr = 136.02;
+  else if(sampleType_==ST_tchannel_antitop)     XsecBr = 80.95;
+  else if(sampleType_==ST_schannel)             XsecBr = 3.36;
+  else if(sampleType_==ST_tW_antitop)            XsecBr = 19.5545;
+  else if(sampleType_==ST_tW_top)                XsecBr = 19.5545;
+  else if(sampleType_==WJetsToLNu)               XsecBr = 61526.7;
+  else if(sampleType_==WJetsToLNu_HT100To200)   XsecBr = 1627.45;
+  else if(sampleType_==WJetsToLNu_HT200To400)   XsecBr = 435.237;
+  else if(sampleType_==WJetsToLNu_HT400To600)   XsecBr = 59.181;
+  else if(sampleType_==WJetsToLNu_HT600To800)   XsecBr = 14.580;
+  else if(sampleType_==WJetsToLNu_HT800To1200)  XsecBr = 6.656;
+  else if(sampleType_==WJetsToLNu_HT1200To2500) XsecBr = 1.608;
+  else if(sampleType_==WJetsToLNu_HT2500ToInf)  XsecBr = 0.0389;
+  else if(sampleType_==TTWJetsToQQ)              XsecBr = 0.4062;
+  else if(sampleType_==TTWJetsToLNu)             XsecBr = 0.2043;
+  else if(sampleType_==TTZToQQ)                  XsecBr = 0.5297;
+  else if(sampleType_==TTZToLLNuNu)              XsecBr = 0.2529;
   /*
   edm::Handle<pat::METCollection> mets;
   iEvent.getByToken(metToken_, mets);
