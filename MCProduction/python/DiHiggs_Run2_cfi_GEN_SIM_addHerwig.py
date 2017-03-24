@@ -26,7 +26,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(1)
 )
 
 # Input source
@@ -62,7 +62,8 @@ process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_sim_hadronization_10k.root'),
+    #fileName = cms.untracked.string('file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_sim_addherwig_10k.root'),
+    fileName = cms.untracked.string('file:out_sim.root'),
     outputCommands = process.RAWSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -215,6 +216,7 @@ process.generator = cms.EDFilter("ThePEGGeneratorFilter",
     'set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 13000.0',
     'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.2*GeV',
 
+    'cd /Herwig/Generators',
     'insert LHCGenerator:AnalysisHandlers 0 /Herwig/Analysis/HepMCFile',
     'set /Herwig/Analysis/HepMCFile:PrintEvent 100'
     'set /Herwig/Analysis/HepMCFile:Format GenEvent'
@@ -222,7 +224,7 @@ process.generator = cms.EDFilter("ThePEGGeneratorFilter",
 
 ##################################################
 # Matrix Elements for hadron-hadron collisions    
-# PLUGIN: gg -> Jpsi Jpsi                         
+# gg->H->hh               
 ##################################################
     'cd /',
     'cd /Herwig/MatrixElements/',
@@ -265,8 +267,12 @@ process.RAWSIMoutput_step = cms.EndPath(process.RAWSIMoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.endjob_step,process.RAWSIMoutput_step)
+#from PhysicsTools.PatAlgos.tools.helpers import *
 for path in process.paths:
+	#print "path ",path, " getattr(process,path) ",getattr(process,path)," listModules(sequence) ",listModules(getattr(process,path))
         getattr(process,path)._seq = process.generator *  getattr(process,path)._seq 
+
+	#print "after ",getattr(process,path)
         #getattr(process,path)._seq = process.generator * process.fourMuonFilter  *  getattr(process,path)._seq 
 
 

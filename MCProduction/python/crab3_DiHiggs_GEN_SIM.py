@@ -5,17 +5,17 @@ config = Configuration()
 config.section_("General")
 
 config.General.workArea = 'crab_DiHiggs_GEN_SIM'
-config.General.requestName='crab_DiHigs_B3_addherwig'
+config.General.requestName='crab_DiHiggs_B3_addherwig_v2'
 config.General.transferOutputs = True
 
 config.section_("JobType")
 
 config.JobType.pluginName = 'PrivateMC'
 #config.JobType.psetName = 'DiHiggs_Run2_cfi_GEN_SIM.py'
-config.JobType.psetName = 'DiHiggs_Run2_cfi_GEN_SIM_addHerwig_test.py'
+config.JobType.psetName = 'DiHiggs_Run2_cfi_GEN_SIM_addHerwig.py'
 #config.JobType.inputFiles = ['/fdata/hepx/store/user/taohuang/Pheno/HH-bbWW-B6-20160518-leptonW-1000000.hepmc']
 #config.JobType.inputFiles = ['HH-bbWW-B3-13TeV-leptonW-OnlyME-10k.hepmc']
-config.JobType.inputFiles = ['MEHiggsPair.so']
+#config.JobType.inputFiles = ['MEHiggsPair.so']
 
 
 config.section_("Data")
@@ -26,7 +26,8 @@ config.Data.outputPrimaryDataset = 'xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW
 config.Data.splitting = 'EventBased'
 
 config.Data.unitsPerJob = 100
-config.Data.totalUnits = 10
+NJOBS = 100
+config.Data.totalUnits = config.Data.unitsPerJob * NJOBS
 
 config.Data.outLFNDirBase = '/store/user/tahuang/'
 
