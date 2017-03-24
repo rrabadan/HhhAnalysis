@@ -147,7 +147,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
     hist.SetLineWidth(3)
     hist.SetMarkerColor(color[nfile])
     hist.SetMarkerStyle(marker[nfile])
-    if(hist.GetEntries()>0):
+    if(hist.Integral()>0):
       if(Norm=="unity"): hist.Scale(1./hist.Integral())
       hs.Add(hist)
       legend.AddEntry(hist, "%s"%B, "l")
@@ -157,6 +157,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
       print "   ",cut
   hs.Draw("nostack")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
-  hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
+  if(Norm=="unity"): hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
+  if(Norm=="lumi"):   hs.GetHistogram().GetYaxis().SetTitle("Normalized to "+str(Lumi)+"fb-1")
   legend.Draw("same")
   c1.SaveAs("Plots/"+pic_name)

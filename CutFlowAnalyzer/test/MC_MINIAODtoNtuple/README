@@ -1,0 +1,4 @@
+1) Open multicrab3.py and add all the DATASET you want
+2) Each dataset need to have a argument for runDiHiggsWWAnalyzer.py that say what sample is
+3) Use the nomeclature in ../../../CutFlowAnalyzer/plugins/DiHiggsWWBBAnalyzer.cc
+4) python multicrab3.py
