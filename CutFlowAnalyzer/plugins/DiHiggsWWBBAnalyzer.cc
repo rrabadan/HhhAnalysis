@@ -1017,10 +1017,16 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
 	  j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
     printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
+     auto daus(j.daughterPtrVector());
+     std::sort(daus.begin(), daus.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); }); // the joys of C++11
+     for (unsigned int i2 = 0, n = daus.size(); i2 < n && i2 <= 3; ++i2) {
+	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus[i2]);
+	 printf("         constituent %3d: pt %6.2f, dz(pv) %+.3f, pdgId %+3d\n", i2,cand.pt(),cand.dz(PV.position()),cand.pdgId());
+	}
     const reco::GenParticle * genp = j.genParticle();
     if (genp)
 	std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
-  }
+   }
 
   // sort jets by pt
   std::sort(allbjets.begin(), allbjets.end(), [](pat::Jet& jet1, pat::Jet& jet2) { return jet1.pt() > jet2.pt(); });
@@ -1043,12 +1049,28 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b1jet_px = allbjets[jet1].px(); b1jet_py = allbjets[jet1].py(); b1jet_pz = allbjets[jet1].pz(); b1jet_energy = allbjets[jet1].energy();
     b1jet_pt = allbjets[jet1].pt(); b1jet_eta = allbjets[jet1].eta(); b1jet_phi = allbjets[jet1].phi();
     b1jet_bDiscVar = allbjets[jet1].bDiscriminator(bjetDiscrName_);
-    //b1jet_leadTrackPt = allbjets[jet1].leadTrackPt(); b1jet_mt  = allbjets[jet1].mt();//ptcorrection?
-    //b1jet_leptonPdgId = allbjets[jet1].leptons[0].pdgId(); b1jet_leptonPhi = allbjets[jet1].leptons[0].phi(); b1jet_leptonEta = allbjets[jet1].leptons[0].eta();
-    //b1jet_leptonPtRel = 0; b1jet_leptonPt = allbjets[jet1].leptons[0].pt();
-    //b1jet_leptonDeltaR = deltaR(b1jet_leptonEta, b1jet_leptonPhi, b1jet_eta, b1jet_phi);
+    b1jet_mt  = allbjets[jet1].mt();//ptcorrection?
+    auto daus1(allbjets[jet1].daughterPtrVector());
+    std::sort(daus1.begin(), daus1.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); }); // C++11
+    bool leadinglepton1 = false;
+    for (unsigned int i = 0; i < daus1.size(); ++i) {
+	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus1[i]);
+	if (i==0)
+	    b1jet_leadTrackPt = cand.pt();
+	if (abs(cand.pdgId()) == 13  and not(leadinglepton1)){
+	    b1jet_leptonPdgId = cand.pdgId(); b1jet_leptonPt = cand.pt(); 
+	    b1jet_leptonEta = cand.eta(); b1jet_leptonPhi = cand.phi();
+	    leadinglepton1 = true;
+	}
+	if (leadinglepton1 and b1jet_leadTrackPt>0)
+	    break;
+    }
+    b1jet_leptonPtRel = 0;
+    b1jet_leptonDeltaR = deltaR(b1jet_leptonEta, b1jet_leptonPhi, b1jet_eta, b1jet_phi);
     //b1jet_neHEF = allbjets[jet1].neutralHadronEnergy()/(allbjets[jet1].p4()*allbjets[jet1].rawFactor()).energy();//neutralHardonEfraction
     //b1jet_neEmEF = allbjets[jet1].neutralEmEnergy()/(allbjets[jet1].p4()*allbjets[jet1].rawFactor()).energy();//neutralEmEnergyFraction
+    b1jet_neHEF = allbjets[jet1].neutralHadronEnergyFraction();
+    b1jet_neEmEF = allbjets[jet1].neutralEmEnergyFraction();
     b1jet_vtxMass = allbjets[jet1].userFloat("vtxMass"); b1jet_vtxNtracks = allbjets[jet1].userFloat("vtxNtracks"); 
     b1jet_vtxPx = allbjets[jet1].userFloat("vtxPx"); b1jet_vtxPy = allbjets[jet1].userFloat("vtxPy");
     b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
@@ -1057,10 +1079,26 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet2].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
     b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet2].eta(); b2jet_phi = allbjets[jet2].phi();
     b2jet_bDiscVar = allbjets[jet2].bDiscriminator(bjetDiscrName_);
-    //b2jet_leadTrackPt = allbjets[jet2].leadTrackPt(); b2jet_mt  = allbjets[jet2].mt();//ptcorrection?
-    //b2jet_leptonPdgId = allbjets[jet2].leptons[0].pdgId(); b2jet_leptonPhi = allbjets[jet2].leptons[0].phi(); b2jet_leptonEta = allbjets[jet2].leptons[0].eta();
-    //b2jet_leptonPtRel = 0; b2jet_leptonPt = allbjets[jet2].leptons[0].pt();
-    //b2jet_leptonDeltaR = deltaR(b2jet_leptonEta, b2jet_leptonPhi, b2jet_eta, b2jet_phi);
+    b2jet_mt  = allbjets[jet2].mt();//ptcorrection?
+    auto daus2(allbjets[jet2].daughterPtrVector());
+    std::sort(daus2.begin(), daus2.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); }); // C++11
+    bool leadinglepton2 = false;
+    for (unsigned int i = 0; i < daus2.size(); ++i) {
+	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus2[i]);
+	if (i==0)
+	    b2jet_leadTrackPt = cand.pt();
+	if (abs(cand.pdgId()) == 13  and not(leadinglepton2)){
+	    b2jet_leptonPdgId = cand.pdgId(); b2jet_leptonPt = cand.pt(); 
+	    b2jet_leptonEta = cand.eta(); b2jet_leptonPhi = cand.phi();
+	    leadinglepton2 = true;
+	}
+	if (leadinglepton2 and b2jet_leadTrackPt>0)
+	    break;
+    }
+    b2jet_leptonPtRel = 0;
+    b2jet_leptonDeltaR = deltaR(b2jet_leptonEta, b2jet_leptonPhi, b2jet_eta, b2jet_phi);
+    b2jet_neHEF = allbjets[jet2].neutralHadronEnergyFraction();
+    b2jet_neEmEF = allbjets[jet2].neutralEmEnergyFraction();
     //b2jet_neHEF = allbjets[jet2].neutralHadronEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralHardonEfraction
     //b2jet_neEmEF = allbjets[jet2].neutralEmEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralEmEnergyFraction
     b2jet_vtxMass = allbjets[jet2].userFloat("vtxMass"); b2jet_vtxNtracks = allbjets[jet2].userFloat("vtxNtracks"); 
@@ -1658,7 +1696,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
 	if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
 	if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
 	if( it->numberOfMothers()==1  and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))
-	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId() << std::endl;
+	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId()<<" muon status "<< it->status()<<" mother's pt "<< it->mother()->pt() <<" mass "<< it->mother()->mass() << std::endl;
     }
     if( it->pdgId() == -13 and it->status() == 1)      lept1Coll.push_back(it->clone());
     if( it->pdgId() == 13 and it->status() == 1)       lept2Coll.push_back(it->clone());
