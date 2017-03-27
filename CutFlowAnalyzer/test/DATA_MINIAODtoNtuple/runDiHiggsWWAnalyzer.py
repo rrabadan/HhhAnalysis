@@ -44,7 +44,7 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 )
 
 print sys.argv
-sample = int(sys.argv[1])
+sample = 0#int(sys.argv[1])
 print "sample",sample
 
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',

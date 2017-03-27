@@ -135,8 +135,8 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
 def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm):
   c1 = ROOT.TCanvas()
   c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
-  color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan]
-  marker = [20,21,22,23,34]
+  color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan, ROOT.kOrange+2, ROOT.kViolet-1, ROOT.kPink+2]
+  marker = [20,21,22,23,34,33,29,28]
   legend = ROOT.TLegend(0.65,0.65,0.8,0.94); legend.SetFillColor(ROOT.kWhite); legend.SetTextSize(0.05); legend.SetTextFont(62)
   hs = ROOT.THStack("hs"," ")
   hists = []
@@ -161,3 +161,12 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
   if(Norm=="lumi"):   hs.GetHistogram().GetYaxis().SetTitle("Normalized to "+str(Lumi)+"fb-1")
   legend.Draw("same")
   c1.SaveAs("Plots/"+pic_name)
+
+def findNewestDir(directory):
+  os.chdir(directory)
+  dirs = {}
+  for dir in glob.glob('*'):
+    if os.path.isdir(dir):
+      dirs[dir] = os.path.getctime(dir)
+  lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
+  return lister[-1][0]
