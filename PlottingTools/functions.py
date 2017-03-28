@@ -1,4 +1,4 @@
-def hist1D(tree, todraw, x_bins, cut, B, Lumi):
+def hist1D(tree, todraw, x_bins, cut, B, Lumi, isMC):
   if cut=="" or cut==" ": cut="1"
   Lumi    = Lumi * 1000 # Convert from fb-1 to pb-1
   xBins   = int(x_bins[1:-1].split(',')[0])
@@ -6,7 +6,12 @@ def hist1D(tree, todraw, x_bins, cut, B, Lumi):
   xmaxBin = float(x_bins[1:-1].split(',')[2])
   b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
   Ntot           = int(tree.GetMaximum("ievent"))
-  cut_and_weight = str(Lumi) + "*(XsecBr/" + str(Ntot) + ")*(" + str(cut) + ")"
+  if isMC:
+    cut_and_weight = str(Lumi) + "*(XsecBr/" + str(Ntot) + ")*(" + str(cut) + ")"
+  else:
+    # WRONG JUST FOR TEST
+    cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(Ntot) + ")*(" + str(cut) + ")"
+    #cut_and_weight = str(cut)
   tree.Draw("%s>>%s_%s"%(todraw,B,todraw), cut_and_weight)
   ROOT.SetOwnership(b1, False)
   return b1
@@ -38,7 +43,7 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
     hists_1.append(ROOT.TH1F("hist1_%d"%nfile,"hist1_%d"%nfile, 190, 200, 4000))
     hists_2.append(ROOT.TH1F("hist2_%d"%nfile,"hist2_%d"%nfile, 190, 200, 4000))
     hists_3.append(ROOT.TH1F("hist3_%d"%nfile,"hist3_%d"%nfile,30,0,300))
-    hists_4.append(ROOT.TH1F("hist4_%d"%nfile,"hist4_%d"%nfile,30,0,900))	
+    hists_4.append(ROOT.TH1F("hist4_%d"%nfile,"hist4_%d"%nfile,30,0,900))
     for nfile in range(len(filelist)):
       rootfile = filelist[nfile]
       B = benchmarks[nfile]
@@ -132,35 +137,52 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
   c1.cd()
   c1.SaveAs("Hhh_PDFvalidation_%s_combined.png"%pic_name)
     
-def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm):
-  c1 = ROOT.TCanvas()
-  c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
-  color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan, ROOT.kOrange+2, ROOT.kViolet-1, ROOT.kPink+2]
-  marker = [20,21,22,23,34,33,29,28]
-  legend = ROOT.TLegend(0.65,0.65,0.8,0.94); legend.SetFillColor(ROOT.kWhite); legend.SetTextSize(0.05); legend.SetTextFont(62)
-  hs = ROOT.THStack("hs"," ")
-  hists = []
-  for nfile in range(len(filelist)):
-    B = benchmarks[nfile]
-    hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi)
-    hist.SetLineColor(color[nfile])
-    hist.SetLineWidth(3)
-    hist.SetMarkerColor(color[nfile])
-    hist.SetMarkerStyle(marker[nfile])
-    if(hist.Integral()>0):
-      if(Norm=="unity"): hist.Scale(1./hist.Integral())
-      hs.Add(hist)
-      legend.AddEntry(hist, "%s"%B, "l")
-      hists.append(hist)
-    else:
-      print "-> NO events for",B,"using the selection:"
-      print "   ",cut
-  hs.Draw("nostack")
-  hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
-  if(Norm=="unity"): hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
-  if(Norm=="lumi"):   hs.GetHistogram().GetYaxis().SetTitle("Normalized to "+str(Lumi)+"fb-1")
-  legend.Draw("same")
-  c1.SaveAs("Plots/"+pic_name)
+def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm, DataOrMC):
+  #Check parameters
+  if (not("unity" in Norm) and not("lumi" in Norm) ): print "WARNING: 'Norm' has a wrong inzialization!"
+  if( ("unity" in Norm) and DataOrMC=="DataMC"):
+    print "You are asking to normalize to unity and you are overimposing MC and data. This make no sense. I will remove the 'unity' option from Norm list."
+    Norm.remove('unity')
+  #Loop over the samples
+  for this_Norm in Norm:
+    c1 = ROOT.TCanvas()
+    c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
+    color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan, ROOT.kOrange+2, ROOT.kViolet-1, ROOT.kPink+2]
+    marker = [20,21,22,23,34,33,29,28]
+    legend = ROOT.TLegend(0.65,0.65,0.8,0.94); legend.SetFillColor(ROOT.kWhite); legend.SetTextSize(0.05); legend.SetTextFont(62)
+    hs = ROOT.THStack("hs"," ")
+    hdata = ROOT.TH1F()
+    hists = []
+    for nfile in range(len(filelist)):
+      isMC = True
+      if( DataOrMC=="DataMC" and (nfile==int(len(filelist)-1)) ): isMC=False
+      B = benchmarks[nfile]
+      hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi, isMC)
+      hist.SetLineColor(color[nfile])
+      hist.SetLineWidth(2)
+      hist.SetMarkerColor(color[nfile])
+      hist.SetMarkerStyle(marker[nfile])
+      if(hist.Integral()<=0):
+        print "-> NO events for",B,"using the selection:"
+        print "   ",cut
+      else:
+        if isMC:
+          if(DataOrMC=="DataMC"): hist.SetFillColor(color[nfile])
+          if(this_Norm=="unity"): hist.Scale(1./hist.Integral())
+          hs.Add(hist)
+          legend.AddEntry(hist, "%s"%B, "l")
+          hists.append(hist)
+        else: # Data is expected to be the last item of filelist
+          hdata = hist
+          hdata.SetLineColor(1); hdata.SetMarkerStyle(20); hdata.SetMarkerColor(1);
+          legend.AddEntry(hist, "%s"%B, "l")
+    if DataOrMC!="DataMC": hs.Draw("nostack") # One on top of the others
+    else:                  hs.Draw(); hdata.Draw("same")
+    hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
+    if(this_Norm=="unity"):  hs.GetHistogram().GetYaxis().SetTitle("Normalized to unity")
+    if(this_Norm=="lumi"):   hs.GetHistogram().GetYaxis().SetTitle("Normalized to "+str(Lumi)+" fb^{-1}")
+    legend.Draw("same")
+    c1.SaveAs("Plots/" + this_Norm + "_" + DataOrMC + "_" + pic_name)
 
 def findNewestDir(directory):
   os.chdir(directory)
