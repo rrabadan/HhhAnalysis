@@ -162,6 +162,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
     hist.SetLineWidth(2)
     hist.SetMarkerColor(color[nfile])
     hist.SetMarkerStyle(marker[nfile])
+    hist.SetMinimum(0)
     if(hist.Integral()<=0):
       print "-> NO events for",B,"using the selection:"
       print "   ",cut
