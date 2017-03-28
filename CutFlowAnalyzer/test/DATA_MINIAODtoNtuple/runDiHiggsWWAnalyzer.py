@@ -14,7 +14,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 process.source = cms.Source("PoolSource",
   secondaryFileNames = cms.untracked.vstring(),
   fileNames = cms.untracked.vstring(
-  'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
+#  'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
+  'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
   )
 )
 

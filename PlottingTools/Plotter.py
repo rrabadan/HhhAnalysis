@@ -10,7 +10,7 @@ tree_name="DiHiggsWWBBAna/evtree"
 os.system("mkdir -p Plots")
 os.system("mkdir -p HADD")
 os.system("rm -rf HADD/*txt")
-Lumi=36.8#fb-1
+Lumi=36.42#fb-1
 
 TT_ch = ROOT.TChain(tree_name)
 os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170327_023645 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
