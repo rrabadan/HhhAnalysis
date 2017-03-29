@@ -111,7 +111,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     //gen matching 
     float leptonsDeltaR_;//dR(gen, reco)
     float jetsDeltaR_;//gen matching 
-    bool finalStates_;
+    bool onlyGenLevel_;
 
     // debuglevel constrol 
     int verbose_; 
@@ -122,6 +122,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
     //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   private:
+    TH1F *hevent;
     TTree *evtree;
     TFile *output;
     void initBranches();
@@ -527,7 +528,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   elIso_                = iConfig.getUntrackedParameter<double>("elIso",0.04);
 
   sampleType_           = iConfig.getUntrackedParameter<int>("SampleType",0);
-  finalStates_          = iConfig.getParameter<bool>("finalStates");
+  onlyGenLevel_          = iConfig.getParameter<bool>("onlyGenLevel");
   runMMC_               = iConfig.getParameter<bool>("runMMC");
   simulation_           = iConfig.getParameter<bool>("simulation");
   /*
@@ -895,16 +896,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   else if(sampleType_==TTWJetsToLNu)             XsecBr = 0.2043;
   else if(sampleType_==TTZToQQ)                  XsecBr = 0.5297;
   else if(sampleType_==TTZToLLNuNu)              XsecBr = 0.2529;
-  /*
-  edm::Handle<pat::METCollection> mets;
-  iEvent.getByToken(metToken_, mets);
-  const pat::MET &met = mets->front();
-  const reco::GenMET *genmet = met.genMET();
-  genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
-  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
-  met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
-  met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
-   */
+
+
   //****************************************************************************
   //                GENERATOR LEVEL                       
   //****************************************************************************
@@ -917,6 +910,11 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets) checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles) matchGenJet2Parton( genjetColl );
   if (findAllGenParticles) fillbranches(); //fill Gen info into tree
+
+  if (onlyGenLevel_){
+  	evtree->Fill();
+	return;
+  }
 
   //****************************************************************************
   //                RECO LEVEL
@@ -935,6 +933,18 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //****************************************************************************
   //                Triggering matching 
   //****************************************************************************
+
+  //****************************************************************************
+  //                MET
+  //****************************************************************************
+  edm::Handle<pat::METCollection> mets;
+  iEvent.getByToken(metToken_, mets);
+  const pat::MET &met = mets->front();
+  const reco::GenMET *genmet = met.genMET();
+  genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
+  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
+  met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
+  met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
   //****************************************************************************
   //                Di-Leptons selection
   //****************************************************************************
@@ -1145,6 +1155,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 }
 
 void DiHiggsWWBBAnalyzer::beginJob(){
+  hevent = fs->make<TH1F>("hevent", "event counter",10,0,10);
   evtree = fs->make<TTree>("evtree", "evtree");
   //output = new TFile("output.root","recreate");
   // output->cd();
@@ -1425,6 +1436,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 DiHiggsWWBBAnalyzer::endJob() {
+   hevent->Fill(1, ievent);
   //   std::cout << "endJob, ievent  " << ievent << std::endl;
   //output->Write();
   // output->Close();
