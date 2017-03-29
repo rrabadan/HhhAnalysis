@@ -1044,7 +1044,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	}
     }
   }
-  if (allbjets.size()>2){
+  if (allbjets.size() >= 2){
     std::cout <<"found two bjets "<< std::endl;
     b1jet_px = allbjets[jet1].px(); b1jet_py = allbjets[jet1].py(); b1jet_pz = allbjets[jet1].pz(); b1jet_energy = allbjets[jet1].energy();
     b1jet_pt = allbjets[jet1].pt(); b1jet_eta = allbjets[jet1].eta(); b1jet_phi = allbjets[jet1].phi();
@@ -1688,6 +1688,8 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
   std::vector<reco::GenParticle*> lept2Coll;
   std::vector<reco::GenParticle*> bJet1Coll;
   std::vector<reco::GenParticle*> bJet2Coll;
+  std::vector<const reco::Candidate*> ZColl;
+
   std::cout <<"*********** start to check GenParticles for DY sample ***********"<< std::endl;
   for(reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
     if( debug_ and abs(it->pdgId()) == 13){ 
@@ -1698,36 +1700,34 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
 	if( it->numberOfMothers()==1  and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))
 	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId()<<" muon status "<< it->status()<<" mother's pt "<< it->mother()->pt() <<" mass "<< it->mother()->mass() << std::endl;
     }
-    if( it->pdgId() == -13 and it->status() == 1)      lept1Coll.push_back(it->clone());
-    if( it->pdgId() == 13 and it->status() == 1)       lept2Coll.push_back(it->clone());
+    if( it->pdgId() == -13 and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))      lept1Coll.push_back(it->clone());
+    if( it->pdgId() == 13 and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))       lept2Coll.push_back(it->clone());
     if( fabs(it->pdgId()) == 5 )  bJet1Coll.push_back(it->clone());
     if( fabs(it->pdgId()) == -5 ) bJet2Coll.push_back(it->clone());
   }// all Gen particles
-  //Fill Final quantites
-  if(lept1Coll.size()>0){
-    float minPT=-1;
+  //Fill Final quantites, only Z/gamma->ll are accepted 
+  if(lept1Coll.size()>0 and lept2Coll.size()>0){
     for (auto lept1Cand : lept1Coll){
-	const reco::Candidate *tmpcand = lept1Cand;
-	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
-	if(part.Pt()>minPT){
-	  mu1cand = tmpcand;
-	  minPT = part.Pt();
-	}
+	for (auto lept2Cand : lept2Coll){
+	    const reco::Candidate *tmpcand1 = lept1Cand->mother();
+	    const reco::Candidate *tmpcand2 = lept2Cand->mother();
+	    if (tmpcand1 == tmpcand2){
+		ZColl.push_back(tmpcand1);
+		TLorentzVector part(tmpcand1->px(), tmpcand1->py(), tmpcand1->pz(), tmpcand1->energy());
+		std::cout <<"find Z/gamma to ll , pdgId "<< tmpcand1->pdgId() <<" mass "<< part.M()<<" pt "<< part.Pt() << std::endl;
+	    }
+    	}
     }
   }
-  if(lept2Coll.size()>0){
-    float minPT=-1;
-    for (auto lept2Cand : lept2Coll){
-	const reco::Candidate *tmpcand = lept2Cand;
-	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
-	if(part.Pt()>minPT){
-	  mu2cand = tmpcand;
-	  minPT = part.Pt();
-	}
-    }
+
+  if (ZColl.size()>0){
+      mu1cand = stabledecendant(ZColl[0], -13);
+      mu2cand = stabledecendant(ZColl[0], 13);
   }
+
+  //not care about where b comes from 
   if(bJet1Coll.size()>0){
-    float minPT=-1;
+    float minPT=5;//min pt cut 
     for (auto bJet1Cand : bJet1Coll){
 	const reco::Candidate *tmpcand = bJet1Cand;
 	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
@@ -1738,7 +1738,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
     }
   }
   if(bJet2Coll.size()>0){
-    float minPT=-1;
+    float minPT=5;
     for (auto bJet2Cand : bJet2Coll){
 	const reco::Candidate *tmpcand = bJet2Cand;
 	TLorentzVector part(tmpcand->px(), tmpcand->py(), tmpcand->pz(), tmpcand->energy());
@@ -1748,8 +1748,8 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
 	}
     }
   }
-  if(debug_) if(lept1Coll.size()>0 and lept2Coll.size()>0 and bJet1Coll.size()>0 and bJet2Coll.size()>0) findAllGenParticles=true;
-  std::cout <<"size lept1Coll "<< lept1Coll.size()<<" size lept2Coll "<< lept2Coll.size()<<" bJet1Coll "<< bJet1Coll.size()<<" bJet2Coll "<< bJet2Coll.size()<<" -> "<<findAllGenParticles<< std::endl;
+  if(ZColl.size()>0 and bJet1Coll.size()>0 and bJet2Coll.size()>0) findAllGenParticles=true;
+  //std::cout <<"size lept1Coll "<< lept1Coll.size()<<" size lept2Coll "<< lept2Coll.size()<<" bJet1Coll "<< bJet1Coll.size()<<" bJet2Coll "<< bJet2Coll.size()<<" -> "<<findAllGenParticles<< std::endl;
   std::cout <<"*********** end in checking GenParticles for DY sample ***********"<< std::endl;
 }
 
@@ -1901,6 +1901,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     }
     TLorentzVector mu1_p4(mu1cand->px(), mu1cand->py(), mu1cand->pz(), mu1cand->energy());
     TLorentzVector mu2_p4(mu2cand->px(), mu2cand->py(), mu2cand->pz(), mu2cand->energy());
+    
     TLorentzVector b1_p4(b1cand->px(), b1cand->py(), b1cand->pz(), b1cand->energy());
     TLorentzVector b2_p4(b2cand->px(), b2cand->py(), b2cand->pz(), b2cand->energy());
     dR_genbl   = (b1_p4.Pt()>b2_p4.Pt()) ? (b1_p4.DeltaR( (mu1_p4.Pt()>mu2_p4.Pt()) ? mu1_p4 : mu2_p4 )) : (b2_p4.DeltaR( (mu1_p4.Pt()>mu2_p4.Pt()) ? mu1_p4 : mu2_p4 ));
