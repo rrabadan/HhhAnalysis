@@ -77,25 +77,30 @@ ttV_ch = ROOT.TChain(tree_name)
 os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170327_025521 | grep root | grep -v failed > HADD/ttV_TTWJetsToQQTuneCUETP8M1.txt")
 os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170327_025533 | grep root | grep -v failed > HADD/ttV_TTWJetsToLNuTuneCUETP8M1.txt")
 os.system("find /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170327_025546 | grep root | grep -v failed > HADD/ttV_TTZToQQTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170327_025558 | grep root | grep -v failed > HADD/ttV_TTZToLLNuNuM-10.txt")
 os.system("cat HADD/ttV_* > HADD/ttV.txt")
 with open("HADD/ttV.txt","r") as f:
   for line in f:
     if not line.isspace():
       ttV_ch.Add(str(line[:-1]))
-##print "ttV has", ttV_ch.GetEntries(), "entries."
-##os.system("find /fdata/hepx/store/user/lpernie/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170327_025558 | grep root | grep -v failed > HADD/ttV_TTZToLLNuNuM-10.txt")
+print "ttV has", ttV_ch.GetEntries(), "entries."
 # Data
-Data_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170327_023645 | grep root | grep -v failed > HADD/Data_All.txt")
-os.system("cat HADD/Data_* > HADD/Data.txt")
-with open("HADD/Data.txt","r") as f:
+DATA_ch = ROOT.TChain(tree_name)
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016B-23Sep2016-v3/170328_165041 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016B-23Sep2016-v3.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016C-23Sep2016-v1/170328_165054 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016C-23Sep2016-v1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016D-23Sep2016-v1/170328_155649 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016D-23Sep2016-v1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016E-23Sep2016-v1/170328_165119 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016E-23Sep2016-v1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016F-23Sep2016-v1/170328_165132 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016F-23Sep2016-v1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016G-23Sep2016-v1/170328_165144 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016G-23Sep2016-v1.txt")
+os.system("cat HADD/DATA_* > HADD/DATA.txt")
+with open("HADD/DATA.txt","r") as f:
   for line in f:
     if not line.isspace():
-      Data_ch.Add(str(line[:-1]))
-print "Data has", Data_ch.GetEntries(), "entries."
+      DATA_ch.Add(str(line[:-1]))
+print "DATA has", DATA_ch.GetEntries(), "entries."
 
 # Dataset to plot
-filelist = [ttV_ch, Wjet_ch, sT_ch, VV_ch, DY_ch, TT_ch, Data_ch] #If you draw a StackPlot place the smaller samples at the beginning and data as last one
+filelist = [ttV_ch, Wjet_ch, sT_ch, VV_ch, DY_ch, TT_ch, DATA_ch] #If you draw a StackPlot place the smaller samples at the beginning and data as last one
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 #Cuts and Ordering
 cut = "" #cut = "mu1_pt>10 && mu2_pt>10 && fabs(mu1_eta)<2.4 && fabs(mu2_eta)<2.4"
