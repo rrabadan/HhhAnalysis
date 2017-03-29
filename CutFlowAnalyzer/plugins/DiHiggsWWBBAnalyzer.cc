@@ -904,20 +904,26 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //                GENERATOR LEVEL                       
   //****************************************************************************
   edm::Handle<reco::GenParticleCollection> genParticleColl;
-  iEvent.getByToken(genParticlesToken_, genParticleColl);
   edm::Handle<std::vector<reco::GenJet>> genjetColl;
-  iEvent.getByToken(genjetToken_, genjetColl);
+  try{
+      iEvent.getByToken(genParticlesToken_, genParticleColl);
+      iEvent.getByToken(genjetToken_, genjetColl);
+  } catch (...){
+  	std::cout <<"no Gen information "<< std::endl;
+  }
+
   if (sampleType_>Data and sampleType_<=B12)             checkGenParticlesSignal(genParticleColl);
   else if (sampleType_==TTbar)                           checkGenParticlesTTbar(genParticleColl);
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets) checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles) matchGenJet2Parton( genjetColl );
   if (findAllGenParticles) fillbranches(); //fill Gen info into tree
 
-  if (onlyGenLevel_){
+  if (onlyGenLevel_ and sampleType_>Data){
   	evtree->Fill();
 	return;
   }
 
+  //std::cout <<"reco level "<< std::endl;
   //****************************************************************************
   //                RECO LEVEL
   //****************************************************************************
@@ -941,17 +947,22 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //****************************************************************************
   //                MET
   //****************************************************************************
+
+  //std::cout <<"MET "<< std::endl;
   edm::Handle<pat::METCollection> mets;
   iEvent.getByToken(metToken_, mets);
   const pat::MET &met = mets->front();
-  const reco::GenMET *genmet = met.genMET();
-  genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
-  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). genMET %.1f. MET with JES up/down: %.1f/%.1f\n",
-  met.pt(), met.phi(), met.sumEt(), met.genMET()->pt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
+  if (sampleType_ > Data){
+      const reco::GenMET *genmet = met.genMET();
+      genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
+  }
+  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). MET with JES up/down: %.1f/%.1f\n",
+  met.pt(), met.phi(), met.sumEt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
   met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
   //****************************************************************************
   //                Di-Leptons selection
   //****************************************************************************
+  //std::cout <<"diMuon "<< std::endl;
   for (const pat::Muon &mu : *muons) {
     const MuonPFIsolation& muonIso = mu.pfIsolationR03();
     float isoVar = (muonIso.sumChargedHadronPt + muonIso.sumNeutralHadronEt + muonIso.sumPhotonEt)/mu.pt();
@@ -1012,6 +1023,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //****************************************************************************
   //                Di-Jets selection
   //****************************************************************************
+  //std::cout <<"diJet "<< std::endl;
   edm::Handle<pat::JetCollection> jets;
   iEvent.getByToken(jetToken_, jets);
   std::vector<pat::Jet> allbjets;
