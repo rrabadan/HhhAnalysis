@@ -844,7 +844,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   using namespace edm;
   initBranches(); 
   ievent++;
-  if (debug_) std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
+  //if (debug_) 
+      std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
   //Compute weight
   float BR_h_bb   = 0.577;
   float BR_h_WW   = 0.215;
@@ -1694,9 +1695,9 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
   for(reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
     if( debug_ and abs(it->pdgId()) == 13){ 
 	std::cout<<"ID: "<<it->pdgId()<<" ->numOfmothers: "<<it->numberOfMothers()<<std::endl;
-	if( it->numberOfMothers()==0 ) std::cout<<"  DY: NO MOTHER!"<<std::endl;
-	if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
-	if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
+	//if( it->numberOfMothers()==0 ) std::cout<<"  DY: NO MOTHER!"<<std::endl;
+	//if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
+	//if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
 	if( it->numberOfMothers()==1  and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))
 	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId()<<" muon status "<< it->status()<<" mother's pt "<< it->mother()->pt() <<" mass "<< it->mother()->mass() << std::endl;
     }
