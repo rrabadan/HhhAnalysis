@@ -103,26 +103,26 @@ cut = "" #cut = "mu1_pt>10 && mu2_pt>10 && fabs(mu1_eta)<2.4 && fabs(mu2_eta)<2.
 #---Starting to plot histos here-------------------------------------------------------------------------------------------------------------------------------------
 NORM=["lumi"] #NORM=["unity","lumi"]
 DataOrMC="DataMC" # MC or DATA = all samples overimposed, DataMC = MC is stack, data is overimposed
-LOG=["yes","no"] # You can choose if you want the plots to be log, linear or both
+LOG=["yes"]#,"no"] # You can choose if you want the plots to be log, linear or both
 Format=[".pdf",".C"]
 for this_LOG in LOG:
   for this_Norm in NORM:
     #GEN
     #RECO Di-Leptons
-    draw1D(filelist, "muon1_pt", "(50,10,100)", "Pt [GeV]", cut, benchmarks, "h_MU1_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon2_pt", "(50,10,100)", "Pt [GeV]", cut, benchmarks, "h_MU2_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon1_eta", "(50,-3,3)", "#Eta", cut, benchmarks, "h_MU1_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon2_eta", "(50,-3,3)", "#Eta", cut, benchmarks, "h_MU2_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon1_pt", "(50,10,100)", "P_{T} [GeV]", cut, benchmarks, "h_MU1_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon2_pt", "(50,10,100)", "P_{T} [GeV]", cut, benchmarks, "h_MU2_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon1_eta", "(50,-3,3)", "#eta", cut, benchmarks, "h_MU1_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon2_eta", "(50,-3,3)", "#eta", cut, benchmarks, "h_MU2_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "mass_l1l2", "(40,20,150)", "m(l,l)", cut, benchmarks, "h_M_l1l2", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "dR_l1l2", "(50,0,5)", "#Delta R(l,l)", cut, benchmarks, "h_DR_l1l2", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     #RECO Di-Jets
-    draw1D(filelist, "b1jet_pt", "(50,20,200)", "Pt [GeV]", cut, benchmarks, "h_J1_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b2jet_pt", "(50,20,100)", "Pt [GeV]", cut, benchmarks, "h_J2_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b1jet_eta", "(50,-3.,3.)", "#Eta", cut, benchmarks, "h_J1_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b2jet_eta", "(50,-3.,3.)", "#Eta", cut, benchmarks, "h_J2_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b1jet_pt", "(50,20,200)", "P_{T} [GeV]", cut, benchmarks, "h_J1_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b2jet_pt", "(50,20,100)", "P_{T} [GeV]", cut, benchmarks, "h_J2_pt", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b1jet_eta", "(50,-3.,3.)", "#eta", cut, benchmarks, "h_J1_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b2jet_eta", "(50,-3.,3.)", "#eta", cut, benchmarks, "h_J2_eta", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "mass_b1b2", "(40,40,180)", "m(j,j)", cut, benchmarks, "h_M_b1b2", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "dR_b1b2", "(50,0,5)", "#Delta R(j,j)", cut, benchmarks, "h_DR_b1b2", Lumi, this_Norm, DataOrMC, this_LOG, Format)
     #RECO MIX
     #draw1D(filelist, "mass_trans", "(50,5,100)", "M_trans [GeV]", cut, benchmarks, "h_MT", Lumi, NORM)
     draw1D(filelist, "dR_l1l2b1b2", "(50,0,5)", "#Delta R(lljj)", cut, benchmarks, "h_dR_l1l2b1b2", Lumi, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "dphi_llmet", "(50,-4,4)", "#Delta #Phi (ll,MET)", cut, benchmarks, "h_Dphi_llmet", Lumi, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "dphi_llmet", "(50,-4,4)", "#Delta #phi (ll,MET)", cut, benchmarks, "h_Dphi_llmet", Lumi, this_Norm, DataOrMC, this_LOG, Format)
