@@ -76,7 +76,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     edm::EDGetTokenT<reco::TrackCollection> tracksToken_;
     edm::EDGetTokenT<edm::TriggerResults> trigResToken_;
     edm::EDGetTokenT<reco::TrackCollection> trackRefToken_;
-    edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
+    //edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
     edm::EDGetTokenT<reco::VertexCollection> primaryVerticesToken_;
     bool debug_;
     enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
@@ -500,7 +500,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   tracksToken_          = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"));
   trigResToken_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"));
   trackRefToken_        = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("TrackRefitter"));
-  trajToken_            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
+  //trajToken_            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
   primaryVerticesToken_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"));
 
   debug_                = iConfig.getUntrackedParameter<bool>("debug",false);
