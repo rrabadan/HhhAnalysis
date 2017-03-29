@@ -475,7 +475,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float mass_trans;
   private:
     bool runMMC_;
-    bool simulation_;
     MMC* thismmc;
     // MMC tree branches
 };
@@ -531,7 +530,6 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   sampleType_           = iConfig.getUntrackedParameter<int>("SampleType",0);
   onlyGenLevel_          = iConfig.getParameter<bool>("onlyGenLevel");
   runMMC_               = iConfig.getParameter<bool>("runMMC");
-  simulation_           = iConfig.getParameter<bool>("simulation");
   /*
      iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
      seed_ = iConfig.getParameter<int>("seed");
@@ -848,7 +846,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   initBranches(); 
   ievent++;
   //if (debug_) 
-      std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
+  std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
   //Compute weight
   float BR_h_bb   = 0.577;
   float BR_h_WW   = 0.215;
@@ -956,8 +954,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
       const reco::GenMET *genmet = met.genMET();
       genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
   }
-  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). MET with JES up/down: %.1f/%.1f\n",
-  met.pt(), met.phi(), met.sumEt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
+  printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). MET with JES up/down: %.1f/%.1f\n", 
+	  met.pt(), met.phi(), met.sumEt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
   met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
   //****************************************************************************
   //                Di-Leptons selection
@@ -1039,20 +1037,20 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     float bDiscVar = j.bDiscriminator(bjetDiscrName_);
     if (bDiscVar < bjetDiscrCut_loose_)  continue;
     allbjets.push_back(j);
-    
+
     printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
 	  j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
     printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
-     auto daus(j.daughterPtrVector());
-     std::sort(daus.begin(), daus.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); }); // the joys of C++11
-     for (unsigned int i2 = 0, n = daus.size(); i2 < n && i2 <= 3; ++i2) {
+    auto daus(j.daughterPtrVector());
+    std::sort(daus.begin(), daus.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); }); // the joys of C++11
+    for (unsigned int i2 = 0, n = daus.size(); i2 < n && i2 <= 3; ++i2) {
 	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus[i2]);
-	 printf("         constituent %3d: pt %6.2f, dz(pv) %+.3f, pdgId %+3d\n", i2,cand.pt(),cand.dz(PV.position()),cand.pdgId());
-	}
+	printf("         constituent %3d: pt %6.2f, dz(pv) %+.3f, pdgId %+3d\n", i2,cand.pt(),cand.dz(PV.position()),cand.pdgId());
+    }
     const reco::GenParticle * genp = j.genParticle();
     if (genp)
 	std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
-   }
+  }
 
   // sort jets by pt
   std::sort(allbjets.begin(), allbjets.end(), [](pat::Jet& jet1, pat::Jet& jet2) { return jet1.pt() > jet2.pt(); });
@@ -1068,21 +1066,21 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	if (bDiscVar1 > bjetDiscrCut_medium_) mbtags++;
 	if (bDiscVar2 > bjetDiscrCut_medium_) mbtags++;
 	if (mbtags >=  1)
-	    hastwojets = true;
+	  hastwojets = true;
 	else continue;
 
 	if (mbtags > numOfMediumbtags){//first priority: 2 medium btags
+	  jet1 = i;
+	  jet2 = j;
+	  numOfMediumbtags = mbtags;
+	}else if (mbtags == numOfMediumbtags){//second priority: invariant mass close to M_H
+	  TLorentzVector dijet_p4(allbjets[i].px()+allbjets[j].px(), allbjets[i].py()+allbjets[j].py(), 
+		allbjets[i].pz()+allbjets[j].pz(),allbjets[i].energy()+allbjets[j].energy());
+	  if (fabs(dijet_p4.M()-125)<diff_higgsmass){
 	    jet1 = i;
 	    jet2 = j;
-	    numOfMediumbtags = mbtags;
-	}else if (mbtags == numOfMediumbtags){//second priority: invariant mass close to M_H
-	    TLorentzVector dijet_p4(allbjets[i].px()+allbjets[j].px(), allbjets[i].py()+allbjets[j].py(), 
-		allbjets[i].pz()+allbjets[j].pz(),allbjets[i].energy()+allbjets[j].energy());
-	    if (fabs(dijet_p4.M()-125)<diff_higgsmass){
-	      jet1 = i;
-	      jet2 = j;
-	      diff_higgsmass = fabs(dijet_p4.M()-125); 
-	    }
+	    diff_higgsmass = fabs(dijet_p4.M()-125); 
+	  }
 	}
     }
   }
@@ -1098,18 +1096,18 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     for (unsigned int i = 0; i < daus1.size(); ++i) {
 	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus1[i]);
 	if (i==0)
-	    b1jet_leadTrackPt = cand.pt();
+	  b1jet_leadTrackPt = cand.pt();
 	if (abs(cand.pdgId()) == 13  and not(leadinglepton1)){
-	    b1jet_leptonPdgId = cand.pdgId(); b1jet_leptonPt = cand.pt(); 
-	    b1jet_leptonEta = cand.eta(); b1jet_leptonPhi = cand.phi();
-	    leadinglepton1_px = cand.px(); 
-	    leadinglepton1_py = cand.py(); 
-	    leadinglepton1_pz = cand.pz(); 
-	    leadinglepton1_p = cand.p(); 
-	    leadinglepton1 = true;
+	  b1jet_leptonPdgId = cand.pdgId(); b1jet_leptonPt = cand.pt(); 
+	  b1jet_leptonEta = cand.eta(); b1jet_leptonPhi = cand.phi();
+	  leadinglepton1_px = cand.px(); 
+	  leadinglepton1_py = cand.py(); 
+	  leadinglepton1_pz = cand.pz(); 
+	  leadinglepton1_p = cand.p(); 
+	  leadinglepton1 = true;
 	}
 	if (leadinglepton1 and b1jet_leadTrackPt>0)
-	    break;
+	  break;
     }
     float lepXj1 = leadinglepton1_px*b1jet_px+leadinglepton1_py*b1jet_py+leadinglepton1_pz*b1jet_pz; 
     float pTrel2_1 = leadinglepton1_p*leadinglepton1_p - lepXj1*lepXj1/allbjets[jet1].p();
@@ -1127,7 +1125,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
     b1jet_vtx3DSig = allbjets[jet1].userFloat("vtx3DSig"); b1jet_vtx3DVal = allbjets[jet1].userFloat("vtx3DVal");
     b1jet_vtxPosX = allbjets[jet1].userFloat("vtxPosX"); b1jet_vtxPosY = allbjets[jet1].userFloat("vtxPosY"); b1jet_vtxPosZ = allbjets[jet1].userFloat("vtxPosZ");
-    
+
     b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet2].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
     b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet2].eta(); b2jet_phi = allbjets[jet2].phi();
     b2jet_bDiscVar = allbjets[jet2].bDiscriminator(bjetDiscrName_);
@@ -1139,18 +1137,18 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     for (unsigned int i = 0; i < daus2.size(); ++i) {
 	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus2[i]);
 	if (i==0)
-	    b2jet_leadTrackPt = cand.pt();
+	  b2jet_leadTrackPt = cand.pt();
 	if (abs(cand.pdgId()) == 13  and not(leadinglepton2)){
-	    b2jet_leptonPdgId = cand.pdgId(); b2jet_leptonPt = cand.pt(); 
-	    b2jet_leptonEta = cand.eta(); b2jet_leptonPhi = cand.phi();
-	    leadinglepton2_px = cand.px(); 
-	    leadinglepton2_py = cand.py(); 
-	    leadinglepton2_pz = cand.pz(); 
-	    leadinglepton2_p = cand.p(); 
-	    leadinglepton2 = true;
+	  b2jet_leptonPdgId = cand.pdgId(); b2jet_leptonPt = cand.pt(); 
+	  b2jet_leptonEta = cand.eta(); b2jet_leptonPhi = cand.phi();
+	  leadinglepton2_px = cand.px(); 
+	  leadinglepton2_py = cand.py(); 
+	  leadinglepton2_pz = cand.pz(); 
+	  leadinglepton2_p = cand.p(); 
+	  leadinglepton2 = true;
 	}
 	if (leadinglepton2 and b2jet_leadTrackPt>0)
-	    break;
+	  break;
     }
     float lepXj2 = leadinglepton2_px*b2jet_px+leadinglepton2_py*b2jet_py+leadinglepton2_pz*b2jet_pz; 
     float pTrel2_2 = leadinglepton2_p*leadinglepton2_p - lepXj2*lepXj2/allbjets[jet2].p();
@@ -1492,7 +1490,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 DiHiggsWWBBAnalyzer::endJob() {
-   hevent->Fill(1, ievent);
+  hevent->Fill(1, ievent);
   //   std::cout << "endJob, ievent  " << ievent << std::endl;
   //output->Write();
   // output->Close();
@@ -1767,7 +1765,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
 	//if( it->numberOfMothers()==1 ) std::cout<<"  DY: Mother is: "<<it->mother()->pdgId()<<std::endl;
 	//if( it->numberOfMothers()==2 ) std::cout<<"  DY: MORE THAN 2 MOTHERS. "<<(it->mother(0))->pdgId()<<" "<<(it->mother(1))->pdgId()<<std::endl;
 	if( it->numberOfMothers()==1  and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))
-	    std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId()<<" muon status "<< it->status()<<" mother's pt "<< it->mother()->pt() <<" mass "<< it->mother()->mass() << std::endl;
+	  std::cout <<"found muons from gamma or Z, id "<< it->mother()->pdgId()<<" muon status "<< it->status()<<" mother's pt "<< it->mother()->pt() <<" mass "<< it->mother()->mass() << std::endl;
     }
     if( it->pdgId() == -13 and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))      lept1Coll.push_back(it->clone());
     if( it->pdgId() == 13 and (it->mother()->pdgId()==22 or it->mother()->pdgId()==23))       lept2Coll.push_back(it->clone());
@@ -1778,20 +1776,20 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesDY(edm::Handle<reco::GenParticleColle
   if(lept1Coll.size()>0 and lept2Coll.size()>0){
     for (auto lept1Cand : lept1Coll){
 	for (auto lept2Cand : lept2Coll){
-	    const reco::Candidate *tmpcand1 = lept1Cand->mother();
-	    const reco::Candidate *tmpcand2 = lept2Cand->mother();
-	    if (tmpcand1 == tmpcand2){
-		ZColl.push_back(tmpcand1);
-		TLorentzVector part(tmpcand1->px(), tmpcand1->py(), tmpcand1->pz(), tmpcand1->energy());
-		std::cout <<"find Z/gamma to ll , pdgId "<< tmpcand1->pdgId() <<" mass "<< part.M()<<" pt "<< part.Pt() << std::endl;
-	    }
-    	}
+	  const reco::Candidate *tmpcand1 = lept1Cand->mother();
+	  const reco::Candidate *tmpcand2 = lept2Cand->mother();
+	  if (tmpcand1 == tmpcand2){
+	    ZColl.push_back(tmpcand1);
+	    TLorentzVector part(tmpcand1->px(), tmpcand1->py(), tmpcand1->pz(), tmpcand1->energy());
+	    std::cout <<"find Z/gamma to ll , pdgId "<< tmpcand1->pdgId() <<" mass "<< part.M()<<" pt "<< part.Pt() << std::endl;
+	  }
+	}
     }
   }
 
   if (ZColl.size()>0){
-      mu1cand = stabledecendant(ZColl[0], -13);
-      mu2cand = stabledecendant(ZColl[0], 13);
+    mu1cand = stabledecendant(ZColl[0], -13);
+    mu2cand = stabledecendant(ZColl[0], 13);
   }
 
   //not care about where b comes from 
@@ -1970,7 +1968,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     }
     TLorentzVector mu1_p4(mu1cand->px(), mu1cand->py(), mu1cand->pz(), mu1cand->energy());
     TLorentzVector mu2_p4(mu2cand->px(), mu2cand->py(), mu2cand->pz(), mu2cand->energy());
-    
+
     TLorentzVector b1_p4(b1cand->px(), b1cand->py(), b1cand->pz(), b1cand->energy());
     TLorentzVector b2_p4(b2cand->px(), b2cand->py(), b2cand->pz(), b2cand->energy());
     dR_genbl   = (b1_p4.Pt()>b2_p4.Pt()) ? (b1_p4.DeltaR( (mu1_p4.Pt()>mu2_p4.Pt()) ? mu1_p4 : mu2_p4 )) : (b2_p4.DeltaR( (mu1_p4.Pt()>mu2_p4.Pt()) ? mu1_p4 : mu2_p4 ));
