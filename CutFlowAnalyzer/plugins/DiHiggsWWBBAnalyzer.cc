@@ -917,7 +917,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   if (findAllGenParticles) fillbranches(); //fill Gen info into tree
 
   if (onlyGenLevel_ and sampleType_>Data){
-  	evtree->Fill();
+        if (findAllGenParticles)
+	    evtree->Fill();
 	return;
   }
 
@@ -1295,6 +1296,11 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("htobb_pz",&htobb_pz, "htobb_pz/F");
   evtree->Branch("htobb_energy",&htobb_energy, "htobb_energy/F");
   evtree->Branch("htobb_mass",&htobb_mass, "htobb_mass/F");
+  evtree->Branch("h2tohh_px",&h2tohh_px,"h2tohh_px/F");
+  evtree->Branch("h2tohh_py",&h2tohh_py,"h2tohh_py/F");
+  evtree->Branch("h2tohh_pz",&h2tohh_pz,"h2tohh_pz/F");
+  evtree->Branch("h2tohh_energy",&h2tohh_energy,"h2tohh_energy/F");
+  evtree->Branch("h2tohh_mass",&h2tohh_mass,"h2tohh_mass/F");
 
   evtree->Branch("b1genjet_px",&b1genjet_px, "b1genjet_px/F");
   evtree->Branch("b1genjet_py",&b1genjet_py, "b1genjet_py/F");

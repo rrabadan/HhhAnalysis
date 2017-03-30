@@ -24,11 +24,11 @@ process.source = cms.Source("PoolSource",
 
 from HhhAnalysis.MCProduction.InputFileHelpers import *
 #inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_1M/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_1M/170329_023747/0000/']
-#inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/170330_023219/0000/']
-#process = useInputDir(process, inputdir)
+inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/170330_023219/0000/']
+process = useInputDir(process, inputdir)
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(10000) 
+    input = cms.untracked.int32(100) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 
@@ -37,7 +37,6 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.eventCounterFilter = cms.EDFilter("EventCounterFilter")
-
 import HLTrigger.HLTfilters.triggerResultsFilter_cfi as hlt
 #print hlt," hlt.triggerResultsFilter ",hlt.triggerResultsFilter
 # accept if any path succeeds (explicit OR)
@@ -63,16 +62,16 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	)
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
-    SampleType = cms.untracked.int32(17), #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
-    sampleName = cms.untracked.int32(17), #B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
-    #genParticles = cms.InputTag("genParticles"),
-    genParticles = cms.InputTag("prunedGenParticles"),#minAOD
+    SampleType = cms.untracked.int32(3), #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
+    sampleName = cms.untracked.int32(3), #B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
+    genParticles = cms.InputTag("genParticles"),
+    #genParticles = cms.InputTag("prunedGenParticles"),#minAOD
+    #genjets = cms.InputTag("slimmedGenJets"),
+    #genjets = cms.InputTag("ak4GenJetsNoNu"),
+    genjets = cms.InputTag("ak4GenJets"),
     #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
     muons = cms.InputTag("slimmedMuons"),
     electrons = cms.InputTag("slimmedElectrons"),
-    genjets = cms.InputTag("slimmedGenJets"),
-    #genjets = cms.InputTag("ak4GenJetsNoNu"),
-    #genjets = cms.InputTag("ak4GenJets"),
     jets = cms.InputTag("slimmedJets"),
     mets = cms.InputTag("slimmedMETs"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -91,13 +90,14 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("out_ana.root")
+    #fileName = cms.string("out_ana.root")
+    fileName = cms.string("file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ana_genlevel_B3_10k.root")
 )
 
-process.phlt = cms.Path(process.hltfilter)
+#process.phlt = cms.Path(process.hltfilter)
 process.pDiHiggsWWBBAna = cms.Path(
-    process.eventCounterFilter*
-    process.hltfilter*
+    #process.hltfilter*
+    process.eventCounterFilter *
     process.DiHiggsWWBBAna
 )
 
@@ -105,3 +105,8 @@ process.pdump = cms.Path(process.dump)
 
 #process.schedule = cms.Schedule(process.phlt*process.pDiHiggsWWBBAna)
 process.schedule = cms.Schedule( process.pDiHiggsWWBBAna)
+print "----------------------------------------------\n"
+print "Inputfiles: \n"
+print process.source.fileNames
+print "Outputfile: \n"
+print process.TFileService.fileName
