@@ -6,7 +6,6 @@ def hist1D(tree, todraw, x_bins, cut, B, Lumi, nTOT, isMC):
   xmaxBin = float(x_bins[1:-1].split(',')[2])
   b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
   if isMC:
-    print "it WAS", int(tree.GetMaximum("ievent")), " and is ", nTOT
     cut_and_weight = str(Lumi) + "*(XsecBr/" + str(nTOT) + ")*(" + str(cut) + ")"
   else:
     #cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(nTOT) + ")*(" + str(cut) + ")" #Use this if you want to make a test and use a MC sample as if it was DATA
@@ -159,7 +158,6 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
     if( DataOrMC=="DataMC" and (nfile==int(len(filelist)-1)) ): isMC=False
     B = benchmarks[nfile]
     hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi, nTOT[i], isMC)
-    print " It has ", hist.GetEntries(), "entries and ", hist.Integral(), "as integral"
     hist.SetLineColor(color[nfile])
     hist.SetLineWidth(2)
     hist.SetMarkerColor(color[nfile])

@@ -49,10 +49,10 @@ process.hltfilter = hlt.triggerResultsFilter.clone(
 """
 process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	triggerConditions = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
-	    				 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+					 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
 					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
 					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
-	    ),
+	),
 	hltResults = cms.InputTag( "TriggerResults","","HLT"),
 	#l1tResults = cms.InputTag( "hltGtDigis" ),
 	l1tResults = cms.InputTag( "" ),
@@ -60,48 +60,47 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	l1techIgnorePrescales = cms.bool( False ),
 	daqPartitions = cms.uint32( 1 ),
 	throw = cms.bool(True)    
-	)
-process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
-    verbose = cms.untracked.int32(0),
-    SampleType = cms.untracked.int32(17), #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
-    sampleName = cms.untracked.int32(17), #B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
-    #genParticles = cms.InputTag("genParticles"),
-    genParticles = cms.InputTag("prunedGenParticles"),#minAOD
-    #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
-    muons = cms.InputTag("slimmedMuons"),
-    electrons = cms.InputTag("slimmedElectrons"),
-    genjets = cms.InputTag("slimmedGenJets"),
-    #genjets = cms.InputTag("ak4GenJetsNoNu"),
-    #genjets = cms.InputTag("ak4GenJets"),
-    jets = cms.InputTag("slimmedJets"),
-    mets = cms.InputTag("slimmedMETs"),
-    beamSpot = cms.InputTag("offlineBeamSpot"),
-    triggerEvent = cms.InputTag("patTriggerEvent"),
-    tracks = cms.InputTag("generalTracks"),
-    TriggerResults = cms.InputTag("TriggerResults","","RECO"),
-    TrackRefitter = cms.InputTag("TrackRefitter"),
-    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    Traj = cms.InputTag("TrackRefitter"),
-    debug = cms.untracked.bool(False),
-    onlyGenLevel = cms.bool(True),
-    simulation = cms.bool(True),
-    runMMC = cms.bool(False)
 )
-#print "process.DiHiggsWWBBAna ",process.DiHiggsWWBBAna
+process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
+  verbose = cms.untracked.int32(0),
+  #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
+  SampleType = cms.untracked.int32(17),
+  sampleName = cms.untracked.int32(17),
+  #genParticles = cms.InputTag("genParticles"),
+  genParticles = cms.InputTag("prunedGenParticles"),#minAOD
+  #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
+  muons = cms.InputTag("slimmedMuons"),
+  electrons = cms.InputTag("slimmedElectrons"),
+  genjets = cms.InputTag("slimmedGenJets"),
+  #genjets = cms.InputTag("ak4GenJetsNoNu"),
+  #genjets = cms.InputTag("ak4GenJets"),
+  jets = cms.InputTag("slimmedJets"),
+  mets = cms.InputTag("slimmedMETs"),
+  beamSpot = cms.InputTag("offlineBeamSpot"),
+  triggerEvent = cms.InputTag("patTriggerEvent"),
+  tracks = cms.InputTag("generalTracks"),
+  TriggerResults = cms.InputTag("TriggerResults","","RECO"),
+  TrackRefitter = cms.InputTag("TrackRefitter"),
+  primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+  Traj = cms.InputTag("TrackRefitter"),
+  debug = cms.untracked.bool(False),
+  onlyGenLevel = cms.bool(True),
+  simulation = cms.bool(True),
+  runMMC = cms.bool(False)
+)
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("out_ana.root")
+  fileName = cms.string("out_ana.root")
 )
 
 process.phlt = cms.Path(process.hltfilter)
 process.pDiHiggsWWBBAna = cms.Path(
-    process.eventCounterFilter*
-    process.hltfilter*
-    process.DiHiggsWWBBAna
+  process.eventCounterFilter*
+  process.hltfilter*
+  process.DiHiggsWWBBAna
 )
 
-process.pdump = cms.Path(process.dump)	
+process.pdump = cms.Path(process.dump)
 
-#process.schedule = cms.Schedule(process.phlt*process.pDiHiggsWWBBAna)
-process.schedule = cms.Schedule( process.pDiHiggsWWBBAna)
+process.schedule = cms.Schedule(process.pDiHiggsWWBBAna)

@@ -33,14 +33,16 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=False
+OnlySubmitCRAB=True
 datasets  = []; 
-datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
-datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD")
 
 check_f   = open("check_crab.sh",'w'); check_f.write("#!/bin/bash\n")
 resub_f   = open("resub_crab.sh",'w'); check_f.write("#!/bin/bash\n")

@@ -124,7 +124,7 @@ filelist   = [ttV_ch, Wjet_ch, sT_ch, VV_ch, DY_ch, TT_ch, DATA_ch] #If you draw
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 nTOT       = [nTOT_ttV, nTOT_Wjet, nTOT_sT, nTOT_VV, nTOT_DY, nTOT_TT, 1]
 #Cuts and Ordering
-cut = "" #cut = "mu1_pt>10 && mu2_pt>10 && fabs(mu1_eta)<2.4 && fabs(mu2_eta)<2.4"
+cut = "met_pt>20 && b1jet_pt>30 && b2jet_pt>30 && muon1_pt>20 && muon2_pt>20"
 
 #---Starting to plot histos here-------------------------------------------------------------------------------------------------------------------------------------
 NORM=["lumi"] #NORM=["unity","lumi"]
@@ -149,6 +149,6 @@ for this_LOG in LOG:
     draw1D(filelist, "mass_b1b2", "(40,40,180)", "m(j,j)", cut, benchmarks, "h_M_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "dR_b1b2", "(50,0,5)", "#Delta R(j,j)", cut, benchmarks, "h_DR_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
     #RECO MIX
-    #draw1D(filelist, "mass_trans", "(50,5,100)", "M_trans [GeV]", cut, benchmarks, "h_MT", Lumi, NORM)
+    draw1D(filelist, "mass_trans", "(50,10,150)", "M_{tran} [GeV]", cut, benchmarks, "h_MT", Lumi, NORM)
     draw1D(filelist, "dR_l1l2b1b2", "(50,0,5)", "#Delta R(lljj)", cut, benchmarks, "h_dR_l1l2b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
     draw1D(filelist, "dphi_llmet", "(50,-4,4)", "#Delta #phi (ll,MET)", cut, benchmarks, "h_Dphi_llmet", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
