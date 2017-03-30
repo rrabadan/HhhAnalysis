@@ -143,10 +143,11 @@ if __name__ == '__main__':
       plotter_f.write('os.system("find ' + path + ' | grep root | grep -v failed > HADD/' + sampleN_short[i] + "_" + sampleN + '.txt")\n')
       lastSampleShort = sampleN_short[i]
       lastSample      = sampleN
-    config.Data.inputDataset = dataset
-    config.General.requestName = dataset.split('/')[1]
-    args[0] = NumSample[i]
-    config.JobType.pyCfgParams = args
-    crabCommand('submit', config = config)
+    if OnlySubmitCRAB:
+      config.Data.inputDataset = dataset
+      config.General.requestName = dataset.split('/')[1]
+      args[0] = NumSample[i]
+      config.JobType.pyCfgParams = args
+      crabCommand('submit', config = config)
     i=i+1
 print "bash check_crab.sh > RESULTS.txt"
