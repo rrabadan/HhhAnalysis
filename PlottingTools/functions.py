@@ -1,17 +1,16 @@
-def hist1D(tree, todraw, x_bins, cut, B, Lumi, isMC):
+def hist1D(tree, todraw, x_bins, cut, B, Lumi, nTOT, isMC):
   if cut=="" or cut==" ": cut="1"
   Lumi    = Lumi * 1000 # Convert from fb-1 to pb-1
   xBins   = int(x_bins[1:-1].split(',')[0])
   xminBin = float(x_bins[1:-1].split(',')[1])
   xmaxBin = float(x_bins[1:-1].split(',')[2])
   b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
-  Ntot           = int(tree.GetMaximum("ievent"))
   if isMC:
-    cut_and_weight = str(Lumi) + "*(XsecBr/" + str(Ntot) + ")*(" + str(cut) + ")"
+    print "it WAS", int(tree.GetMaximum("ievent")), " and is ", nTOT
+    cut_and_weight = str(Lumi) + "*(XsecBr/" + str(nTOT) + ")*(" + str(cut) + ")"
   else:
-    # WRONG JUST FOR TEST
-    cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(Ntot) + ")*(" + str(cut) + ")"
-    #cut_and_weight = str(cut)
+    #cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(nTOT) + ")*(" + str(cut) + ")" #Use this if you want to make a test and use a MC sample as if it was DATA
+    cut_and_weight = str(cut)
   tree.Draw("%s>>%s_%s"%(todraw,B,todraw), cut_and_weight)
   ROOT.SetOwnership(b1, False)
   return b1
@@ -137,7 +136,7 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
   c1.cd()
   c1.SaveAs("Hhh_PDFvalidation_%s_combined.png"%pic_name)
     
-def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, Norm, DataOrMC, LOG, Format):
+def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nTOT, Norm, DataOrMC, LOG, Format):
   #Check parameters
   if (not(".pdf" in Format) and not(".C" in Format) ): print "WARNING: 'Format' has a wrong inzialization!"
   if( (Norm=="unity") and DataOrMC=="DataMC"):
@@ -153,11 +152,14 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
   hs = ROOT.THStack("hs"," ")
   hdata = ROOT.TH1F()
   hists = []
+  i = 0
   for nfile in range(len(filelist)):
+    print "TEST: printing", nfile
     isMC = True
     if( DataOrMC=="DataMC" and (nfile==int(len(filelist)-1)) ): isMC=False
     B = benchmarks[nfile]
-    hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi, isMC)
+    hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi, nTOT[i], isMC)
+    print " It has ", hist.GetEntries(), "entries and ", hist.Integral(), "as integral"
     hist.SetLineColor(color[nfile])
     hist.SetLineWidth(2)
     hist.SetMarkerColor(color[nfile])
@@ -177,6 +179,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, No
         hdata = hist
         hdata.SetLineColor(1); hdata.SetMarkerStyle(20); hdata.SetMarkerColor(1);
         legend.AddEntry(hist, "%s"%B, "l")
+    i = i+1
   if DataOrMC!="DataMC": hs.Draw("nostack") # One on top of the others
   else:                  hs.Draw("hist"); hdata.Draw("same")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)

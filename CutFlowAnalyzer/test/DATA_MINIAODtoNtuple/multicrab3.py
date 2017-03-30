@@ -33,7 +33,7 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=True
+OnlySubmitCRAB=False
 datasets  = []; 
 datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
 datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
@@ -45,7 +45,7 @@ datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
 check_f   = open("check_crab.sh",'w'); check_f.write("#!/bin/bash\n")
 resub_f   = open("resub_crab.sh",'w'); check_f.write("#!/bin/bash\n")
 
-plotter_f = open("for_plotter.sh",'w')
+plotter_f = open("for_plotter.py",'w')
 if not OnlySubmitCRAB: plotter_f.write('DATA_ch = ROOT.TChain(tree_name)\n')
 
 if __name__ == '__main__':

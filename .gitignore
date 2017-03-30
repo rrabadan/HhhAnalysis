@@ -11,12 +11,12 @@ PlottingTools/Plots*/*
 CutFlowAnalyzer/*/*/crab_projects
 CutFlowAnalyzer/*/*/*.pyc
 CutFlowAnalyzer/test/DATA_MINIAODtoNtuple/check_crab.sh
-CutFlowAnalyzer/test/DATA_MINIAODtoNtuple/for_plotter.sh
+CutFlowAnalyzer/test/DATA_MINIAODtoNtuple/for_plotter.py
 CutFlowAnalyzer/test/DATA_MINIAODtoNtuple/out_ana.root
 CutFlowAnalyzer/test/DATA_MINIAODtoNtuple/resub_crab.sh
 CutFlowAnalyzer/test/MC_MINIAODtoNtuple/check_crab.sh
 CutFlowAnalyzer/test/MC_MINIAODtoNtuple/crab.log
-CutFlowAnalyzer/test/MC_MINIAODtoNtuple/for_plotter.sh
+CutFlowAnalyzer/test/MC_MINIAODtoNtuple/for_plotter.py
 CutFlowAnalyzer/test/MC_MINIAODtoNtuple/out_ana.root
 MCProduction/python/LHC-HH-bbWW-B3-LeptonW.run
 MCProduction/python/LHC.hepmc
