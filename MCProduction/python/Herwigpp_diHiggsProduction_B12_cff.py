@@ -34,8 +34,8 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'create ThePEG::ParticleData h0',
     'setup h0 25 h0 125 0.003196 0.03196 0 0 0 1 0',
     'create ThePEG::ParticleData H',
-    #setup name id genericname mass width widthcut(=width*10) lifetime(in mm) charge colour spin(=2j+1) stable
-    'setup H 35 H 352.75 2.17 21.7 0 0 0 1 0',
+    #setup name id genericname mass width widthcut(=width*10) lifetime(in mm) charge colour spin stable
+    'setup H 35 H 840.350 4.03 40.3 0 0 0 1 0',
     'create ThePEG::ParticleData t',
     'setup t 6 t 174.3 1.4 14 0 2 3 2 0', 
     'create ThePEG::ParticleData tbar',
@@ -97,9 +97,9 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'set MEHiggsPair:Process ggToHTohh',
     #set MEHiggsPair:Process All
     #lamda_111*2*higgs_vacuum_expection/mh^2
-    'set MEHiggsPair:SelfCoupling 7.1514',
+    'set MEHiggsPair:SelfCoupling 1.3832',
      #lamda_211*2*higgs_vacuum_expection/mH^2
-    'set MEHiggsPair:hhHCoupling -0.5681',
+    'set MEHiggsPair:hhHCoupling 0.5840',
 
 
 ##################################################

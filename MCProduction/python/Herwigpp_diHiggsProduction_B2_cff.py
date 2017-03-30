@@ -34,8 +34,7 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'create ThePEG::ParticleData h0',
     'setup h0 25 h0 125 0.003196 0.03196 0 0 0 1 0',
     'create ThePEG::ParticleData H',
-    #setup name id genericname mass width widthcut(=width*10) lifetime(in mm) charge colour spin(=2j+1) stable
-    'setup H 35 H 352.75 2.17 21.7 0 0 0 1 0',
+    'setup H 35 H 341.4142 2.41 24.1 0 0 0 1 0',
     'create ThePEG::ParticleData t',
     'setup t 6 t 174.3 1.4 14 0 2 3 2 0', 
     'create ThePEG::ParticleData tbar',
@@ -81,6 +80,7 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'set /Herwig/Particles/W-/W-->nu_ebar,e-;:OnOff On',
     'set /Herwig/Particles/W-/W-->nu_mubar,mu-;:OnOff On',
     'set /Herwig/Particles/W-/W-->nu_taubar,tau-;:OnOff Off',
+    #
 
 ##################################################
 # Matrix Elements for hadron-hadron collisions    
@@ -96,10 +96,8 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'insert SimpleQCD:MatrixElements[0] MEHiggsPair',
     'set MEHiggsPair:Process ggToHTohh',
     #set MEHiggsPair:Process All
-    #lamda_111*2*higgs_vacuum_expection/mh^2
-    'set MEHiggsPair:SelfCoupling 7.1514',
-     #lamda_211*2*higgs_vacuum_expection/mH^2
-    'set MEHiggsPair:hhHCoupling -0.5681',
+    'set MEHiggsPair:SelfCoupling 6.44136',
+    'set MEHiggsPair:hhHCoupling -0.6345',
 
 
 ##################################################
