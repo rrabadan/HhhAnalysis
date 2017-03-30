@@ -32,7 +32,7 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=False
+OnlySubmitCRAB=True
 datasets  = []; NumSample = []; sampleN_short = []
 doTT=True; doDY=True; doVV=True; doSingleT=True; doWjets=True; dottV=True
 #doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False

@@ -55,7 +55,7 @@ process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     #fileName = cms.untracked.string('file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_sim_b6.root'),
-    fileNames = cms.untracked.vstring('file:out_sim.root')
+    fileNames = cms.untracked.vstring('file:out_sim.root'),
     outputCommands = process.RAWSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )

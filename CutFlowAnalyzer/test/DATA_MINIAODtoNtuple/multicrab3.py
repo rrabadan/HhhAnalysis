@@ -44,8 +44,8 @@ datasets  = [];
 datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD")
 datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD")
 
-check_f   = open("check_crab.sh",'w'); check_f.write("#!/bin/bash\n")
-resub_f   = open("resub_crab.sh",'w'); check_f.write("#!/bin/bash\n")
+check_f = open("check_crab.sh",'w'); check_f.write("#!/bin/bash\n")
+resub_f = open("resub_crab.sh",'w'); resub_f.write("#!/bin/bash\n")
 
 plotter_f = open("for_plotter.py",'w')
 if not OnlySubmitCRAB: plotter_f.write('DATA_ch = ROOT.TChain(tree_name)\n')
