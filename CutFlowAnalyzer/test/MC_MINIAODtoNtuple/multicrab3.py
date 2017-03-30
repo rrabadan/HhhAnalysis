@@ -32,7 +32,7 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=True
+OnlySubmitCRAB=False
 datasets  = []; NumSample = []; sampleN_short = []
 doTT=True; doDY=True; doVV=True; doSingleT=True; doWjets=True; dottV=True
 #doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False
@@ -68,7 +68,7 @@ if doVV:
   NumSample.append('24'); sampleN_short.append('VV')
   datasets.append('/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM')
   NumSample.append('25'); sampleN_short.append('VV')
-  datasets.append('/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/#MINIAODSIM#')
+  datasets.append('/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM')
   NumSample.append('26'); sampleN_short.append('VV')
 # Single-t
 if doSingleT:
@@ -111,7 +111,7 @@ if dottV:
   datasets.append('/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext3-v1/MINIAODSIM')
   NumSample.append('43'); sampleN_short.append('ttV')
 
-plotter_f = open("for_plotter.sh",'w')
+plotter_f = open("for_plotter.py",'w')
 check_f   = open("check_crab.sh",'w')
 if not OnlySubmitCRAB:
   check_f.write("#!/bin/bash\n")
@@ -134,6 +134,9 @@ if __name__ == '__main__':
       if(sampleN_short[i]==lastSampleShort): newSample = False
       if((newSample and lastSampleShort!="NOSAMPLESHORT") or i==int(len(NumSample)-1) ):
         plotter_f.write('os.system("cat HADD/' + sampleN_short[i-1] + '_*' ' > HADD/' + sampleN_short[i-1] + '.txt")\n')
+        plotter_f.write('os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt")\n')
+        plotter_f.write('N_tot_path_' + sampleN_short[i-1] + ' = "/fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
+        plotter_f.write(sampleN_short[i-1] + '_file =  ROOT.TFile.Open(N_tot_path_' + sampleN_short[i-1] + ',"read"); h_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("DiHiggsWWBBAna/hevent")); nTOT_' + sampleN_short[i-1] + ' = h_' + sampleN_short[i-1] + '.GetBinContent(2);\n')
         plotter_f.write('with open("HADD/' + sampleN_short[i-1] +'.txt","r") as f:\n')
         plotter_f.write('  for line in f:\n')
         plotter_f.write('    if not line.isspace():\n')
@@ -150,4 +153,5 @@ if __name__ == '__main__':
       config.JobType.pyCfgParams = args
       crabCommand('submit', config = config)
     i=i+1
+    oldDataset = dataset.split('/')[1]
 print "bash check_crab.sh > RESULTS.txt"
