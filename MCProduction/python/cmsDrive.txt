@@ -1,7 +1,7 @@
 
 ############### Gen-SIM
 
-cmsDriver.py  HhhAnalysis/MCProduction/Herwigpp_diHiggsProduction_cff \
+cmsDriver.py  HhhAnalysis/MCProduction/Herwigpp_diHiggsProduction_B3_cff \
 	-s GEN,SIM --mc --datatier GEN-SIM --beamspot Realistic25ns13TeV2016Collision \
 	--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
 	--eventcontent RAWSIM \
