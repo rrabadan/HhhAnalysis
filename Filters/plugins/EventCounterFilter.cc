@@ -79,6 +79,7 @@ class EventCounterFilter : public edm::stream::EDFilter<> {
 EventCounterFilter::EventCounterFilter(const edm::ParameterSet& iConfig)
 {
    //now do what ever initialization is needed
+   ievent  = 0;
 
 }
 
