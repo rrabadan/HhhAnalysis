@@ -84,7 +84,7 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
   Traj = cms.InputTag("TrackRefitter"),
   debug = cms.untracked.bool(False),
-  onlyGenLevel = cms.bool(True),
+  onlyGenLevel = cms.bool(False),
   simulation = cms.bool(True),
   runMMC = cms.bool(False)
 )
