@@ -8,6 +8,7 @@ def hist1D(tree, todraw, x_bins, cut, B, Lumi, nTOT, isMC):
   if isMC:
     cut_and_weight = str(Lumi) + "*(XsecBr/" + str(nTOT) + ")*(" + str(cut) + ")"
   else:
+    if nTOT!=1: print 'WARNING!!! DATA have "nTOT" that is different from 1. nTOT is the totoal number of MC event geenrated, that should be set to 1 for DATA.'
     #cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(nTOT) + ")*(" + str(cut) + ")" #Use this if you want to make a test and use a MC sample as if it was DATA
     cut_and_weight = str(cut)
   tree.Draw("%s>>%s_%s"%(todraw,B,todraw), cut_and_weight)
@@ -153,7 +154,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
   hists = []
   i = 0
   for nfile in range(len(filelist)):
-    print "TEST: printing", nfile
+    print "TEST: printing", nfile, benchmarks[nfile]
     isMC = True
     if( DataOrMC=="DataMC" and (nfile==int(len(filelist)-1)) ): isMC=False
     B = benchmarks[nfile]
@@ -163,21 +164,25 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
     hist.SetMarkerColor(color[nfile])
     hist.SetMarkerStyle(marker[nfile])
     hist.SetMinimum(0.00001)
+    print ' ->', hist.Integral()
     if(hist.Integral()<=0):
       print "-> NO events for",B,"using the selection:"
       print "   ",cut
     else:
       if isMC:
+        print "IS MC"
         if(DataOrMC=="DataMC"): hist.SetFillColor(color[nfile])
         if(Norm=="unity"): hist.Scale(1./hist.Integral())
         hs.Add(hist)
         legend.AddEntry(hist, "%s"%B, "l")
         hists.append(hist)
       else: # Data is expected to be the last item of filelist
+        print "IS DATA"
         hdata = hist
         hdata.SetLineColor(1); hdata.SetMarkerStyle(20); hdata.SetMarkerColor(1);
         legend.AddEntry(hist, "%s"%B, "l")
     i = i+1
+  print 'Done with LOOP'
   if DataOrMC!="DataMC": hs.Draw("nostack") # One on top of the others
   else:                  hs.Draw("hist"); hdata.Draw("same")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
