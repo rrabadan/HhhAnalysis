@@ -32,7 +32,7 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=True
+OnlySubmitCRAB=False
 datasets  = []; NumSample = []; sampleN_short = []
 doTT=True; doDY=True; doVV=True; doSingleT=True; doWjets=True; dottV=True
 #doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False
@@ -112,9 +112,9 @@ if dottV:
   NumSample.append('43'); sampleN_short.append('ttV')
 
 plotter_f = open("for_plotter.py",'w')
+if not OnlySubmitCRAB: plotter_f.write("makeHadd = False\n")
 check_f   = open("check_crab.sh",'w')
-if not OnlySubmitCRAB:
-  check_f.write("#!/bin/bash\n")
+check_f.write("#!/bin/bash\n")
 args = []; args.append("-99")
 lastSampleShort="NOSAMPLESHORT"
 lastSample="NOSAMPLE"
@@ -134,9 +134,9 @@ if __name__ == '__main__':
       if(sampleN_short[i]==lastSampleShort): newSample = False
       if((newSample and lastSampleShort!="NOSAMPLESHORT") or i==int(len(NumSample)-1) ):
         plotter_f.write('os.system("cat HADD/' + sampleN_short[i-1] + '_*' ' > HADD/' + sampleN_short[i-1] + '.txt")\n')
-        plotter_f.write('os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt")\n')
+        plotter_f.write('if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt")\n')
         plotter_f.write('N_tot_path_' + sampleN_short[i-1] + ' = "/fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
-        plotter_f.write(sampleN_short[i-1] + '_file =  ROOT.TFile.Open(N_tot_path_' + sampleN_short[i-1] + ',"read"); h_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("DiHiggsWWBBAna/hevent")); nTOT_' + sampleN_short[i-1] + ' = h_' + sampleN_short[i-1] + '.GetBinContent(2);\n')
+        plotter_f.write(sampleN_short[i-1] + '_file =  ROOT.TFile.Open(N_tot_path_' + sampleN_short[i-1] + ',"read"); h_prehlt_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("TriggerResults/hevent_filter")); nTOT_prehlt_' + sampleN_short[i-1] + ' = h_prehlt_' + sampleN_short[i-1] + '.GetBinContent(2)\nh_posthlt_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("DiHiggsWWBBAna/hevent")); nTOT_posthlt_' + sampleN_short[i-1] + ' = h_posthlt_' + sampleN_short[i-1] + '.GetBinContent(2);\n')
         plotter_f.write('with open("HADD/' + sampleN_short[i-1] +'.txt","r") as f:\n')
         plotter_f.write('  for line in f:\n')
         plotter_f.write('    if not line.isspace():\n')
