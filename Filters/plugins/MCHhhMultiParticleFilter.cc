@@ -1,37 +1,12 @@
 #include "HhhAnalysis/Filters/interface/MCHhhMultiParticleFilter.h"
-#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
 MCHhhMultiParticleFilter::MCHhhMultiParticleFilter(const edm::ParameterSet& iConfig) :
   srctoken_(consumes<edm::HepMCProduct>(iConfig.getUntrackedParameter<edm::InputTag>("src", edm::InputTag(std::string("generator"),"unsmeared")))),
-  numRequired_(iConfig.getParameter<int>("NumRequired")),
-  acceptMore_(iConfig.getParameter<bool>("AcceptMore")),
-  particleID_(iConfig.getParameter< std::vector<int> >("ParticleID")),
-  ptMin_(iConfig.getParameter< std::vector<double> >("PtMin")),
-  etaMax_(iConfig.getParameter< std::vector<double> >("EtaMax")),
-  status_(iConfig.getParameter< std::vector<int> >("Status")),
+  debug_(iConfig.getUntrackedParameter<bool>("debug", false)),
   totalEvents_(0), passedEvents_(0)
 {
   //here do whatever other initialization is needed
-
-  // default pt, eta, status cuts to "don't care"
-  std::vector<double> defptmin(1, 0);
-  std::vector<double> defetamax(1, 999.0);
-  std::vector<int> defstat(1, 0);
-
-  // check for same size
-  if ( (ptMin_.size() > 1 &&  particleID_.size() != ptMin_.size()) 
-       ||  (etaMax_.size() > 1 && particleID_.size() != etaMax_.size()) 
-       ||  (status_.size() > 1 && particleID_.size() != status_.size()) ) {
-    edm::LogWarning("MCHhhMultiParticleFilter") << "WARNING: MCHhhMultiParticleFilter: size of PtMin, EtaMax, and/or Status does not match ParticleID size!" << std::endl;   
-  }
   
-  // Fill arrays with defaults if necessary
-  while (ptMin_.size() < particleID_.size())
-    ptMin_.push_back(defptmin[0]);
-  while (etaMax_.size() < particleID_.size())
-    etaMax_.push_back(defetamax[0]);
-  while (status_.size() < particleID_.size())
-    status_.push_back(defstat[0]);
 }
 
 MCHhhMultiParticleFilter::~MCHhhMultiParticleFilter()
@@ -49,40 +24,93 @@ bool MCHhhMultiParticleFilter::filter(edm::Event& iEvent, const edm::EventSetup&
   edm::Handle<edm::HepMCProduct> evt;
   iEvent.getByToken(srctoken_, evt);
   
-  std::vector<bool> matched;
-  for (unsigned int i=0; i < particleID_.size(); ++i) 
-      matched.push_back(false);
   totalEvents_++;
-  int nFound = 0;
   
+  bool htobb = false;
+  bool htoWW = false;
   const HepMC::GenEvent * myGenEvent = evt->GetEvent();
   
   for ( HepMC::GenEvent::particle_const_iterator p = myGenEvent->particles_begin();
 	p != myGenEvent->particles_end(); ++p ) {
-    
-    for (unsigned int i = 0; i < particleID_.size(); ++i) {
-      if (!matched[i] && (particleID_[i] == 0 || abs(particleID_[i]) == abs((*p)->pdg_id())) &&
-	  (*p)->momentum().perp() > ptMin_[i] &&
-	  fabs((*p)->momentum().eta()) < etaMax_[i] &&
-	  (status_[i] == 0 || (*p)->status() == status_[i])) {
-	//std::cout <<"Found id "<< particleID_[i]<<" status  "<< status_[i] <<" nFound "<< nFound << std::endl;
-	matched[i] = true;
-	nFound++;
-	break; // only match a given particle once!
+      if (debug_){
+	  if ((*p)->pdg_id() == 99926 or (*p)->pdg_id()==99927) printChildren(*p); 
+	  if ((*p)->pdg_id() == 25) printChildren(*p); 
       }
-    } // loop over targets
-    
-    if (acceptMore_ && nFound == numRequired_) break; // stop looking if we don't mind having more
-  } // loop over particles
+      if ((*p)->pdg_id() == 25){
+	  const HepMC::GenParticle *genP=*p;
+	  bool getb1 = false; bool getb2 = false;
+	  bool getw1 = false; bool getw2 = false;
+	  if (genP->end_vertex()&& (*genP->end_vertex()->particles_begin(HepMC::children))){
+	    for ( HepMC::GenVertex::particle_iterator child = genP->end_vertex()->particles_begin(HepMC::children);
+		                                  child != genP->end_vertex()->particles_end(HepMC::children);  ++child ){
+		if ((*child)->pdg_id()==5) getb1 = true;
+		if ((*child)->pdg_id()==-5) getb2 = true;
+		if ((*child)->pdg_id()==24) getw1 = true;
+		if ((*child)->pdg_id()==-24) getw2 = true;
+	    }
+
+	  }
+	  htobb = ((getb1 and getb2) or htobb);
+	  htoWW = ((getw1 and getw2) or htoWW);
+      }
+  }
   
+  /*
   if (nFound == numRequired_) {
     passedEvents_++;
     return true;
   } else {
     return false;
+  }*/
+  if (debug_){
+      if (htobb and htoWW)
+	std::cout <<"h2tohhtoWWbb "<< std::endl;
+      else if (htobb and not(htoWW))
+	  std::cout <<"only htobb" << std::endl;
+      else if (not(htobb) and htoWW)
+	  std::cout <<"only htoWW" << std::endl;
+      else std::cout <<"no htobb nor htoWW "<< std::endl;
+  }
+  if (htobb and htoWW){
+    passedEvents_++;
+    return true;
+  }else {
+    return false;
   }
   
 }
+
+void 
+MCHhhMultiParticleFilter::printParents(const HepMC::GenParticle* genP){
+
+
+   std::cout << "Print the parents  of genP id " << genP->pdg_id() << std::endl;
+    genP->print();
+   if (genP->production_vertex()&& !genP->is_beam()){
+   	for ( HepMC::GenVertex::particle_iterator mother = genP->production_vertex()->particles_begin(HepMC::parents);
+		                                  mother != genP->production_vertex()->particles_end(HepMC::parents);  ++mother ){
+                std::cout << "its mother "; (*mother)->print();
+         }
+   }
+
+}
+
+
+
+void 
+MCHhhMultiParticleFilter::printChildren(const HepMC::GenParticle* genP){
+
+   std::cout << "Print the children of genP id" << genP->pdg_id() << std::endl; 
+   genP->print();
+   if (genP->end_vertex()&& (*genP->end_vertex()->particles_begin(HepMC::children))){
+   	for ( HepMC::GenVertex::particle_iterator child = genP->end_vertex()->particles_begin(HepMC::children);
+		                                  child != genP->end_vertex()->particles_end(HepMC::children);  ++child ){
+                std::cout << "its child "; (*child)->print();
+         }
+
+    }
+}
+
 
 // ------------ method called once each job just after ending the event loop  ------------
 void MCHhhMultiParticleFilter::endJob() {

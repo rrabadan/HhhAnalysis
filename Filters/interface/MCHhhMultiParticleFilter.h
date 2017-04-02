@@ -29,6 +29,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include <HepMC/GenEvent.h>
 
 namespace edm {
       class HepMCProduct;
@@ -47,19 +49,12 @@ class MCHhhMultiParticleFilter : public edm::EDFilter {
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob();
   
+  void printChildren(const HepMC::GenParticle* genP);
+  void printParents(const HepMC::GenParticle* genP);
   // ----------member data ---------------------------
   
   edm::EDGetTokenT<edm::HepMCProduct> srctoken_;
-  int numRequired_;                // number of particles required to pass filter
-  bool acceptMore_;                // if true (default), accept numRequired or more.
-                                   // if false, accept events with exactly equal to numRequired.
-  std::vector<int> particleID_;    // vector of particle IDs to look for
-  // the three next variables can either be a vector of length 1 (in which case the same
-  // value is used for all particle IDs) or of length equal to the length of ParticleID (in which
-  // case the corresponding value is used for each).
-  std::vector<double> ptMin_;      // minimum Pt of particles
-  std::vector<double> etaMax_;     // maximum fabs(eta) of particles
-  std::vector<int> status_;        // status of particles
+  bool debug_;
   int totalEvents_;                // counters
   int passedEvents_;
 };
