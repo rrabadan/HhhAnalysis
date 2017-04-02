@@ -1613,6 +1613,9 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
     b2cand = finddecendant(htoBBcand, -5, false);
     w1cand = finddecendant(htoWWcand, 24, false);
     w2cand = finddecendant(htoWWcand, -24, false);   
+    if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)) std::cout <<" find two muons "<< std::endl;
+    if (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 11)) std::cout <<" find two elelctrons "<< std::endl;
+    if ((hasDaughter(w1cand, -13) and hasDaughter(w2cand, 11)) or (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 13))) std::cout <<" find two elelctron+muon "<< std::endl;
     if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)){
 	mu1cand = findmudaughter(w1cand);
 	nu1cand = findnudaughter(w1cand);

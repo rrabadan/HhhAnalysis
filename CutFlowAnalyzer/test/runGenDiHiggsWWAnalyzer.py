@@ -28,7 +28,7 @@ inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_lepto
 process = useInputDir(process, inputdir)
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(100) 
+    input = cms.untracked.int32(10000) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 
