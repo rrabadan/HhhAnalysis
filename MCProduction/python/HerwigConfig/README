@@ -1,0 +1,12 @@
+1. modify all model dependent parameters for all bench marks: m2, lifetime, lamda_111, lamda_211
+2. change the generator name 
+
+to run Herwig++ in CMSSW
+1.setup environment 
+scram setup herwigpp
+scram setup gsl
+scram setup thepeg
+2.if [ -z $HERWIGPP_ROOT ]; then echo "HERWIGPP_ROOT is not defined"; HERWIGPP_ROOT="/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/herwigpp/2.7.1-ikhhed3/"; source /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/herwigpp/2.7.1-ikhhed3/etc/profile.d/init.sh ; else echo "var is set to '$HERWIGPP_ROOT'"; source $HERWIGPP_ROOT/etc/profile.d/init.sh ; fi
+#example: source /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/herwigpp/2.7.1-giojec/etc/profile.d/init.sh
+3.Herwig++ read LHC-x.in --repo=$HERWIGPP_ROOT/share/Herwig++/HerwigDefaults.rpo
+4.Herwig++ run LHC-x.run

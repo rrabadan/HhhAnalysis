@@ -1,0 +1,142 @@
+##################################################
+# Example generator based on LHC parameters
+# usage: Herwig++ read LHC.in
+##################################################
+
+cd /Herwig/Particles
+create ThePEG::ParticleData boxon
+setup boxon 99926 boxon 0.0 0.0 0.0 0.0 0 0 0 1
+create ThePEG::ParticleData triangon
+setup triangon 99927 triangon 0.0 0.0 0.0 0.0 0 0 0 1
+create ThePEG::ParticleData h0
+setup h0 25 h0 125 0.003196 0.03196 0 0 0 1 0 
+create ThePEG::ParticleData H
+setup H 35 H 345 4.92 49.2 0 0 0 1 0 
+create ThePEG::ParticleData t
+setup t 6 t 174.3 1.4 14 0 2 3 2 0 
+create ThePEG::ParticleData tbar
+setup tbar -6 tbar 174.3 1.4 14 0 -2 -3 2 0 
+makeanti tbar t
+create ThePEG::ConstituentParticleData b
+setup b 5 b 4.7 0.  0 0 -1 3 2 1  5
+create ThePEG::ConstituentParticleData bbar
+setup bbar -5 bbar 4.7 0.  0 0 1 -3 2 1  5
+makeanti bbar b
+
+# Disable/Enable Higgs decays
+set /Herwig/Particles/h0/h0->b,bbar;:OnOff On
+set /Herwig/Particles/h0/h0->W+,W-;:OnOff On
+set /Herwig/Particles/h0/h0->tau-,tau+;:OnOff Off
+set /Herwig/Particles/h0/h0->g,g;:OnOff Off
+set /Herwig/Particles/h0/h0->c,cbar;:OnOff Off
+set /Herwig/Particles/h0/h0->Z0,Z0;:OnOff Off
+set /Herwig/Particles/h0/h0->gamma,gamma;:OnOff Off
+set /Herwig/Particles/h0/h0->mu-,mu+;:OnOff Off
+set /Herwig/Particles/h0/h0->t,tbar;:OnOff Off
+
+# Set B-mesons stable (?)
+#set /Herwig/Particles/B+:Stable Stable
+#set /Herwig/Particles/B-:Stable Stable
+#set /Herwig/Particles/B0:Stable Stable
+#set /Herwig/Particles/Bbar0:Stable Stable
+#set /Herwig/Particles/B_s0:Stable Stable
+#set /Herwig/Particles/B_sbar0:Stable Stable
+#set /Herwig/Particles/B_c+:Stable Stable
+#set /Herwig/Particles/B_c-:Stable Stable
+#set /Herwig/Particles/Upsilon:Stable Stable
+
+# Set b-baryons stable
+#set /Herwig/Particles/Sigma_b+:Stable Stable
+#set /Herwig/Particles/Lambda_b0:Stable Stable
+#set /Herwig/Particles/Sigma_b-:Stable Stable
+#set /Herwig/Particles/Xi_b0:Stable Stable
+#set /Herwig/Particles/Xi_b-:Stable Stable
+#set /Herwig/Particles/Omega_b-:Stable Stable
+#set /Herwig/Particles/Sigma_bbar-:Stable Stable
+#set /Herwig/Particles/Lambda_bbar0:Stable Stable
+#set /Herwig/Particles/Sigma_bbar+:Stable Stable
+#set /Herwig/Particles/Xi_bbar0:Stable Stable
+#set /Herwig/Particles/Xi_bbar+:Stable Stable
+#set /Herwig/Particles/Omega_bbar+:Stable Stable
+
+#set /Herwig/Particles/h0:Stable Stable
+
+cd /Herwig/EventHandlers
+create ThePEG::Cuts   /Herwig/Cuts/NoCuts
+erase LHCHandler:PostSubProcessHandlers[0]
+
+#set LHCHandler:CascadeHandler NULL
+#set LHCHandler:HadronizationHandler NULL
+#set LHCHandler:DecayHandler NULL 
+
+cd /Herwig/Partons
+create ThePEG::LHAPDF thePDFset ThePEGLHAPDF.so
+#set thePDFset:PDFName cteq6ll.LHpdf
+#set thePDFset:PDFName CT10nlo.LHpdf
+set thePDFset:RemnantHandler  HadronRemnants
+set /Herwig/Particles/p+:PDF thePDFset
+set /Herwig/Particles/pbar-:PDF thePDFset
+
+# The PDF for beam particles A/B - overrides particle's own PDF above
+set /Herwig/Shower/ShowerHandler:PDFA thePDFset
+set /Herwig/Shower/ShowerHandler:PDFB thePDFset
+
+##################################################
+# Technical parameters for this run
+##################################################
+cd /Herwig
+
+cd /Herwig/Generators
+set LHCGenerator:NumberOfEvents 1000
+set LHCGenerator:RandomNumberGenerator:Seed 31122001
+set LHCGenerator:PrintEvent 10
+set LHCGenerator:MaxErrors 10000
+#set LHCGenerator:EventHandler:CascadeHandler:MPIHandler NULL
+set LHCGenerator:EventHandler:Cuts /Herwig/Cuts/NoCuts
+
+##################################################
+# LHC physics parameters (override defaults here) 
+##################################################
+set LHCGenerator:EventHandler:LuminosityFunction:Energy 14000.0
+
+# Intrinsic pT tune extrapolated to LHC energy
+set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.2*GeV
+
+cd /Herwig/Cuts
+#set JetKtCut:MinKT 100.0*GeV
+#set QCDCuts:MHatMin 250*GeV                  
+
+##################################################
+# Matrix Elements for hadron-hadron collisions 
+##################################################
+cd /Herwig/MatrixElements/
+create Herwig::MEHiggsPair MEHiggsPair MEHiggsPair.so
+
+insert SimpleQCD:MatrixElements[0] MEHiggsPair
+set MEHiggsPair:Process ggToHTohh        
+#set MEHiggsPair:Process All
+set MEHiggsPair:SelfCoupling 5.8
+set MEHiggsPair:hhHCoupling -0.762
+
+#cd /Herwig/Analysis
+#create Herwig::rootsimple2 RAnalysis2 rootsimple2.so
+#insert /Herwig/Generators/LHCGenerator:AnalysisHandlers 0 /Herwig/Analysis/RAnalysis2
+#set Basics:CheckQuark false
+
+cd /Herwig/Generators
+##################################################
+#  Useful analysis handlers for HepMC related output
+##################################################
+# Schematic overview of an event (requires --with-hepmc to be set at configure time
+# and the graphviz program 'dot' to produce a plot)
+# insert LHCGenerator:AnalysisHandlers 0 /Herwig/Analysis/Plot
+# A HepMC dump file (requires --with-hepmc to be set at configure time)
+insert LHCGenerator:AnalysisHandlers 0 /Herwig/Analysis/HepMCFile
+set /Herwig/Analysis/HepMCFile:PrintEvent 1000000
+set /Herwig/Analysis/HepMCFile:Format GenEvent
+set /Herwig/Analysis/HepMCFile:Units GeV_mm
+
+##################################################
+# Save run for later usage with 'Herwig++ run'
+##################################################
+saverun HH-bbWW-B3-0225 LHCGenerator
