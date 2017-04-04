@@ -112,7 +112,7 @@ if dottV:
   NumSample.append('43'); sampleN_short.append('ttV')
 
 plotter_f = open("for_plotter.py",'w')
-if not OnlySubmitCRAB: plotter_f.write("makeHadd = False\n")
+if not OnlySubmitCRAB: plotter_f.write("makeHadd = True\n")
 check_f   = open("check_crab.sh",'w')
 check_f.write("#!/bin/bash\n")
 args = []; args.append("-99")

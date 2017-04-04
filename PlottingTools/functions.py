@@ -153,12 +153,14 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
   hdata = ROOT.TH1F()
   hists = []
   i = 0
+  maxY = -1;
   for nfile in range(len(filelist)):
     print "TEST: printing", nfile, benchmarks[nfile]
     isMC = True
     if( DataOrMC=="DataMC" and (nfile==int(len(filelist)-1)) ): isMC=False
     B = benchmarks[nfile]
     hist = hist1D(filelist[nfile], todraw, x_bins, cut, B, Lumi, nTOT[i], isMC)
+    if ( hist.GetMaximum() > maxY ): maxY = hist.GetMaximum();
     hist.SetLineColor(color[nfile])
     hist.SetLineWidth(2)
     hist.SetMarkerColor(color[nfile])
@@ -183,6 +185,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
         legend.AddEntry(hist, "%s"%B, "l")
     i = i+1
   print 'Done with LOOP'
+  hs.SetMaximum(maxY)
   if DataOrMC!="DataMC": hs.Draw("nostack") # One on top of the others
   else:                  hs.Draw("hist"); hdata.Draw("same")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)

@@ -13,9 +13,9 @@ os.system("rm -rf HADD/*txt")
 Lumi=36.42#fb-1
 
 # MC
-makeHadd=False
+makeHadd = True
 TT_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170330_220400 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170401_035903 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
 os.system("cat HADD/TT_* > HADD/TT.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg.root @HADD/TT.txt")
 N_tot_path_TT = "/fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg.root"
@@ -27,10 +27,10 @@ with open("HADD/TT.txt","r") as f:
       TT_ch.Add(str(line[:-1]))
 print "TT has", TT_ch.GetEntries(), "entries."
 DY_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170330_220412 | grep root | grep -v failed > HADD/DY_DYJetsToLLM-10to50.txt")
-os.system("find /fdata/hepx/store/user/lpernie/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_0J_13TeV-amcatnloFXFX-pythia8/170330_220425 | grep root | grep -v failed > HADD/DY_DYToLL0J.txt")
-os.system("find /fdata/hepx/store/user/lpernie/DYToLL_1J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_1J_13TeV-amcatnloFXFX-pythia8/170330_220437 | grep root | grep -v failed > HADD/DY_DYToLL1J.txt")
-os.system("find /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8/170330_220449 | grep root | grep -v failed > HADD/DY_DYToLL2J.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170401_035916 | grep root | grep -v failed > HADD/DY_DYJetsToLLM-10to50.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_0J_13TeV-amcatnloFXFX-pythia8/170401_035928 | grep root | grep -v failed > HADD/DY_DYToLL0J.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_1J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_1J_13TeV-amcatnloFXFX-pythia8/170401_035940 | grep root | grep -v failed > HADD/DY_DYToLL1J.txt")
+os.system("find /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8/170401_035952 | grep root | grep -v failed > HADD/DY_DYToLL2J.txt")
 os.system("cat HADD/DY_* > HADD/DY.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8.root @HADD/DY.txt")
 N_tot_path_DY = "/fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8.root"
@@ -42,15 +42,15 @@ with open("HADD/DY.txt","r") as f:
       DY_ch.Add(str(line[:-1]))
 print "DY has", DY_ch.GetEntries(), "entries."
 VV_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170330_220502 | grep root | grep -v failed > HADD/VV_ZZTo2L2Q13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ZZTo2L2Nu_13TeV_powheg_pythia8/crab_ZZTo2L2Nu_13TeV_powheg_pythia8/170330_220514 | grep root | grep -v failed > HADD/VV_ZZTo2L2Nu13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8/170330_220526 | grep root | grep -v failed > HADD/VV_ZZTo4L13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/crab_WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/170330_220538 | grep root | grep -v failed > HADD/VV_WWToLNuQQaTGC.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/crab_WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/170330_220550 | grep root | grep -v failed > HADD/VV_WWTo2L2NuMWW-600To800.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170330_220603 | grep root | grep -v failed > HADD/VV_WZTo2L2Q13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/170330_220616 | grep root | grep -v failed > HADD/VV_WZTo1L3Nu13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/170329_225618 | grep root | grep -v failed > HADD/VV_WZTo1L1Nu2Q13TeV.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/170330_220641 | grep root | grep -v failed > HADD/VV_WZTo3LNuTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170401_040005 | grep root | grep -v failed > HADD/VV_ZZTo2L2Q13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ZZTo2L2Nu_13TeV_powheg_pythia8/crab_ZZTo2L2Nu_13TeV_powheg_pythia8/170401_040017 | grep root | grep -v failed > HADD/VV_ZZTo2L2Nu13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8/170401_040030 | grep root | grep -v failed > HADD/VV_ZZTo4L13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/crab_WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/170401_040043 | grep root | grep -v failed > HADD/VV_WWToLNuQQaTGC.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/crab_WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/170401_040055 | grep root | grep -v failed > HADD/VV_WWTo2L2NuMWW-600To800.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170401_040108 | grep root | grep -v failed > HADD/VV_WZTo2L2Q13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/170401_040121 | grep root | grep -v failed > HADD/VV_WZTo1L3Nu13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/170401_040134 | grep root | grep -v failed > HADD/VV_WZTo1L1Nu2Q13TeV.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/170401_040146 | grep root | grep -v failed > HADD/VV_WZTo3LNuTuneCUETP8M1.txt")
 os.system("cat HADD/VV_* > HADD/VV.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8.root @HADD/VV.txt")
 N_tot_path_VV = "/fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8.root"
@@ -62,11 +62,11 @@ with open("HADD/VV.txt","r") as f:
       VV_ch.Add(str(line[:-1]))
 print "VV has", VV_ch.GetEntries(), "entries."
 sT_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170329_225903 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170330_220707 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/crab_ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/170330_220720 | grep root | grep -v failed > HADD/sT_STs-channel.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170330_220732 | grep root | grep -v failed > HADD/sT_STtW.txt")
-os.system("find /fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170330_220745 | grep root | grep -v failed > HADD/sT_STtW.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170401_040200 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170401_040213 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/crab_ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/170401_040225 | grep root | grep -v failed > HADD/sT_STs-channel.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170401_040237 | grep root | grep -v failed > HADD/sT_STtW.txt")
+os.system("find /fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170401_040249 | grep root | grep -v failed > HADD/sT_STtW.txt")
 os.system("cat HADD/sT_* > HADD/sT.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1.root @HADD/sT.txt")
 N_tot_path_sT = "/fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1.root"
@@ -78,14 +78,14 @@ with open("HADD/sT.txt","r") as f:
       sT_ch.Add(str(line[:-1]))
 print "sT has", sT_ch.GetEntries(), "entries."
 Wjet_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170330_220757 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuTuneCUETP8M1.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220811 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-100To200.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220824 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-200To400.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220836 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-400To600.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220848 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-600To800.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220900 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-800To1200.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220914 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-1200To2500.txt")
-os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170330_220926 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-2500ToInf.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170401_040303 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040315 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-100To200.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040328 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-200To400.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040341 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-400To600.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040353 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-600To800.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040408 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-800To1200.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040421 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-1200To2500.txt")
+os.system("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170401_040433 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-2500ToInf.txt")
 os.system("cat HADD/Wjet_* > HADD/Wjet.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root @HADD/Wjet.txt")
 N_tot_path_Wjet = "/fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"
@@ -97,10 +97,10 @@ with open("HADD/Wjet.txt","r") as f:
       Wjet_ch.Add(str(line[:-1]))
 print "Wjet has", Wjet_ch.GetEntries(), "entries."
 ttV_ch = ROOT.TChain(tree_name)
-os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170330_220938 | grep root | grep -v failed > HADD/ttV_TTWJetsToQQTuneCUETP8M1.txt")
-os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170330_220950 | grep root | grep -v failed > HADD/ttV_TTWJetsToLNuTuneCUETP8M1.txt")
-os.system("find /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170330_221002 | grep root | grep -v failed > HADD/ttV_TTZToQQTuneCUETP8M1.txt")
-os.system("find /fdata/hepx/store/user/lpernie/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170330_221015 | grep root | grep -v failed > HADD/ttV_TTZToLLNuNuM-10.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170401_040446 | grep root | grep -v failed > HADD/ttV_TTWJetsToQQTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170401_040458 | grep root | grep -v failed > HADD/ttV_TTWJetsToLNuTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170401_040512 | grep root | grep -v failed > HADD/ttV_TTZToQQTuneCUETP8M1.txt")
+os.system("find /fdata/hepx/store/user/lpernie/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170401_040525 | grep root | grep -v failed > HADD/ttV_TTZToLLNuNuM-10.txt")
 os.system("cat HADD/ttV_* > HADD/ttV.txt")
 if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root @HADD/ttV.txt")
 N_tot_path_ttV = "/fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root"
@@ -133,7 +133,7 @@ filelist   = [ttV_ch, Wjet_ch, sT_ch, VV_ch, DY_ch, TT_ch, DATA_ch] #If you draw
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 nTOT       = [nTOT_prehlt_ttV, nTOT_prehlt_Wjet, nTOT_prehlt_sT, nTOT_prehlt_VV, nTOT_prehlt_DY, nTOT_prehlt_TT, 1]
 #Cuts and Ordering
-cut = "met_pt>20 && b1jet_pt>30 && b2jet_pt>30 && muon1_pt>20 && muon2_pt>20"
+cut = "met_pt>20 && b1jet_pt>30 && TMath::Abs(b1jet_eta)<2.5 && b2jet_pt>30 && TMath::Abs(b2jet_eta)<2.5 && muon1_pt>20 && TMath::Abs(muon1_eta)<2.4 && muon2_pt>20 && TMath::Abs(muon2_eta)<2.4"
 
 #---Starting to plot histos here-------------------------------------------------------------------------------------------------------------------------------------
 NORM=["lumi"] #NORM=["unity","lumi"]
@@ -144,20 +144,21 @@ for this_LOG in LOG:
   for this_Norm in NORM:
     #GEN
     #RECO Di-Leptons
-    draw1D(filelist, "muon1_pt", "(50,10,100)", "P_{T} [GeV]", cut, benchmarks, "h_MU1_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon2_pt", "(50,10,100)", "P_{T} [GeV]", cut, benchmarks, "h_MU2_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon1_eta", "(50,-3,3)", "#eta", cut, benchmarks, "h_MU1_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "muon2_eta", "(50,-3,3)", "#eta", cut, benchmarks, "h_MU2_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "mass_l1l2", "(40,20,150)", "m(l,l)", cut, benchmarks, "h_M_l1l2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "dR_l1l2", "(50,0,5)", "#Delta R(l,l)", cut, benchmarks, "h_DR_l1l2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon1_pt", "(50,10.,350.)", "Lead. #mu P_{T} [GeV]", cut, benchmarks, "h_MU1_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon2_pt", "(50,10.,350.)", "Sublead. #mu P_{T} [GeV]", cut, benchmarks, "h_MU2_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon1_eta", "(50,-3.,3.)", "Lead. #mu #eta", cut, benchmarks, "h_MU1_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "muon2_eta", "(50,-3.,3.)", "Sublead. #mu #eta", cut, benchmarks, "h_MU2_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "mass_l1l2", "(40,20.,150.)", "m(l,l)", cut, benchmarks, "h_M_l1l2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "dR_l1l2", "(50,0.,5.)", "#Delta R(l,l)", cut, benchmarks, "h_DR_l1l2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
     #RECO Di-Jets
-    draw1D(filelist, "b1jet_pt", "(50,20,200)", "P_{T} [GeV]", cut, benchmarks, "h_J1_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b2jet_pt", "(50,20,100)", "P_{T} [GeV]", cut, benchmarks, "h_J2_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b1jet_eta", "(50,-3.,3.)", "#eta", cut, benchmarks, "h_J1_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "b2jet_eta", "(50,-3.,3.)", "#eta", cut, benchmarks, "h_J2_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "mass_b1b2", "(40,40,180)", "m(j,j)", cut, benchmarks, "h_M_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "dR_b1b2", "(50,0,5)", "#Delta R(j,j)", cut, benchmarks, "h_DR_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b1jet_pt", "(50,20.,350.)", "Lead. jet P_{T} [GeV]", cut, benchmarks, "h_J1_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b2jet_pt", "(50,20.,350.)", "Sublead. jet P_{T} [GeV]", cut, benchmarks, "h_J2_pt", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b1jet_eta", "(50,-3.,3.)", "Lead. jet #eta", cut, benchmarks, "h_J1_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "b2jet_eta", "(50,-3.,3.)", "Sublead. jet #eta", cut, benchmarks, "h_J2_eta", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "mass_b1b2", "(40,40.,400.)", "m(j,j)", cut, benchmarks, "h_M_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "dR_b1b2", "(50,0.,6.)", "#Delta R(j,j)", cut, benchmarks, "h_DR_b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
     #RECO MIX
-    draw1D(filelist, "mass_trans", "(50,10,150)", "M_{tran} [GeV]", cut, benchmarks, "h_MT", Lumi, NORM)
-    draw1D(filelist, "dR_l1l2b1b2", "(50,0,5)", "#Delta R(lljj)", cut, benchmarks, "h_dR_l1l2b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
-    draw1D(filelist, "dphi_llmet", "(50,-4,4)", "#Delta #phi (ll,MET)", cut, benchmarks, "h_Dphi_llmet", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "met_pt", "(50,10.,400.)", "MET [GeV]", cut, benchmarks, "h_MET", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "mass_trans", "(50,0.,250.)", "M_{trans} [GeV]", cut, benchmarks, "h_MT", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "dR_l1l2b1b2", "(50,0.,6.)", "#Delta R(lljj)", cut, benchmarks, "h_dR_l1l2b1b2", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
+    draw1D(filelist, "dphi_llmet", "(50,-4.,4.)", "#Delta #phi (ll,MET)", cut, benchmarks, "h_Dphi_llmet", Lumi, nTOT, this_Norm, DataOrMC, this_LOG, Format)
