@@ -31,6 +31,8 @@
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+//POG
+#include "HhhAnalysis/CutFlowAnalyzer/interface/POGRecipesRun2.h"
 //headers from root lib
 #include "TTree.h"
 #include "TFile.h"
@@ -87,6 +89,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     int jetCorrectionAlgo_;
     int metCorrectionAlgo_;
     float mu_eta_;
+    float mu_PFIso_;
+    std::string mu_id_;
     float el_eta_;
     float leadingpt_mumu_;//mu-mu events, leading
     float trailingpt_mumu_;//
@@ -507,6 +511,8 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   debug_                = iConfig.getUntrackedParameter<bool>("debug",false);
   verbose_              = iConfig.getUntrackedParameter<int>("verbose",0);
   mu_eta_               = iConfig.getUntrackedParameter<double>("mu_eta",2.4);
+  mu_PFIso_               = iConfig.getUntrackedParameter<double>("mu_PFIso", 0.25);
+  mu_id_      = iConfig.getUntrackedParameter<std::string>("mu_id","2016Medium");
   el_eta_               = iConfig.getUntrackedParameter<double>("el_eta",2.5);
   leadingpt_mumu_       = iConfig.getUntrackedParameter<double>("leadingpt_mumu",10);
   trailingpt_mumu_      = iConfig.getUntrackedParameter<double>("trailingpt_mumu",10);
@@ -960,20 +966,27 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
   //****************************************************************************
   //                Di-Leptons selection
+  //                Medium ID + loose PF-based combined relative isolation with detaB correction
   //****************************************************************************
   //std::cout <<"diMuon "<< std::endl;
   for (const pat::Muon &mu : *muons) {
-    const MuonPFIsolation& muonIso = mu.pfIsolationR03();
+    bool muonid = false;
+    if (mu_id_ == "2016Medium") muonid = POGRecipesRun2::is2016MediumMuon(mu);
+    else if (mu_id_ == "Medium") muonid = POGRecipesRun2::isMediumMuon(mu);
+    else std::cout <<"mu ID is not correct: "<< mu_id_ << std::endl;
+    float isoVar = POGRecipesRun2::MuonIsoPFbased(mu);
+    if (muonid and isoVar <= mu_PFIso_){
+    /*const MuonPFIsolation& muonIso = mu.pfIsolationR03();
     float isoVar = (muonIso.sumChargedHadronPt + muonIso.sumNeutralHadronEt + muonIso.sumPhotonEt)/mu.pt();
     if (fabs(mu.eta())<mu_eta_ and mu.pt()>10 and fabs(mu.muonBestTrack()->dz(PV.position()))<0.1 and 
 	  ((mu.pt()>20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.02) or 
-	   (mu.pt()<20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.01)) and isoVar<0.15){
+	   (mu.pt()<20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.01)) and isoVar<0.15){*/
 	if (mu.charge()>0) pleptons.push_back(&mu);
 	else if (mu.charge()<0) nleptons.push_back(&mu);
 	if (debug_)
-	    std::cout <<"get one muon passed selection eta "<< mu.eta() <<" pt "<< mu.pt()<<" isovar "<< isoVar <<" charge "<< mu.charge()<< std::endl;
+	    std::cout <<"get one muon passed selection eta "<< mu.eta() <<" pt "<< mu.pt()<<" isovar "<<  isoVar <<" charge "<< mu.charge()<< std::endl;
 	const reco::GenParticle * genp = mu.genParticle();
-	if (genp)
+	if (genp and debug_)
 	  std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
     }
     if(debug_) printf("muon with pt %4.1f, charge %d, IsoVar %5.3f, dz(PV) %+5.3f, dxy(PV)%+5.3f, POG loose id %d, tight id %d\n",
@@ -1046,7 +1059,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
     }
     const reco::GenParticle * genp = j.genParticle();
-    if (genp)
+    if (genp and debug_)
 	std::cout <<"matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
   }
 
@@ -1608,14 +1621,16 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
   }
 
   if (h2tohh){
-    std::cout << "h2 candidate id " << h2tohhcand->pdgId() << " mass " << h2tohhcand->mass() << std::endl;
     b1cand = finddecendant(htoBBcand, 5, false);
     b2cand = finddecendant(htoBBcand, -5, false);
     w1cand = finddecendant(htoWWcand, 24, false);
     w2cand = finddecendant(htoWWcand, -24, false);   
-    if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)) std::cout <<" find two muons "<< std::endl;
-    if (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 11)) std::cout <<" find two elelctrons "<< std::endl;
-    if ((hasDaughter(w1cand, -13) and hasDaughter(w2cand, 11)) or (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 13))) std::cout <<" find two elelctron+muon "<< std::endl;
+    if (debug_){
+	std::cout << "h2 candidate id " << h2tohhcand->pdgId() << " mass " << h2tohhcand->mass() << std::endl;
+	if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)) std::cout <<" find two muons "<< std::endl;
+	if (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 11)) std::cout <<" find two electrons "<< std::endl;
+	if ((hasDaughter(w1cand, -13) and hasDaughter(w2cand, 11)) or (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 13))) std::cout <<" find two electron+muon "<< std::endl;
+    }
     if (hasDaughter(w1cand, -13) and hasDaughter(w2cand, 13)){
 	mu1cand = findmudaughter(w1cand);
 	nu1cand = findnudaughter(w1cand);
