@@ -2,9 +2,6 @@
 */*/*__init__.py
 */*/.*swp
 */*/.*swo
-MVA_Studies/weights*
-MVA_Studies/*.root
-MVA_Studies/files/
 DataFormats/scripts/*.root
 PlottingTools/HADD*/*
 PlottingTools/*.err
@@ -26,3 +23,12 @@ MCProduction/python/LHC.log
 MCProduction/python/LHC.out
 MCProduction/python/LHC.tex
 MCProduction/python/out_sim.root
+MCProduction/python/HerwigConfig/__*__.py*
+Regression/*.root
+Regression/*_C.d
+Regression/*.pcm
+Regression/weights/*.xml
+Regression/*_C.so
+MVA_Studies/weights*
+MVA_Studies/*.root
+MVA_Studies/files/
