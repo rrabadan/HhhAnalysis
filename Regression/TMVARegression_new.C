@@ -47,12 +47,12 @@ using namespace TMVA;
 
 void TMVARegression_new( TString myMethodList = "" ){
 
-  //Here all my paramteres
+  //#! Parameters
   myMethodList = "BDT";
   TString outfileName( "TMVAReg.root" );  
-  TString fname = "./files/signal_B1.root";
-  TString tree_name="evtree";
-  TCut mycut = "MMC_h2massweight1_prob>200 && hasRECOjet1 && hasRECOjet1 && hasMET && hastwomuons && (((b1jet_btag&2)>0 && (b2jet_btag&3)>0) || ((b1jet_btag&3)>0 && (b 2jet_btag&2)>0)) && dR_l1l2<3.3 && dR_l1l2>0.07 && dR_b1b2<5. && mass_l1l2<100 && mass_l1l2>5. && dR_bl<5 && dR_l1l2b1b2<6 && MINdR_bl<3.2 && MINdR_bl>0.4 && mass_b1b2<700 && mass_trans<250 && MT2<400 && pt_b1b2<300"; 
+  TString fname = "/fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg_FULL.root";
+  TString tree_name="DiHiggsWWBBAna/evtree";
+  TCut mycut = "met_pt>20 && b1jet_pt>30 && TMath::Abs(b1jet_eta)<2.5 && b2jet_pt>30 && TMath::Abs(b2jet_eta)<2.5 && muon1_pt>20 && TMath::Abs(muon1_eta)<2.4 && muon2_pt>20 && TMath::Abs(muon2_eta)<2.4"; 
   // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
   // if you use your private .rootrc, or run from a different directory, please copy the 
   // corresponding lines from .rootrc
@@ -68,27 +68,21 @@ void TMVARegression_new( TString myMethodList = "" ){
 
   // Default MVA methods to be trained + tested
   std::map<std::string,int> Use;
-
   // --- Mutidimensional likelihood and Nearest-Neighbour methods
   Use["PDERS"]           = 0;
   Use["PDEFoam"]         = 1; 
   Use["KNN"]             = 1;
-  // 
   // --- Linear Discriminant Analysis
-  Use["LD"]		        = 1;
-  // 
+  Use["LD"]              = 1;
   // --- Function Discriminant analysis
   Use["FDA_GA"]          = 1;
   Use["FDA_MC"]          = 0;
   Use["FDA_MT"]          = 0;
   Use["FDA_GAMT"]        = 0;
-  // 
   // --- Neural Network
   Use["MLP"]             = 1; 
-  // 
   // --- Support Vector Machine 
   Use["SVM"]             = 0;
-  // 
   // --- Boosted Decision Trees
   Use["BDT"]             = 0;
   Use["BDTG"]            = 1;
@@ -116,9 +110,7 @@ void TMVARegression_new( TString myMethodList = "" ){
   }
 
   // --------------------------------------------------------------------------------------------------
-
   // --- Here the preparation phase begins
-
   // Create a new root output file
   TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
 
@@ -140,14 +132,24 @@ void TMVARegression_new( TString myMethodList = "" ){
   //    (TMVA::gConfig().GetVariablePlotting()).fTimesRMS = 8.0;
   //    (TMVA::gConfig().GetIONames()).fWeightFileDir = "myWeightDirectory";
 
-  // Define the input variables that shall be used for the MVA training
-  // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
-  // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
-  factory->AddVariable( "dR_b1b2", "dR_b1b2", "units", 'F' );
-  factory->AddVariable( "pt_b1b2", "pt_b1b2", "units", 'F' );
-  factory->AddVariable( "phi_b1b2", "phi_b1b2", "units", 'F' );
-  factory->AddVariable( "eta_b1b2", "eta_b1b2", "units", 'F' );
-  //factory->AddVariable( "mass_b1b2", "mass_b1b2", "units", 'F' );
+  //#!Define the input variables that shall be used for the MVA training
+  //  note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
+  //  [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
+  factory->AddVariable( "numOfVertices",      "numOfVertices", "units", 'I' );
+  factory->AddVariable( "b1jet_pt",           "b1jet_pt", "units", 'F' );
+  factory->AddVariable( "b1jet_eta",          "b1jet_eta", "units", 'F' );
+  factory->AddVariable( "b1jet_mt",           "b1jet_mt", "units", 'F' );
+  //factory->AddVariable( "b1jet_leadTrackPt",  "b1jet_leadTrackPt", "units", 'F' );
+  factory->AddVariable( "b1jet_leptonDeltaR", "b1jet_leptonDeltaR", "units", 'F' );
+  //factory->AddVariable( "b1jet_leptonPtRel",  "b1jet_leptonPtRel", "units", 'F' );
+  factory->AddVariable( "b1jet_leptonPt",     "b1jet_leptonPt", "units", 'F' );
+  factory->AddVariable( "b1jet_vtxPt",        "b1jet_vtxPt", "units", 'F' );
+  factory->AddVariable( "b1jet_vtxMass",      "b1jet_vtxMass", "units", 'F' );
+  factory->AddVariable( "b1jet_vtxNtracks",   "b1jet_vtxNtracks", "units", 'F' );
+  factory->AddVariable( "b1jet_neHEF",        "b1jet_neHEF", "units", 'F' );
+  factory->AddVariable( "b1jet_neEmEF",       "b1jet_neEmEF", "units", 'F' );
+  factory->AddVariable( "b1jet_vtx3DSig",     "b1jet_vtx3DSig", "units", 'F' );
+  factory->AddVariable( "b1jet_vtx3DVal",     "b1jet_vtx3DVal", "units", 'F' );
 
   // You can add so-called "Spectator variables", which are not used in the MVA training, 
   // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the 
@@ -155,7 +157,7 @@ void TMVARegression_new( TString myMethodList = "" ){
   factory->AddSpectator( "spec1:=mass_b1b2",  "mass_b1b2", "units", 'F' );
 
   // Add the variable carrying the regression target
-  factory->AddTarget( "mass_genb1b2/mass_b1b2" ); 
+  factory->AddTarget( "b1genjet_pt/b1jet_pt" ); 
 
   // It is also possible to declare additional targets for multi-dimensional regression, ie:
   // -- factory->AddTarget( "fvalue2" );

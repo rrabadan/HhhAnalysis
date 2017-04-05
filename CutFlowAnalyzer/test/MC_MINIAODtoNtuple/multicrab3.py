@@ -9,6 +9,7 @@ config.section_("JobType")
 config.JobType.pluginName   = 'Analysis'
 config.JobType.outputFiles  = ['out_ana.root']
 config.JobType.psetName     = "runDiHiggsWWAnalyzer.py"
+config.JobType.inputFiles   = ["File/EfficienciesAndSF_BCDEFGH_Tracking.root","File/EfficienciesAndSF_BCDEF_Tracking.root","File/EfficienciesAndSF_GH_ISO.root","File/EfficienciesAndSF_BCDEF_ID.root","File/EfficienciesAndSF_BCDEF_trigger.root","File/EfficienciesAndSF_GH_Tracking.root","File/EfficienciesAndSF_BCDEF_ISO.root","File/EfficienciesAndSF_GH_ID.root","File/EfficienciesAndSF_GH_trigger.root"]
 
 config.section_("Data")
 config.Data.inputDBS        = 'global'

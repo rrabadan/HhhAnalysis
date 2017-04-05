@@ -9,6 +9,7 @@ config.section_("JobType")
 config.JobType.pluginName   = 'Analysis'
 config.JobType.outputFiles  = ['out_ana.root']
 config.JobType.psetName     = "runDiHiggsWWAnalyzer.py"
+config.JobType.inputFiles   = ["File/EfficienciesAndSF_BCDEFGH_Tracking.root","File/EfficienciesAndSF_BCDEF_Tracking.root","File/EfficienciesAndSF_GH_ISO.root","File/EfficienciesAndSF_BCDEF_ID.root","File/EfficienciesAndSF_BCDEF_trigger.root","File/EfficienciesAndSF_GH_Tracking.root","File/EfficienciesAndSF_BCDEF_ISO.root","File/EfficienciesAndSF_GH_ID.root","File/EfficienciesAndSF_GH_trigger.root"]
 
 config.section_("Data")
 config.Data.inputDBS        = 'global'
@@ -35,12 +36,12 @@ def findNewestDir(directory):
 
 OnlySubmitCRAB=True
 datasets  = []; 
-#datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
-#datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
-#datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
-#datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
-#datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
-#datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
+datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
 datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD")
 datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD")
 

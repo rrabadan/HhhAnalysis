@@ -63,6 +63,18 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
   #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
   muons = cms.InputTag("slimmedMuons"),
+  #2016data: Run BCDEF use 2016Medium, GH use Medium
+  mu_id = cms.untracked.string("2016Medium"),
+  mu_PFIso = cms.untracked.double(0.15),#tight iso
+  triggerSFFile = cms.string("EfficienciesAndSF_BCDEF_trigger.root"),
+  isoSFFile = cms.string("EfficienciesAndSF_BCDEF_ISO.root"),
+  idSFFile = cms.string("EfficienciesAndSF_BCDEF_ID.root"),
+  trackingSFFile = cms.string("EfficienciesAndSF_BCDEFGH_Tracking.root"),
+  triggerSFhist = cms.string("IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"),
+  isoSFhist = cms.string("TightISO_MediumID_pt_eta/abseta_pt_ratio"),
+  idSFhist = cms.string("MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"),
+  trackingSFhist = cms.string("ratio_eff_eta3_dr030e030_corr"),
+
   electrons = cms.InputTag("slimmedElectrons"),
   genjets = cms.InputTag("slimmedGenJets"), # For miniAOD
   #genjets = cms.InputTag("ak4GenJetsNoNu"),
