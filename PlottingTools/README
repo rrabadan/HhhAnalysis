@@ -6,4 +6,4 @@
   d) copy the content of for_plotter.py in PlotterProducer.py (under # Data)
   e) Redo these steps for the file "multicrab3.py" in HhhAnalysis/CutFlowAnalyzer/test/MC_MINIAODtoNtuple 
 2) source Send_PlotterProducer.sh
-3) Once the jobs are done Make the Stack plots running
+3) Once the jobs are done you can run: 'python FinalPlotter.py -b'
