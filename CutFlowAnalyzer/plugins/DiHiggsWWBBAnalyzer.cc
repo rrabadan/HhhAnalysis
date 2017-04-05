@@ -1063,22 +1063,27 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     muon2_pt = selectedsubleadinglep->pt(); muon2_eta = selectedsubleadinglep->eta(); muon2_phi = selectedsubleadinglep->phi();
     muon2_dxy = dxy(selectedsubleadinglep, &PV); muon2_dz = dz(selectedsubleadinglep, &PV);
 
-    float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
-    float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
-    float idSF1 =  POGRecipesRun2::getMuonIDSF(std::abs(muon1_eta), muon1_pt, idSFFile_, idSFhist_);
-    float trackingSF1 = POGRecipesRun2::getMuonTrackingSF(muon1_eta, trackingSFFile_, trackingSFhist_);
-    muon1_pogSF = triggerSF1*isoSF1*idSF1*trackingSF1;
-    muon1_triggerSF = triggerSF1; muon1_isoSF = isoSF1; muon1_idSF = idSF1; muon1_trackingSF = trackingSF1;
-    float triggerSF2 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon2_eta), muon2_pt, triggerSFFile_, triggerSFhist_);
-    float isoSF2 =  POGRecipesRun2::getMuonISOSF(std::abs(muon2_eta), muon2_pt, isoSFFile_, isoSFhist_);
-    float idSF2 =  POGRecipesRun2::getMuonIDSF(std::abs(muon2_eta), muon2_pt, idSFFile_, idSFhist_);
-    float trackingSF2 = POGRecipesRun2::getMuonTrackingSF(muon2_eta, trackingSFFile_, trackingSFhist_);
-    muon2_pogSF = triggerSF2*isoSF2*idSF2*trackingSF2;
-    muon2_triggerSF = triggerSF2; muon2_isoSF = isoSF2; muon2_idSF = idSF2; muon2_trackingSF = trackingSF2;
     hastwomuons = true;
+    if (sampleType_>0){//apply SF for MC samplpes 
+	float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
+	float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
+	float idSF1 =  POGRecipesRun2::getMuonIDSF(std::abs(muon1_eta), muon1_pt, idSFFile_, idSFhist_);
+	float trackingSF1 = POGRecipesRun2::getMuonTrackingSF(muon1_eta, trackingSFFile_, trackingSFhist_);
+	muon1_pogSF = triggerSF1*isoSF1*idSF1*trackingSF1;
+	muon1_triggerSF = triggerSF1; muon1_isoSF = isoSF1; muon1_idSF = idSF1; muon1_trackingSF = trackingSF1;
+	float triggerSF2 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon2_eta), muon2_pt, triggerSFFile_, triggerSFhist_);
+	float isoSF2 =  POGRecipesRun2::getMuonISOSF(std::abs(muon2_eta), muon2_pt, isoSFFile_, isoSFhist_);
+	float idSF2 =  POGRecipesRun2::getMuonIDSF(std::abs(muon2_eta), muon2_pt, idSFFile_, idSFhist_);
+	float trackingSF2 = POGRecipesRun2::getMuonTrackingSF(muon2_eta, trackingSFFile_, trackingSFhist_);
+	muon2_pogSF = triggerSF2*isoSF2*idSF2*trackingSF2;
+	muon2_triggerSF = triggerSF2; muon2_isoSF = isoSF2; muon2_idSF = idSF2; muon2_trackingSF = trackingSF2;
 
-    printf("leadinglepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon1_pt, muon1_eta, triggerSF1, isoSF1, idSF1, trackingSF1);
-    printf("subleadlepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon2_pt, muon2_eta, triggerSF2, isoSF2, idSF2, trackingSF2);
+	printf("leadinglepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon1_pt, muon1_eta, triggerSF1, isoSF1, idSF1, trackingSF1);
+	printf("subleadlepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon2_pt, muon2_eta, triggerSF2, isoSF2, idSF2, trackingSF2);
+    }else {
+	printf("leadinglepton: pt %5.1f, eta %+4.2f, pogSF %+2.4f\n", muon1_pt, muon1_eta, muon1_pogSF);
+	printf("subleadlepton: pt %5.1f, eta %+4.2f, pogSF %+2.4f\n", muon2_pt, muon2_eta, muon2_pogSF);
+    }
   }
 
   //****************************************************************************
