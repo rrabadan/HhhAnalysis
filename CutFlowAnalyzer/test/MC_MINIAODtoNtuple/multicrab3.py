@@ -20,6 +20,7 @@ config.Data.publication     = False
 
 config.section_("Site")
 config.Site.storageSite     = 'T3_US_TAMU'
+OnlySubmitCRAB=False
 
 import os
 import glob
@@ -33,7 +34,6 @@ def findNewestDir(directory):
   lister = sorted(dirs.iteritems(), key=operator.itemgetter(1))
   return lister[-1][0]
 
-OnlySubmitCRAB=False
 datasets  = []; NumSample = []; sampleN_short = []
 doTT=True; doDY=True; doVV=True; doSingleT=True; doWjets=True; dottV=True
 #doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False
@@ -113,15 +113,13 @@ if dottV:
   NumSample.append('43'); sampleN_short.append('ttV')
 
 plotter_f = open("for_plotter.py",'w')
-if not OnlySubmitCRAB: plotter_f.write("makeHadd = True\n")
 check_f   = open("check_crab.sh",'w')
 check_f.write("#!/bin/bash\n")
-args = []; args.append("-99")
-lastSampleShort="NOSAMPLESHORT"
-lastSample="NOSAMPLE"
-i=0
 if __name__ == '__main__':
   from CRABAPI.RawCommand import crabCommand
+  i=0
+  args = []; args.append("-99")
+  lastSampleShort="NOSAMPLESHORT"
   for dataset in datasets:
     # To check the status
     check_f.write("crab status -d crab_projects/crab_"+dataset.split('/')[1]+"\n")
@@ -134,19 +132,13 @@ if __name__ == '__main__':
       newSample = True
       if(sampleN_short[i]==lastSampleShort): newSample = False
       if((newSample and lastSampleShort!="NOSAMPLESHORT") or i==int(len(NumSample)-1) ):
-        plotter_f.write('os.system("cat HADD/' + sampleN_short[i-1] + '_*' ' > HADD/' + sampleN_short[i-1] + '.txt")\n')
-        plotter_f.write('if makeHadd: os.system("hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt")\n')
-        plotter_f.write('N_tot_path_' + sampleN_short[i-1] + ' = "/fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
-        plotter_f.write(sampleN_short[i-1] + '_file =  ROOT.TFile.Open(N_tot_path_' + sampleN_short[i-1] + ',"read"); h_prehlt_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("TriggerResults/hevent_filter")); nTOT_prehlt_' + sampleN_short[i-1] + ' = h_prehlt_' + sampleN_short[i-1] + '.GetBinContent(2)\nh_posthlt_' + sampleN_short[i-1] + ' =  ROOT.TH1F(' + sampleN_short[i-1] + '_file.Get("DiHiggsWWBBAna/hevent")); nTOT_posthlt_' + sampleN_short[i-1] + ' = h_posthlt_' + sampleN_short[i-1] + '.GetBinContent(2);\n')
-        plotter_f.write('with open("HADD/' + sampleN_short[i-1] +'.txt","r") as f:\n')
-        plotter_f.write('  for line in f:\n')
-        plotter_f.write('    if not line.isspace():\n')
-        plotter_f.write('      '+sampleN_short[i-1]+'_ch.Add(str(line[:-1]))\n')
-        plotter_f.write('print "'+sampleN_short[i-1]+' has", '+sampleN_short[i-1]+'_ch.GetEntries(), "entries."\n')
-      if(newSample):  plotter_f.write(sampleN_short[i]+'_ch = ROOT.TChain(tree_name)\n')
-      plotter_f.write('os.system("find ' + path + ' | grep root | grep -v failed > HADD/' + sampleN_short[i] + "_" + sampleN + '.txt")\n')
+        plotter_f.write('  this_cat      = "cat HADD/' + sampleN_short[i-1] + '_*' ' > HADD/' + sampleN_short[i-1] + '.txt"\n')
+        plotter_f.write('  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt"\n')
+        plotter_f.write('  this_NtotPath = "/fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
+      if(newSample):
+        plotter_f.write('if( whichSample == "' + sampleN_short[i] + '" ):\n')
+      plotter_f.write('  Find_str.append("find ' + path + ' | grep root | grep -v failed > HADD/' + sampleN_short[i] + "_" + sampleN + '.txt")\n')
       lastSampleShort = sampleN_short[i]
-      lastSample      = sampleN
     if OnlySubmitCRAB:
       config.Data.inputDataset = dataset
       config.General.requestName = dataset.split('/')[1]

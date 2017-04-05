@@ -1,0 +1,8 @@
+sbatch Send_PlotterProducer_TT.slrm
+sbatch PlotterProducer.py
+sbatch Send_PlotterProducer_DY.slrm
+sbatch Send_PlotterProducer_VV.slrm
+sbatch Send_PlotterProducer_Data.slrm
+sbatch Send_PlotterProducer_ttV.slrm
+sbatch Send_PlotterProducer_Wjet.slrm
+sbatch Send_PlotterProducer_singTop.slrm

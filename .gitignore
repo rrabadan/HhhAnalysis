@@ -29,6 +29,7 @@ Regression/*_C.d
 Regression/*.pcm
 Regression/weights/*.xml
 Regression/*_C.so
+Regression/plots/*
 MVA_Studies/weights*
 MVA_Studies/*.root
 MVA_Studies/files/
