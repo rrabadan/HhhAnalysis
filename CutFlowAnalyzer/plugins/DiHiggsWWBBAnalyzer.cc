@@ -1215,7 +1215,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	b2jet_leptonPtRel = std::sqrt(pTrel2_2);
     else 
 	b2jet_leptonPtRel = 0;
-    std::cout <<"b1jet_leptonPtRel "<<b1jet_leptonPtRel <<" b2jet_leptonPtRel "<< b2jet_leptonPtRel << std::endl;
+    //std::cout <<"b1jet_leptonPtRel "<<b1jet_leptonPtRel <<" b2jet_leptonPtRel "<< b2jet_leptonPtRel << std::endl;
     b2jet_leptonDeltaR = deltaR(b2jet_leptonEta, b2jet_leptonPhi, b2jet_eta, b2jet_phi);
     b2jet_neHEF = allbjets[jet2].neutralHadronEnergyFraction();
     b2jet_neEmEF = allbjets[jet2].neutralEmEnergyFraction();
