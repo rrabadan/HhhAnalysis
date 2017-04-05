@@ -117,12 +117,6 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
 #process.bbWWFilter = cms.EDFilter("MCMultiParticleFilter",
 bbWWFilter = cms.EDFilter("MCHhhMultiParticleFilter",
   src         = cms.untracked.InputTag("generator", "unsmeared"),
-  NumRequired = cms.int32(4), #
-  AcceptMore  = cms.bool(True),
-  Status      = cms.vint32(11, 11, 11, 11),
-  ParticleID  = cms.vint32(5, -5, 24, -24),
-  EtaMax      = cms.vdouble(10, 10, 10, 10), # no cut on eta
-  PtMin       = cms.vdouble(0., 0.,0, 0)
 )
 
 

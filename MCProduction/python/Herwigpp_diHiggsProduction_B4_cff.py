@@ -32,7 +32,7 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
     'create ThePEG::ParticleData triangon',
     'setup triangon 99927 triangon 0.0 0.0 0.0 0.0 0 0 0 1',
     'create ThePEG::ParticleData h0',
-    'setup h0 25 h0 125 0.003196 0.03196 0 0 0 1 0',
+    'setup h0 25 h0 125 0.004088 0.04088 0 0 0 1 0',
     'create ThePEG::ParticleData H',
     'setup H 35 H 415.488 1.593 15.93 0 0 0 1 0',
     'create ThePEG::ParticleData t',
@@ -117,12 +117,7 @@ generator = cms.EDFilter("ThePEGGeneratorFilter",
 #process.bbWWFilter = cms.EDFilter("MCMultiParticleFilter",
 bbWWFilter = cms.EDFilter("MCHhhMultiParticleFilter",
   src         = cms.untracked.InputTag("generator", "unsmeared"),
-  NumRequired = cms.int32(4), #
-  AcceptMore  = cms.bool(True),
-  Status      = cms.vint32(11, 11, 11, 11),
-  ParticleID  = cms.vint32(5, -5, 24, -24),
-  EtaMax      = cms.vdouble(10, 10, 10, 10), # no cut on eta
-  PtMin       = cms.vdouble(0., 0.,0, 0)
+  debug       = cms.untracked.bool(False)
 )
 
 

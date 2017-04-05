@@ -44,4 +44,64 @@ float POGRecipesRun2::MuonIsoTrackerbased(const pat::Muon & recoMu)
 }
 
 
+float POGRecipesRun2::getMuonTriggerSF(float mueta, float mupt, std::string filename, std::string histname)
+{
+     TFile* file = new TFile(filename.c_str());
+     TH2F* abseta_pt_ratio = (TH2F*)file->Get(histname.c_str());
+     int bin1 = abseta_pt_ratio->GetXaxis()->FindBin(mueta);
+     int bin2 = abseta_pt_ratio->GetYaxis()->FindBin(mupt);
+     if (bin1==0 or bin1==abseta_pt_ratio->GetNbinsX() or bin2==0 or bin2==abseta_pt_ratio->GetNbinsY())
+	 return 1.0;//not find corresponding bin
+     float sf = abseta_pt_ratio->GetBinContent(bin1, bin2);
+     delete file;
+     return sf;
+}
+
+
+float POGRecipesRun2::getMuonISOSF(float mueta, float mupt, std::string filename, std::string histname)
+{
+     TFile* file = new TFile(filename.c_str());
+     TH2F* abseta_pt_ratio = (TH2F*)file->Get(histname.c_str());
+     int bin1 = abseta_pt_ratio->GetXaxis()->FindBin(mueta);
+     int bin2 = abseta_pt_ratio->GetYaxis()->FindBin(mupt);
+     if (bin1==0 or bin1==abseta_pt_ratio->GetNbinsX() or bin2==0 or bin2==abseta_pt_ratio->GetNbinsY())
+	 return 1.0;//not find corresponding bin
+     float sf = abseta_pt_ratio->GetBinContent(bin1, bin2);
+     delete file;
+     return sf;
+}
+
+float POGRecipesRun2::getMuonIDSF(float mueta, float mupt, std::string filename, std::string histname)
+{
+     TFile* file = new TFile(filename.c_str());
+     TH2F* abseta_pt_ratio = (TH2F*)file->Get(histname.c_str());
+     int bin1 = abseta_pt_ratio->GetXaxis()->FindBin(mueta);
+     int bin2 = abseta_pt_ratio->GetYaxis()->FindBin(mupt);
+     if (bin1==0 or bin1==abseta_pt_ratio->GetNbinsX() or bin2==0 or bin2==abseta_pt_ratio->GetNbinsY())
+	 return 1.0;//not find corresponding bin
+     float sf = abseta_pt_ratio->GetBinContent(bin1, bin2);
+     delete file;
+     return sf;
+}
+
+float POGRecipesRun2::getMuonTrackingSF(float mueta, std::string filename, std::string histname)
+{
+     TFile* file = new TFile(filename.c_str());
+     TGraphAsymmErrors* ratio_eff_eta3_dr030e030_corr = (TGraphAsymmErrors*)file->Get(histname.c_str());
+     int n = ratio_eff_eta3_dr030e030_corr->GetN();
+     double eta_up = 0.0;
+     double sf_up = 0.0;
+     double eta_low = 0.0;
+     double sf_low = 0.0;
+     for (int i =0; i < n-1; i++ ){
+	 ratio_eff_eta3_dr030e030_corr->GetPoint(i, eta_low, sf_low);
+	 ratio_eff_eta3_dr030e030_corr->GetPoint(i+1, eta_up, sf_up);
+	 if (float(eta_low) <= mueta and mueta < float(eta_up))
+	     break;
+     }
+     if (mueta > float(eta_up)) return 1.0;//not found eta bin
+     float sf = sf_low + (sf_up-sf_low)/(eta_up-eta_low)*(mueta-eta_low);
+     delete file;
+     return sf;
+}
 

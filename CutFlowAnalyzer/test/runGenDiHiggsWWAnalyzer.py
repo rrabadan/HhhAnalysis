@@ -24,7 +24,9 @@ process.source = cms.Source("PoolSource",
 
 from HhhAnalysis.MCProduction.InputFileHelpers import *
 #inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_1M/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_1M/170329_023747/0000/']
-inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/170330_023219/0000/']
+#inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/170330_023219/0000/']
+#inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter/170331_052059/0000/']
+inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter_updatehwidth/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter_updatehwidth/170331_053038/0000/']
 process = useInputDir(process, inputdir)
 
 process.maxEvents = cms.untracked.PSet( 
@@ -60,10 +62,12 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	daqPartitions = cms.uint32( 1 ),
 	throw = cms.bool(True)    
 	)
+muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test/MuonEffAndSF_2016Data/"
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
     SampleType = cms.untracked.int32(3), #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar};//add other background
     sampleName = cms.untracked.int32(3), #B1 = 1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, tt, DYJets, DY0Jets, DY1Jets, DY2Jets
+    onlyGenLevel = cms.bool(True),
     genParticles = cms.InputTag("genParticles"),
     #genParticles = cms.InputTag("prunedGenParticles"),#minAOD
     #genjets = cms.InputTag("slimmedGenJets"),
@@ -71,6 +75,14 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     genjets = cms.InputTag("ak4GenJets"),
     #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
     muons = cms.InputTag("slimmedMuons"),
+    triggerSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_trigger.root"),
+    isoSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_ISO.root"),
+    idSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_ID.root"),
+    trackingSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEFGH_Tracking.root"),
+    triggerSFhist = cms.string("IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"),
+    isoSFhist = cms.string("TightISO_MediumID_pt_eta/abseta_pt_ratio"),
+    idSFhist = cms.string("MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"),
+    trackingSFhist = cms.string("ratio_eff_eta3_dr030e030_corr"),
     electrons = cms.InputTag("slimmedElectrons"),
     jets = cms.InputTag("slimmedJets"),
     mets = cms.InputTag("slimmedMETs"),
@@ -82,8 +94,7 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     Traj = cms.InputTag("TrackRefitter"),
     debug = cms.untracked.bool(False),
-    onlyGenLevel = cms.bool(True),
-    simulation = cms.bool(True),
+    #simulation = cms.bool(True),
     runMMC = cms.bool(False)
 )
 #print "process.DiHiggsWWBBAna ",process.DiHiggsWWBBAna
@@ -91,7 +102,7 @@ process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.TFileService = cms.Service("TFileService",
     #fileName = cms.string("out_ana.root")
-    fileName = cms.string("file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ana_genlevel_B3_10k.root")
+    fileName = cms.string("file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ana_genlevel_B3_10k_nobbwwfilter_updatehiggswidth.root")
 )
 
 #process.phlt = cms.Path(process.hltfilter)

@@ -15,8 +15,8 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
-	#'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
-	'/store/mc/RunIISpring16MiniAODv2/DYBBJetsToLL_M-10To70_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14-v3/100000/0072F5C1-5089-E611-8340-D8D385AF8AE4.root'
+	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	#'/store/mc/RunIISpring16MiniAODv2/DYBBJetsToLL_M-10To70_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14-v3/100000/0072F5C1-5089-E611-8340-D8D385AF8AE4.root'
 	#'/store/data/Run2016H/DoubleMuon/MINIAOD/03Feb2017_ver2-v1/110000/08ADA6AA-D3EC-E611-AF17-B083FED42488.root'
 	#'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
     )
@@ -61,19 +61,35 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	daqPartitions = cms.uint32( 1 ),
 	throw = cms.bool(True)    
 )
+
+
+muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test/MuonEffAndSF_2016Data/"
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   verbose = cms.untracked.int32(0),
   #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
-  SampleType = cms.untracked.int32(17),
-  sampleName = cms.untracked.int32(17),
+  SampleType = cms.untracked.int32(13),
+  sampleName = cms.untracked.int32(13),
+  #############gen level
   #genParticles = cms.InputTag("genParticles"),
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
-  #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
-  muons = cms.InputTag("slimmedMuons"),
-  electrons = cms.InputTag("slimmedElectrons"),
   genjets = cms.InputTag("slimmedGenJets"),
   #genjets = cms.InputTag("ak4GenJetsNoNu"),
   #genjets = cms.InputTag("ak4GenJets"),
+  #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
+  muons = cms.InputTag("slimmedMuons"),
+  #2016data: Run BCDEF use 2016Medium, GH use Medium
+  mu_id = cms.untracked.string("2016Medium"),
+  mu_PFIso = cms.untracked.double(0.15),#tight iso
+  triggerSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_trigger.root"),
+  isoSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_ISO.root"),
+  idSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEF_ID.root"),
+  trackingSFFile = cms.string(muonPOGSFdir+"EfficienciesAndSF_BCDEFGH_Tracking.root"),
+  triggerSFhist = cms.string("IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"),
+  isoSFhist = cms.string("TightISO_MediumID_pt_eta/abseta_pt_ratio"),
+  idSFhist = cms.string("MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"),
+  trackingSFhist = cms.string("ratio_eff_eta3_dr030e030_corr"),
+
+  electrons = cms.InputTag("slimmedElectrons"),
   jets = cms.InputTag("slimmedJets"),
   mets = cms.InputTag("slimmedMETs"),
   beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -85,7 +101,9 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   Traj = cms.InputTag("TrackRefitter"),
   debug = cms.untracked.bool(False),
   onlyGenLevel = cms.bool(False),
-  simulation = cms.bool(True),
+
+
+  #simulation = cms.bool(True),
   runMMC = cms.bool(False)
 )
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')

@@ -92,6 +92,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float mu_PFIso_;
     std::string mu_id_;
     float el_eta_;
+    float el_Iso_;
     float leadingpt_mumu_;//mu-mu events, leading
     float trailingpt_mumu_;//
     float leadingpt_muel_;//
@@ -109,13 +110,19 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float bjetDiscrCut_tight_;
     float met_;
     float jetleptonDeltaR_;
-    float muIso_;
-    float elIso_;
     float iterations_;
     //gen matching 
     float leptonsDeltaR_;//dR(gen, reco)
     float jetsDeltaR_;//gen matching 
     bool onlyGenLevel_;
+    std::string triggerSFFile_;
+    std::string isoSFFile_;
+    std::string idSFFile_;
+    std::string trackingSFFile_;
+    std::string triggerSFhist_;
+    std::string isoSFhist_;
+    std::string idSFhist_;
+    std::string trackingSFhist_;
 
     // debuglevel constrol 
     int verbose_; 
@@ -365,6 +372,11 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     //muonid loose, medium, tight
     int muon1_id;
     float dR_mu1;
+    float muon1_triggerSF;
+    float muon1_isoSF;
+    float muon1_idSF;
+    float muon1_trackingSF;
+    float muon1_pogSF;
     float muon2_energy;
     float muon2_pt;
     float muon2_eta;
@@ -377,6 +389,11 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float muon2_dz;
     int muon2_id;
     float dR_mu2;
+    float muon2_triggerSF;
+    float muon2_isoSF;
+    float muon2_idSF;
+    float muon2_trackingSF;
+    float muon2_pogSF;
     bool hastwomuons;
 
     float dR_b1jet;
@@ -508,20 +525,22 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   //trajToken_            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
   primaryVerticesToken_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"));
 
+  sampleType_           = iConfig.getUntrackedParameter<int>("SampleType",0);
   debug_                = iConfig.getUntrackedParameter<bool>("debug",false);
   verbose_              = iConfig.getUntrackedParameter<int>("verbose",0);
   mu_eta_               = iConfig.getUntrackedParameter<double>("mu_eta",2.4);
-  mu_PFIso_               = iConfig.getUntrackedParameter<double>("mu_PFIso", 0.25);
-  mu_id_      = iConfig.getUntrackedParameter<std::string>("mu_id","2016Medium");
+  mu_PFIso_             = iConfig.getUntrackedParameter<double>("mu_PFIso", 0.25);
+  mu_id_                = iConfig.getUntrackedParameter<std::string>("mu_id","2016Medium");
   el_eta_               = iConfig.getUntrackedParameter<double>("el_eta",2.5);
-  leadingpt_mumu_       = iConfig.getUntrackedParameter<double>("leadingpt_mumu",10);
+  el_Iso_               = iConfig.getUntrackedParameter<double>("el_Iso",0.04);
+  leadingpt_mumu_       = iConfig.getUntrackedParameter<double>("leadingpt_mumu",20);
   trailingpt_mumu_      = iConfig.getUntrackedParameter<double>("trailingpt_mumu",10);
-  leadingpt_muel_       = iConfig.getUntrackedParameter<double>("leadingpt_muel",10);
-  trailingpt_muel_      = iConfig.getUntrackedParameter<double>("trailingpt_muel",10);
-  leadingpt_elmu_       = iConfig.getUntrackedParameter<double>("leadingpt_elmu",10);
+  leadingpt_muel_       = iConfig.getUntrackedParameter<double>("leadingpt_muel",25);
+  trailingpt_muel_      = iConfig.getUntrackedParameter<double>("trailingpt_muel",15);
+  leadingpt_elmu_       = iConfig.getUntrackedParameter<double>("leadingpt_elmu",25);
   trailingpt_elmu_      = iConfig.getUntrackedParameter<double>("trailingpt_elmu",10);
-  leadingpt_elel_       = iConfig.getUntrackedParameter<double>("leadingpt_elel",10);
-  trailingpt_elel_      = iConfig.getUntrackedParameter<double>("trailingpt_elel",10);
+  leadingpt_elel_       = iConfig.getUntrackedParameter<double>("leadingpt_elel",25);
+  trailingpt_elel_      = iConfig.getUntrackedParameter<double>("trailingpt_elel",15);
   jet_eta_              = iConfig.getUntrackedParameter<double>("jet_eta",2.5);
   jet_leadingpt_        = iConfig.getUntrackedParameter<double>("jet_leadingpt",20);
   jet_trailingpt_       = iConfig.getUntrackedParameter<double>("jet_trailingpt",20);
@@ -530,11 +549,16 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   bjetDiscrCut_medium_  = iConfig.getUntrackedParameter<double>("bjetDiscrCut_medium",0.7);
   bjetDiscrCut_tight_   = iConfig.getUntrackedParameter<double>("bjetDiscrCut_tight",0.9);
   jetleptonDeltaR_      = iConfig.getUntrackedParameter<double>("jetleptonDeltaR",0.3);
-  muIso_                = iConfig.getUntrackedParameter<double>("muIso",0.15);
-  elIso_                = iConfig.getUntrackedParameter<double>("elIso",0.04);
 
-  sampleType_           = iConfig.getUntrackedParameter<int>("SampleType",0);
-  onlyGenLevel_          = iConfig.getParameter<bool>("onlyGenLevel");
+  onlyGenLevel_         = iConfig.getParameter<bool>("onlyGenLevel");
+  triggerSFFile_        = iConfig.getParameter<std::string>("triggerSFFile");
+  isoSFFile_             = iConfig.getParameter<std::string>("isoSFFile");
+  idSFFile_             = iConfig.getParameter<std::string>("idSFFile");
+  trackingSFFile_       = iConfig.getParameter<std::string>("trackingSFFile");
+  triggerSFhist_        = iConfig.getParameter<std::string>("triggerSFhist");
+  isoSFhist_             = iConfig.getParameter<std::string>("isoSFhist");
+  idSFhist_             = iConfig.getParameter<std::string>("idSFhist");
+  trackingSFhist_       = iConfig.getParameter<std::string>("trackingSFhist");
   runMMC_               = iConfig.getParameter<bool>("runMMC");
   /*
      iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
@@ -727,6 +751,11 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   muon1_isoVar = 10.0;
   muon1_dxy = -999;
   muon1_dz = -999;
+  muon1_triggerSF = 1.0;
+  muon1_isoSF = 1.0;
+  muon1_idSF = 1.0;
+  muon1_trackingSF = 1.0;
+  muon1_pogSF = 1.0;
   muon2_px = 0;
   muon2_py = 0;
   muon2_pz = 0;
@@ -737,6 +766,11 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   muon2_isoVar = 10.0;
   muon2_dxy = -999;
   muon2_dz = -999;
+  muon2_triggerSF = 1.0;
+  muon2_isoSF = 1.0;
+  muon2_idSF = 1.0;
+  muon2_trackingSF = 1.0;
+  muon2_pogSF = 1.0;
   dR_mu1 = 2.0;
   dR_mu2 = 2.0;
   hastwomuons = false;
@@ -975,12 +1009,10 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     else if (mu_id_ == "Medium") muonid = POGRecipesRun2::isMediumMuon(mu);
     else std::cout <<"mu ID is not correct: "<< mu_id_ << std::endl;
     float isoVar = POGRecipesRun2::MuonIsoPFbased(mu);
-    if (muonid and isoVar <= mu_PFIso_){
-    /*const MuonPFIsolation& muonIso = mu.pfIsolationR03();
-    float isoVar = (muonIso.sumChargedHadronPt + muonIso.sumNeutralHadronEt + muonIso.sumPhotonEt)/mu.pt();
-    if (fabs(mu.eta())<mu_eta_ and mu.pt()>10 and fabs(mu.muonBestTrack()->dz(PV.position()))<0.1 and 
-	  ((mu.pt()>20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.02) or 
-	   (mu.pt()<20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.01)) and isoVar<0.15){*/
+    if (fabs(mu.eta())<mu_eta_ and mu.pt()>10 and muonid and isoVar <= mu_PFIso_){ 
+	//and fabs(mu.muonBestTrack()->dz(PV.position()))<0.1 and 
+	//((mu.pt()>20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.02) or 
+	//(mu.pt()<20 and fabs(mu.muonBestTrack()->dxy(PV.position()))<0.01))){
 	if (mu.charge()>0) pleptons.push_back(&mu);
 	else if (mu.charge()<0) nleptons.push_back(&mu);
 	if (debug_)
@@ -998,39 +1030,55 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   }
   const reco::Candidate * selectedPlep = NULL;
   const reco::Candidate * selectedNlep = NULL;
+  const reco::Candidate * selectedleadinglep = NULL;
+  const reco::Candidate * selectedsubleadinglep = NULL;
   TLorentzVector dilep_p4;
   float sumPt=0.0;
   for (const reco::Candidate *plep : pleptons) {
     for (const reco::Candidate *nlep : nleptons){
 	//select lepton pairs with larger sumPt
 	dilep_p4.SetPxPyPzE(plep->px()+nlep->px(), plep->py()+nlep->py(), plep->pz()+nlep->pz(), plep->energy()+nlep->energy());
-	if(((plep->pt()>10 and nlep->pt()>20) or (nlep->pt()>10 and plep->pt()>20))and dilep_p4.M()>12 and (plep->pt()+nlep->pt())>sumPt){
+	if(((plep->pt()>leadingpt_mumu_ and nlep->pt()>trailingpt_mumu_) or (nlep->pt()>leadingpt_mumu_ and plep->pt()>trailingpt_mumu_))and dilep_p4.M()>12 and (plep->pt()+nlep->pt())>sumPt){
 	  selectedPlep = plep;
 	  selectedNlep = nlep;
 	  sumPt = plep->pt()+nlep->pt();
+	  if (plep->pt() > nlep->pt()){
+	      selectedleadinglep = plep;
+	      selectedsubleadinglep = nlep;
+	  }else {
+	      selectedleadinglep = nlep;
+	      selectedsubleadinglep = plep;
+	  }
 	}
     }
   }
   //bool hastwomuons = false;
   if (sumPt>=30){
-    //muon1, mu1: positive charge
-    muon1_px = selectedPlep->px(); muon1_py = selectedPlep->py(); muon1_pz = selectedPlep->pz(); muon1_energy = selectedPlep->energy();
-    muon1_pt = selectedPlep->pt(); muon1_eta = selectedPlep->eta(); muon1_phi = selectedPlep->phi();
-    muon1_dxy = dxy(selectedPlep, &PV); muon1_dz = dz(selectedPlep, &PV);
-    muon2_px = selectedNlep->px(); muon2_py = selectedNlep->py(); muon2_pz = selectedNlep->pz(); muon2_energy = selectedNlep->energy();
-    muon2_pt = selectedNlep->pt(); muon2_eta = selectedNlep->eta(); muon2_phi = selectedNlep->phi();
-    muon2_dxy = dxy(selectedNlep, &PV); muon2_dz = dz(selectedNlep, &PV);
-    //if (selectedPlep->genParticle()){
-    //    const reco::GenParticle * genp = selectedPlep->genParticle();
-    //    std::cout <<"selectedPlep, matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
-    //}
-    //if (selectedNlep->genParticle()){
-    //   const reco::GenParticle * genp = selectedPlep->genParticle();
-    //   std::cout <<"selectedPNlep, matched genParticle: id "<< genp->pdgId()<<" px "<< genp->px() <<" py "<< genp->py()<<" pz "<< genp->pz() << std::endl;
-    //}
+    muon1_px = selectedleadinglep->px(); muon1_py = selectedleadinglep->py(); muon1_pz = selectedleadinglep->pz(); 
+    muon1_energy = selectedleadinglep->energy();
+    muon1_pt = selectedleadinglep->pt(); muon1_eta = selectedleadinglep->eta(); muon1_phi = selectedleadinglep->phi();
+    muon1_dxy = dxy(selectedleadinglep, &PV); muon1_dz = dz(selectedleadinglep, &PV);
+    muon2_px = selectedsubleadinglep->px(); muon2_py = selectedsubleadinglep->py(); muon2_pz = selectedsubleadinglep->pz(); 
+    muon2_energy = selectedsubleadinglep->energy();
+    muon2_pt = selectedsubleadinglep->pt(); muon2_eta = selectedsubleadinglep->eta(); muon2_phi = selectedsubleadinglep->phi();
+    muon2_dxy = dxy(selectedsubleadinglep, &PV); muon2_dz = dz(selectedsubleadinglep, &PV);
+
+    float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
+    float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
+    float idSF1 =  POGRecipesRun2::getMuonIDSF(std::abs(muon1_eta), muon1_pt, idSFFile_, idSFhist_);
+    float trackingSF1 = POGRecipesRun2::getMuonTrackingSF(muon1_eta, trackingSFFile_, trackingSFhist_);
+    muon1_pogSF = triggerSF1*isoSF1*idSF1*trackingSF1;
+    muon1_triggerSF = triggerSF1; muon1_isoSF = isoSF1; muon1_idSF = idSF1; muon1_trackingSF = trackingSF1;
+    float triggerSF2 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon2_eta), muon2_pt, triggerSFFile_, triggerSFhist_);
+    float isoSF2 =  POGRecipesRun2::getMuonISOSF(std::abs(muon2_eta), muon2_pt, isoSFFile_, isoSFhist_);
+    float idSF2 =  POGRecipesRun2::getMuonIDSF(std::abs(muon2_eta), muon2_pt, idSFFile_, idSFhist_);
+    float trackingSF2 = POGRecipesRun2::getMuonTrackingSF(muon2_eta, trackingSFFile_, trackingSFhist_);
+    muon2_pogSF = triggerSF2*isoSF2*idSF2*trackingSF2;
+    muon2_triggerSF = triggerSF2; muon2_isoSF = isoSF2; muon2_idSF = idSF2; muon2_trackingSF = trackingSF2;
     hastwomuons = true;
-    printf("plepton: pt %5.1f, eta %+4.2f \n", selectedPlep->pt(), selectedPlep->eta());
-    printf("nlepton: pt %5.1f, eta %+4.2f \n", selectedNlep->pt(), selectedNlep->eta());
+
+    printf("leadinglepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon1_pt, muon1_eta, triggerSF1, isoSF1, idSF1, trackingSF1);
+    printf("subleadlepton: pt %5.1f, eta %+4.2f, triggerSF %+2.4f, isoSF %+2.4f, idSF %+2.4f, trackingSF %+2.4f\n", muon2_pt, muon2_eta, triggerSF2, isoSF2, idSF2, trackingSF2);
   }
 
   //****************************************************************************
@@ -1108,7 +1156,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus1[i]);
 	if (i==0)
 	  b1jet_leadTrackPt = cand.pt();
-	if (abs(cand.pdgId()) == 13  and not(leadinglepton1)){
+	if ((abs(cand.pdgId()) == 13 or abs(cand.pdgId()) == 11) and not(leadinglepton1)){
 	  b1jet_leptonPdgId = cand.pdgId(); b1jet_leptonPt = cand.pt(); 
 	  b1jet_leptonEta = cand.eta(); b1jet_leptonPhi = cand.phi();
 	  leadinglepton1_px = cand.px(); 
@@ -1120,8 +1168,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	if (leadinglepton1 and b1jet_leadTrackPt>0)
 	  break;
     }
-    float lepXj1 = leadinglepton1_px*b1jet_px+leadinglepton1_py*b1jet_py+leadinglepton1_pz*b1jet_pz; 
-    float pTrel2_1 = leadinglepton1_p*leadinglepton1_p - lepXj1*lepXj1/allbjets[jet1].p();
+    float lepXj1 = (leadinglepton1_px*b1jet_px+leadinglepton1_py*b1jet_py+leadinglepton1_pz*b1jet_pz)/allbjets[jet1].p(); 
+    float pTrel2_1 = leadinglepton1_p*leadinglepton1_p - lepXj1*lepXj1;
     if (leadinglepton1)
 	b1jet_leptonPtRel = std::sqrt(pTrel2_1);
     else 
@@ -1149,7 +1197,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	const pat::PackedCandidate &cand = dynamic_cast<const pat::PackedCandidate &>(*daus2[i]);
 	if (i==0)
 	  b2jet_leadTrackPt = cand.pt();
-	if (abs(cand.pdgId()) == 13  and not(leadinglepton2)){
+	if ((abs(cand.pdgId()) == 13 or abs(cand.pdgId()) == 11)  and not(leadinglepton2)){
 	  b2jet_leptonPdgId = cand.pdgId(); b2jet_leptonPt = cand.pt(); 
 	  b2jet_leptonEta = cand.eta(); b2jet_leptonPhi = cand.phi();
 	  leadinglepton2_px = cand.px(); 
@@ -1161,12 +1209,13 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	if (leadinglepton2 and b2jet_leadTrackPt>0)
 	  break;
     }
-    float lepXj2 = leadinglepton2_px*b2jet_px+leadinglepton2_py*b2jet_py+leadinglepton2_pz*b2jet_pz; 
-    float pTrel2_2 = leadinglepton2_p*leadinglepton2_p - lepXj2*lepXj2/allbjets[jet2].p();
+    float lepXj2 = (leadinglepton2_px*b2jet_px+leadinglepton2_py*b2jet_py+leadinglepton2_pz*b2jet_pz)/allbjets[jet2].p(); 
+    float pTrel2_2 = leadinglepton2_p*leadinglepton2_p - lepXj2*lepXj2;
     if (leadinglepton2)
 	b2jet_leptonPtRel = std::sqrt(pTrel2_2);
     else 
 	b2jet_leptonPtRel = 0;
+    std::cout <<"b1jet_leptonPtRel "<<b1jet_leptonPtRel <<" b2jet_leptonPtRel "<< b2jet_leptonPtRel << std::endl;
     b2jet_leptonDeltaR = deltaR(b2jet_leptonEta, b2jet_leptonPhi, b2jet_eta, b2jet_phi);
     b2jet_neHEF = allbjets[jet2].neutralHadronEnergyFraction();
     b2jet_neEmEF = allbjets[jet2].neutralEmEnergyFraction();
@@ -1384,6 +1433,11 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("muon1_pt",&muon1_pt, "muon1_pt/F");
   evtree->Branch("muon1_energy",&muon1_energy, "muon1_energy/F");
   evtree->Branch("muon1_isoVar",&muon1_isoVar, "muon1_isoVar/F");
+  evtree->Branch("muon1_triggerSF",&muon1_triggerSF, "muon1_triggerSF/F");
+  evtree->Branch("muon1_isoSF",&muon1_isoSF, "muon1_isoSF/F");
+  evtree->Branch("muon1_idSF",&muon1_idSF, "muon1_idSF/F");
+  evtree->Branch("muon1_trackingSF",&muon1_trackingSF, "muon1_trackingSF/F");
+  evtree->Branch("muon1_pogSF",&muon1_pogSF, "muon1_pogSF/F");
   evtree->Branch("muon1_dxy",&muon1_dxy, "muon1_dxy/F");
   evtree->Branch("muon1_dz",&muon1_dz, "muon1_dz/F");
   evtree->Branch("muon2_px",&muon2_px, "muon2_px/F");
@@ -1396,6 +1450,11 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("muon2_dxy",&muon1_dxy, "muon2_dxy/F");
   evtree->Branch("muon2_dz",&muon1_dz, "muon2_dz/F");
   evtree->Branch("muon2_isoVar",&muon2_isoVar, "muon2_isoVar/F");
+  evtree->Branch("muon2_triggerSF",&muon2_triggerSF, "muon2_triggerSF/F");
+  evtree->Branch("muon2_isoSF",&muon2_isoSF, "muon2_isoSF/F");
+  evtree->Branch("muon2_idSF",&muon2_idSF, "muon2_idSF/F");
+  evtree->Branch("muon2_trackingSF",&muon2_trackingSF, "muon2_trackingSF/F");
+  evtree->Branch("muon2_pogSF",&muon2_pogSF, "muon2_pogSF/F");
   evtree->Branch("dR_mu1",&dR_mu1, "dR_mu1/F");
   evtree->Branch("dR_mu2",&dR_mu2, "dR_mu2/F");
   evtree->Branch("hastwomuons",&hastwomuons, "hastwomuons/B");
@@ -1417,6 +1476,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b1jet_btag",&b1jet_btag, "b1jet_btag/i");//unsigned int
   evtree->Branch("b1jet_bDiscVar",&b1jet_bDiscVar, "b1jet_bDiscVar/F");
   evtree->Branch("b1jet_mt",&b1jet_mt, "b1jet_mt/F");
+  evtree->Branch("b1jet_leadTrackPt",&b1jet_leadTrackPt, "b1jet_leadTrackPt/F");
   evtree->Branch("b1jet_leptonPdgId",&b1jet_leptonPdgId, "b1jet_leptonPdgId/F");
   evtree->Branch("b1jet_leptonPhi",&b1jet_leptonPhi, "b1jet_leptonPhi/F");
   evtree->Branch("b1jet_leptonEta",&b1jet_leptonEta, "b1jet_leptonEta/F");
@@ -1447,6 +1507,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b2jet_btag",&b2jet_btag, "b2jet_btag/i");
   evtree->Branch("b2jet_bDiscVar",&b2jet_bDiscVar, "b2jet_bDiscVar/F");
   evtree->Branch("b2jet_mt",&b2jet_mt, "b2jet_mt/F");
+  evtree->Branch("b2jet_leadTrackPt",&b2jet_leadTrackPt, "b2jet_leadTrackPt/F");
   evtree->Branch("b2jet_leptonPdgId",&b2jet_leptonPdgId, "b2jet_leptonPdgId/F");
   evtree->Branch("b2jet_leptonPhi",&b2jet_leptonPhi, "b2jet_leptonPhi/F");
   evtree->Branch("b2jet_leptonEta",&b2jet_leptonEta, "b2jet_leptonEta/F");
