@@ -103,56 +103,70 @@ f = ROOT.TFile('/fdata/hepx/store/user/lpernie/Hhh_For_Plotting/' + whichSample 
 
 # PRESELECTION
 # Weights
-h_pre_Nev_preHLT       = ROOT.TH1F("h_pre_Nev_preHLT","",1,-0.5,0.5);          h_pre_Nev_preHLT.GetXaxis().SetTitle("#Events (pre HLT)"); h_pre_Nev_preHLT.SetBinContent(1,nTOT_prehlt)
-h_pre_Nev_posHLT       = ROOT.TH1F("h_pre_Nev_posHLT","",1,-0.5,0.5);          h_pre_Nev_posHLT.GetXaxis().SetTitle("#Events (post HLT)"); h_pre_Nev_posHLT.SetBinContent(1,nTOT_posthlt)
-h_pre_XsecBr           = ROOT.TH1F("h_pre_XsecBr","",1,-0.5,0.5);              h_pre_XsecBr.GetXaxis().SetTitle("XsecBr");
-h_pre_muon1_triggerSF  = ROOT.TH1F("h_pre_muon1_triggerSF","",100,0.85,1.15);  h_pre_muon1_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
-h_pre_muon1_isoSF      = ROOT.TH1F("h_pre_muon1_isoSF","",100,0.85,1.15);      h_pre_muon1_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
-h_pre_muon1_idSF       = ROOT.TH1F("h_pre_muon1_idSF","",100,0.85,1.15);       h_pre_muon1_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
-h_pre_muon1_trackingSF = ROOT.TH1F("h_pre_muon1_trackingSF","",100,0.85,1.15); h_pre_muon1_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
-h_pre_muon2_triggerSF  = ROOT.TH1F("h_pre_muon2_triggerSF","",100,0.85,1.15);  h_pre_muon2_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
-h_pre_muon2_isoSF      = ROOT.TH1F("h_pre_muon2_isoSF","",100,0.85,1.15);      h_pre_muon2_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
-h_pre_muon2_idSF       = ROOT.TH1F("h_pre_muon2_idSF","",100,0.85,1.15);       h_pre_muon2_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
-h_pre_muon2_trackingSF = ROOT.TH1F("h_pre_muon2_trackingSF","",100,0.85,1.15); h_pre_muon2_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+h_pre_Nev_preHLT         = ROOT.TH1F("h_pre_Nev_preHLT","",1,-0.5,0.5);          h_pre_Nev_preHLT.GetXaxis().SetTitle("#Events (pre HLT)"); h_pre_Nev_preHLT.SetBinContent(1,nTOT_prehlt)
+h_pre_Nev_posHLT         = ROOT.TH1F("h_pre_Nev_posHLT","",1,-0.5,0.5);          h_pre_Nev_posHLT.GetXaxis().SetTitle("#Events (post HLT)"); h_pre_Nev_posHLT.SetBinContent(1,nTOT_posthlt)
+h_pre_XsecBr             = ROOT.TH1F("h_pre_XsecBr","",1,-0.5,0.5);              h_pre_XsecBr.GetXaxis().SetTitle("XsecBr");
+h_pre_muon1_triggerSF    = ROOT.TH1F("h_pre_muon1_triggerSF","",100,0.85,1.15);  h_pre_muon1_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
+h_pre_muon1_isoSF        = ROOT.TH1F("h_pre_muon1_isoSF","",100,0.85,1.15);      h_pre_muon1_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
+h_pre_muon1_idSF         = ROOT.TH1F("h_pre_muon1_idSF","",100,0.85,1.15);       h_pre_muon1_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
+h_pre_muon1_trackingSF   = ROOT.TH1F("h_pre_muon1_trackingSF","",100,0.85,1.15); h_pre_muon1_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+h_pre_muon2_triggerSF    = ROOT.TH1F("h_pre_muon2_triggerSF","",100,0.85,1.15);  h_pre_muon2_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
+h_pre_muon2_isoSF        = ROOT.TH1F("h_pre_muon2_isoSF","",100,0.85,1.15);      h_pre_muon2_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
+h_pre_muon2_idSF         = ROOT.TH1F("h_pre_muon2_idSF","",100,0.85,1.15);       h_pre_muon2_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
+h_pre_muon2_trackingSF   = ROOT.TH1F("h_pre_muon2_trackingSF","",100,0.85,1.15); h_pre_muon2_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+# Regression variables
+h_pre_numOfVertices      = ROOT.TH1F("h_pre_numOfVertices","",50,0.,50.);      h_pre_numOfVertices.GetXaxis().SetTitle("");
+h_pre_b1jet_mt           = ROOT.TH1F("h_pre_b1jet_mt","",50,0.,100.);          h_pre_b1jet_mt.GetXaxis().SetTitle("");
+h_pre_b1jet_leadTrackPt  = ROOT.TH1F("h_pre_b1jet_leadTrackPt","",50,0.,100.); h_pre_b1jet_leadTrackPt.GetXaxis().SetTitle("");
+h_pre_b1jet_leptonPtRel  = ROOT.TH1F("h_pre_b1jet_leptonPtRel","",50,0.,10.);  h_pre_b1jet_leptonPtRel.GetXaxis().SetTitle("");
+h_pre_b1jet_leptonPt     = ROOT.TH1F("h_pre_b1jet_leptonPt","",50,0.,100.);    h_pre_b1jet_leptonPt.GetXaxis().SetTitle("");
+h_pre_b1jet_leptonDeltaR = ROOT.TH1F("h_pre_b1jet_leptonDeltaR","",50,0.,5.);  h_pre_b1jet_leptonDeltaR.GetXaxis().SetTitle("");
+h_pre_b1jet_neHEF        = ROOT.TH1F("h_pre_b1jet_neHEF","",50,0.,2.);         h_pre_b1jet_neHEF.GetXaxis().SetTitle("");
+h_pre_b1jet_neEmEF       = ROOT.TH1F("h_pre_b1jet_neEmEF","",50,0.,2.);        h_pre_b1jet_neEmEF.GetXaxis().SetTitle("");
+h_pre_b1jet_vtxNtracks   = ROOT.TH1F("h_pre_b1jet_vtxNtracks","",50,0.,50.);   h_pre_b1jet_vtxNtracks.GetXaxis().SetTitle("");
+h_pre_b1jet_vtxPt        = ROOT.TH1F("h_pre_b1jet_vtxPt","",50,0.,100.);       h_pre_b1jet_vtxPt.GetXaxis().SetTitle("");
+h_pre_b1jet_vtxMass      = ROOT.TH1F("h_pre_b1jet_vtxMass","",50,0.,50.);      h_pre_b1jet_vtxMass.GetXaxis().SetTitle("");
+h_pre_b1jet_vtx3DSig     = ROOT.TH1F("h_pre_b1jet_vtx3DSig","",50,0.,5.);      h_pre_b1jet_vtx3DSig.GetXaxis().SetTitle("");
+h_pre_b1jet_vtx3DVal     = ROOT.TH1F("h_pre_b1jet_vtx3DVal","",50,0.,5.);      h_pre_b1jet_vtx3DVal.GetXaxis().SetTitle("");
 # Muons Reco
-h_pre_MU1_pt      = ROOT.TH1F("h_pre_MU1_pt","",50,10.,350.);    h_pre_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    h_pre_MU1_pt.GetYaxis().SetTitle("Entries");
-h_pre_MU2_pt      = ROOT.TH1F("h_pre_MU2_pt","",50,10.,350.);    h_pre_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); h_pre_MU2_pt.GetYaxis().SetTitle("Entries");
-h_pre_MU1_eta     = ROOT.TH1F("h_pre_MU1_eta","",50,-3.,3.);     h_pre_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          h_pre_MU1_eta.GetYaxis().SetTitle("Entries");
-h_pre_MU2_eta     = ROOT.TH1F("h_pre_MU2_eta","",50,-3.,3.);     h_pre_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       h_pre_MU2_eta.GetYaxis().SetTitle("Entries");
-h_pre_mass_l1l2   = ROOT.TH1F("h_pre_mass_l1l2","",40,20.,150.); h_pre_mass_l1l2.GetXaxis().SetTitle("m(l,l)");                h_pre_mass_l1l2.GetYaxis().SetTitle("Entries");
-h_pre_dR_l1l2     = ROOT.TH1F("h_pre_dR_l1l2","",50,0.,5.);      h_pre_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           h_pre_dR_l1l2.GetYaxis().SetTitle("Entries");
+h_pre_MU1_pt             = ROOT.TH1F("h_pre_MU1_pt","",50,10.,350.);    h_pre_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
+h_pre_MU2_pt             = ROOT.TH1F("h_pre_MU2_pt","",50,10.,350.);    h_pre_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
+h_pre_MU1_eta            = ROOT.TH1F("h_pre_MU1_eta","",50,-3.,3.);     h_pre_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          
+h_pre_MU2_eta            = ROOT.TH1F("h_pre_MU2_eta","",50,-3.,3.);     h_pre_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       
+h_pre_mass_l1l2          = ROOT.TH1F("h_pre_mass_l1l2","",40,20.,150.); h_pre_mass_l1l2.GetXaxis().SetTitle("m(l,l)");               
+h_pre_dR_l1l2            = ROOT.TH1F("h_pre_dR_l1l2","",50,0.,5.);      h_pre_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           
 # B-jets Reco
-h_pre_J1_pt       = ROOT.TH1F("h_pre_J1_pt","",50,20.,350.);     h_pre_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     h_pre_J1_pt.GetYaxis().SetTitle("Entries");
-h_pre_J2_pt       = ROOT.TH1F("h_pre_J2_pt","",50,20.,350.);     h_pre_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  h_pre_J2_pt.GetYaxis().SetTitle("Entries");
-h_pre_J1_eta      = ROOT.TH1F("h_pre_J1_eta","",50,-3.,3.);      h_pre_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           h_pre_J1_eta.GetYaxis().SetTitle("Entries");
-h_pre_J2_eta      = ROOT.TH1F("h_pre_J2_eta","",50,-3.,3.);      h_pre_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        h_pre_J2_eta.GetYaxis().SetTitle("Entries");
-h_pre_mass_b1b2   = ROOT.TH1F("h_pre_mass_b1b2","",40,40.,400.); h_pre_mass_b1b2.GetXaxis().SetTitle("m(j,j)");                h_pre_mass_b1b2.GetYaxis().SetTitle("Entries");
-h_pre_dR_b1b2     = ROOT.TH1F("h_pre_dR_b1b2","",50,0.,6.);      h_pre_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           h_pre_dR_b1b2.GetYaxis().SetTitle("Entries");
+h_pre_J1_pt              = ROOT.TH1F("h_pre_J1_pt","",50,20.,350.);     h_pre_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     
+h_pre_J2_pt              = ROOT.TH1F("h_pre_J2_pt","",50,20.,350.);     h_pre_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  
+h_pre_J1_eta             = ROOT.TH1F("h_pre_J1_eta","",50,-3.,3.);      h_pre_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           
+h_pre_J2_eta             = ROOT.TH1F("h_pre_J2_eta","",50,-3.,3.);      h_pre_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        
+h_pre_mass_b1b2          = ROOT.TH1F("h_pre_mass_b1b2","",40,40.,400.); h_pre_mass_b1b2.GetXaxis().SetTitle("m(j,j)");      
+h_pre_dR_b1b2            = ROOT.TH1F("h_pre_dR_b1b2","",50,0.,6.);      h_pre_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           
 # Mix Reco
-h_pre_met_pt      = ROOT.TH1F("h_pre_met_pt","",50,10.,400.);    h_pre_met_pt.GetXaxis().SetTitle("MET [GeV]");                h_pre_met_pt.GetYaxis().SetTitle("Entries");
-h_pre_mass_trans  = ROOT.TH1F("h_pre_mass_trans","",50,0.,250.); h_pre_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");      h_pre_mass_trans.GetYaxis().SetTitle("Entries");
-h_pre_dR_l1l2b1b2 = ROOT.TH1F("h_pre_dR_l1l2b1b2","",50,0.,6.);  h_pre_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");      h_pre_dR_l1l2b1b2.GetYaxis().SetTitle("Entries");
-h_pre_dphi_llmet  = ROOT.TH1F("h_pre_dphi_llmet","",50,-4.,4.);  h_pre_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)"); h_pre_dphi_llmet.GetYaxis().SetTitle("Entries");
+h_pre_met_pt             = ROOT.TH1F("h_pre_met_pt","",50,10.,400.);    h_pre_met_pt.GetXaxis().SetTitle("MET [GeV]");                
+h_pre_mass_trans         = ROOT.TH1F("h_pre_mass_trans","",50,0.,250.); h_pre_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");     
+h_pre_dR_l1l2b1b2        = ROOT.TH1F("h_pre_dR_l1l2b1b2","",50,0.,6.);  h_pre_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");     
+h_pre_dphi_llmet         = ROOT.TH1F("h_pre_dphi_llmet","",50,-4.,4.);  h_pre_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
 # CLEANING CUT
 # Muons Reco
-h_cc_MU1_pt      = ROOT.TH1F("h_cc_MU1_pt","",50,10.,350.);    h_cc_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    h_cc_MU1_pt.GetYaxis().SetTitle("Entries");
-h_cc_MU2_pt      = ROOT.TH1F("h_cc_MU2_pt","",50,10.,350.);    h_cc_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); h_cc_MU2_pt.GetYaxis().SetTitle("Entries");
-h_cc_MU1_eta     = ROOT.TH1F("h_cc_MU1_eta","",50,-3.,3.);     h_cc_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          h_cc_MU1_eta.GetYaxis().SetTitle("Entries");
-h_cc_MU2_eta     = ROOT.TH1F("h_cc_MU2_eta","",50,-3.,3.);     h_cc_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       h_cc_MU2_eta.GetYaxis().SetTitle("Entries");
-h_cc_mass_l1l2   = ROOT.TH1F("h_cc_mass_l1l2","",40,20.,150.); h_cc_mass_l1l2.GetXaxis().SetTitle("m(l,l)");                h_cc_mass_l1l2.GetYaxis().SetTitle("Entries");
-h_cc_dR_l1l2     = ROOT.TH1F("h_cc_dR_l1l2","",50,0.,5.);      h_cc_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           h_cc_dR_l1l2.GetYaxis().SetTitle("Entries");
+h_cc_MU1_pt              = ROOT.TH1F("h_cc_MU1_pt","",50,10.,350.);    h_cc_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
+h_cc_MU2_pt              = ROOT.TH1F("h_cc_MU2_pt","",50,10.,350.);    h_cc_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
+h_cc_MU1_eta             = ROOT.TH1F("h_cc_MU1_eta","",50,-3.,3.);     h_cc_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          
+h_cc_MU2_eta             = ROOT.TH1F("h_cc_MU2_eta","",50,-3.,3.);     h_cc_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       
+h_cc_mass_l1l2           = ROOT.TH1F("h_cc_mass_l1l2","",40,20.,150.); h_cc_mass_l1l2.GetXaxis().SetTitle("m(l,l)");             
+h_cc_dR_l1l2             = ROOT.TH1F("h_cc_dR_l1l2","",50,0.,5.);      h_cc_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           
 # B-jets Reco
-h_cc_J1_pt       = ROOT.TH1F("h_cc_J1_pt","",50,20.,350.);     h_cc_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     h_cc_J1_pt.GetYaxis().SetTitle("Entries");
-h_cc_J2_pt       = ROOT.TH1F("h_cc_J2_pt","",50,20.,350.);     h_cc_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  h_cc_J2_pt.GetYaxis().SetTitle("Entries");
-h_cc_J1_eta      = ROOT.TH1F("h_cc_J1_eta","",50,-3.,3.);      h_cc_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           h_cc_J1_eta.GetYaxis().SetTitle("Entries");
-h_cc_J2_eta      = ROOT.TH1F("h_cc_J2_eta","",50,-3.,3.);      h_cc_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        h_cc_J2_eta.GetYaxis().SetTitle("Entries");
-h_cc_mass_b1b2   = ROOT.TH1F("h_cc_mass_b1b2","",40,40.,400.); h_cc_mass_b1b2.GetXaxis().SetTitle("m(j,j)");                h_cc_mass_b1b2.GetYaxis().SetTitle("Entries");
-h_cc_dR_b1b2     = ROOT.TH1F("h_cc_dR_b1b2","",50,0.,6.);      h_cc_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           h_cc_dR_b1b2.GetYaxis().SetTitle("Entries");
+h_cc_J1_pt               = ROOT.TH1F("h_cc_J1_pt","",50,20.,350.);     h_cc_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     
+h_cc_J2_pt               = ROOT.TH1F("h_cc_J2_pt","",50,20.,350.);     h_cc_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  
+h_cc_J1_eta              = ROOT.TH1F("h_cc_J1_eta","",50,-3.,3.);      h_cc_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           
+h_cc_J2_eta              = ROOT.TH1F("h_cc_J2_eta","",50,-3.,3.);      h_cc_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        
+h_cc_mass_b1b2           = ROOT.TH1F("h_cc_mass_b1b2","",40,40.,400.); h_cc_mass_b1b2.GetXaxis().SetTitle("m(j,j)");              
+h_cc_dR_b1b2             = ROOT.TH1F("h_cc_dR_b1b2","",50,0.,6.);      h_cc_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           
 # Mix Reco
-h_cc_met_pt      = ROOT.TH1F("h_cc_met_pt","",50,10.,400.);    h_cc_met_pt.GetXaxis().SetTitle("MET [GeV]");                h_cc_met_pt.GetYaxis().SetTitle("Entries");
-h_cc_mass_trans  = ROOT.TH1F("h_cc_mass_trans","",50,0.,250.); h_cc_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");      h_cc_mass_trans.GetYaxis().SetTitle("Entries");
-h_cc_dR_l1l2b1b2 = ROOT.TH1F("h_cc_dR_l1l2b1b2","",50,0.,6.);  h_cc_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");      h_cc_dR_l1l2b1b2.GetYaxis().SetTitle("Entries");
-h_cc_dphi_llmet  = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)"); h_cc_dphi_llmet.GetYaxis().SetTitle("Entries");
+h_cc_met_pt              = ROOT.TH1F("h_cc_met_pt","",50,10.,400.);    h_cc_met_pt.GetXaxis().SetTitle("MET [GeV]");                
+h_cc_mass_trans          = ROOT.TH1F("h_cc_mass_trans","",50,0.,250.); h_cc_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");   
+h_cc_dR_l1l2b1b2         = ROOT.TH1F("h_cc_dR_l1l2b1b2","",50,0.,6.);  h_cc_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");
+h_cc_dphi_llmet          = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
 
 nEv = 0
 for ev in TCha:
@@ -181,14 +195,28 @@ for ev in TCha:
   # Minimal Selection
   if( preselection ):
     # SF
-    h_pre_muon1_triggerSF.Fill(ev.muon1_triggerSF)
-    h_pre_muon1_isoSF.Fill(ev.muon1_isoSF)
-    h_pre_muon1_idSF.Fill(ev.muon1_idSF)
-    h_pre_muon1_trackingSF.Fill(ev.muon1_trackingSF)
-    h_pre_muon2_triggerSF.Fill(ev.muon2_triggerSF)
-    h_pre_muon2_isoSF.Fill(ev.muon2_isoSF)
-    h_pre_muon2_idSF.Fill(ev.muon2_idSF)
-    h_pre_muon2_trackingSF.Fill(ev.muon2_trackingSF)
+    h_pre_muon1_triggerSF.Fill( ev.muon1_triggerSF, weight )
+    h_pre_muon1_isoSF.Fill( ev.muon1_isoSF, weight )
+    h_pre_muon1_idSF.Fill( ev.muon1_idSF, weight )
+    h_pre_muon1_trackingSF.Fill( ev.muon1_trackingSF, weight )
+    h_pre_muon2_triggerSF.Fill( ev.muon2_triggerSF, weight )
+    h_pre_muon2_isoSF.Fill( ev.muon2_isoSF, weight )
+    h_pre_muon2_idSF.Fill( ev.muon2_idSF, weight )
+    h_pre_muon2_trackingSF.Fill( ev.muon2_trackingSF, weight )
+    # Regression Variables
+    h_pre_numOfVertices.Fill( ev.numOfVertices, weight )   
+    h_pre_b1jet_mt.Fill( ev.b1jet_mt, weight )
+    h_pre_b1jet_leadTrackPt.Fill( ev.b1jet_leadTrackPt, weight )
+    h_pre_b1jet_leptonPtRel.Fill( ev.b1jet_leptonPtRel, weight )
+    h_pre_b1jet_leptonPt.Fill( ev.b1jet_leptonPt, weight )
+    h_pre_b1jet_leptonDeltaR.Fill( ev.b1jet_leptonDeltaR, weight )
+    h_pre_b1jet_neHEF.Fill( ev.b1jet_neHEF, weight )
+    h_pre_b1jet_neEmEF.Fill( ev.b1jet_neEmEF, weight )
+    h_pre_b1jet_vtxNtracks.Fill( ev.b1jet_vtxNtracks, weight )
+    h_pre_b1jet_vtxPt.Fill( ev.b1jet_vtxPt, weight )
+    h_pre_b1jet_vtxMass.Fill( ev.b1jet_vtxMass, weight )
+    h_pre_b1jet_vtx3DSig.Fill( ev.b1jet_vtx3DSig, weight )
+    h_pre_b1jet_vtx3DVal.Fill( ev.b1jet_vtx3DVal, weight )
     # Kinematic Variables
     h_pre_MU1_pt.Fill( ev.muon1_pt, weight )
     h_pre_MU2_pt.Fill( ev.muon2_pt, weight )
@@ -239,6 +267,19 @@ h_pre_muon2_idSF.Write()
 h_pre_muon2_trackingSF.Write()
 h_pre_Nev_preHLT.Write()
 h_pre_Nev_posHLT.Write()
+h_pre_numOfVertices.Write()  
+h_pre_b1jet_mt.Write()
+h_pre_b1jet_leadTrackPt.Write()
+h_pre_b1jet_leptonPtRel.Write()
+h_pre_b1jet_leptonPt.Write()
+h_pre_b1jet_leptonDeltaR.Write()
+h_pre_b1jet_neHEF.Write()
+h_pre_b1jet_neEmEF.Write()
+h_pre_b1jet_vtxNtracks.Write()
+h_pre_b1jet_vtxPt.Write()
+h_pre_b1jet_vtxMass.Write()
+h_pre_b1jet_vtx3DSig.Write()
+h_pre_b1jet_vtx3DVal.Write()
 h_pre_MU1_pt.Write()
 h_pre_MU2_pt.Write()
 h_pre_MU1_eta.Write()
@@ -273,3 +314,4 @@ h_cc_mass_trans.Write()
 h_cc_dR_l1l2b1b2.Write()
 h_cc_dphi_llmet.Write()
 f.Close()
+print "Done."
