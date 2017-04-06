@@ -61,7 +61,7 @@ cmsDriver.py DiHiggs_Run2_cfi \
 -s DIGI,L1,DIGI2RAW,HLT:@frozen2016 \
 --datatier RAW-HLT \
 --conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
---customise=MuJetAnalysis/GenProduction/addPileup.addPileup \
+--customise=HhhAnalysis/MCProduction/addPileup.addPileup \
 --pileup 2016_25ns_Moriond17MC_PoissonOOTPU \
 --eventcontent RAWSIM \
 --era Run2_2016 \
@@ -70,6 +70,21 @@ cmsDriver.py DiHiggs_Run2_cfi \
 -n 10 \
 --no_exec
 
+#############################################################
+##  dataset=/MinBias*/*RunII*/GEN-SIM | sort dataset.creation_time
+############################################################
+cmsDriver.py DiHiggs_Run2_cfi_v2 \
+-s DIGI,L1,DIGI2RAW,HLT:@frozen2016 \
+--datatier RAW-HLT \
+--conditions 80X_mcRun2_asymptotic_2016_miniAODv2_v1 \
+--pileup 2016_25ns_Moriond17MC_PoissonOOTPU \
+--pileup_input dbs:/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIISummer15GS-MCRUN2_71_V1-v2/GEN-SIM \
+--eventcontent RAWSIM \
+--era Run2_2016 \
+--filein file:out_sim.root \
+--fileout file:out_raw.root \
+-n 10 \
+--no_exec
 
 ############### RAW2DIGI-L1Reco-RECO
 cmsDriver.py DiHiggs_Run2_cfi \
