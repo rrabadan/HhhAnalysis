@@ -21,10 +21,10 @@ ROOT.gStyle.SetPadRightMargin(0.14)
 ROOT.gStyle.SetPadTopMargin(0.06)
 ROOT.gStyle.SetPadBottomMargin(0.13)
 
-c1 = ROOT.TCanvas()
-c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
-
 legend = ROOT.TLegend(0.75,0.6,0.86,0.94)
 legend.SetFillColor(ROOT.kWhite)
 legend.SetTextSize(0.05)
 legend.SetTextFont(62)
+
+color  = {"TT":ROOT.kRed, "DY":ROOT.kBlue, "VV":ROOT.kGreen+2, "singTop":ROOT.kMagenta+2, "Wjet":ROOT.kOrange+2, "ttV":ROOT.kViolet-1, "Data": 0 }
+marker = {"TT":21, "DY":22, "VV":23, "singTop":34, "Wjet":33, "ttV":29, "Data": 0 }

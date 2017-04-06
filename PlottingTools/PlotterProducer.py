@@ -6,12 +6,11 @@ execfile("start.py")
 execfile("functions.py")
 #Creating folders and parameters
 tree_name="DiHiggsWWBBAna/evtree"
-os.system("rm -rf HADD/*txt")
-print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, singTop, Wjet, ttV, Data)"
+print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
 makeHadd = sys.argv[2]
 whichSample = sys.argv[3]
 if( makeHadd!="HaddYes" and makeHadd!="HaddNo" ): print "WARNING! 1st argument has to be HaddYes or HaddNo"; sys.exit()
-if( whichSample!="TT" and whichSample!="DY" and whichSample!="VV" and whichSample!="singTop" and whichSample!="Wjet" and whichSample!="ttV" and whichSample!="Data" ):  print "WARNING! 2nd argument have to be TT, DY, VV, singTop, Wjet, ttV, or Data"; sys.exit()
+if( whichSample!="TT" and whichSample!="DY" and whichSample!="VV" and whichSample!="sT" and whichSample!="Wjet" and whichSample!="ttV" and whichSample!="Data" ):  print "WARNING! 2nd argument have to be TT, DY, VV, singTop, Wjet, ttV, or Data"; sys.exit()
 
 Find_str = []; this_cat = ""; this_hadd = ""; this_NtotPath = ""
 # MC
@@ -174,6 +173,10 @@ for ev in TCha:
     h_J2_eta.Fill( ev.b2jet_eta, weight )
     h_mass_b1b2.Fill( ev.mass_b1b2, weight )
     h_dR_b1b2.Fill( ev.dR_b1b2, weight )
+    h_met_pt.Fill( ev.met_pt, weight )
+    h_mass_trans.Fill( ev.mass_trans, weight )
+    h_dR_l1l2b1b2.Fill( ev.dR_l1l2b1b2, weight )
+    h_dphi_llmet.Fill( ev.dphi_llmet, weight )
 #    if( NoZ_cut ):
   nEv = nEv +1
 

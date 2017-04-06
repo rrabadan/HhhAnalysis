@@ -14,6 +14,8 @@ jobid=$SLURM_JOBID
 source ~/.bashrc
 . /etc/profile.d/modules.sh
 cd /home/lpernie/Hhh_CMSSW/CMSSW_8_0_26/src/HhhAnalysis/PlottingTools/
+source ~/source_CMSSW.sh
+cmsenv
 echo "job$jobid starts, `date`"
 python PlotterProducer.py -b HaddYes VV
 echo "job$jobid is done, `date`"

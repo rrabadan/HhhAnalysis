@@ -1,3 +1,4 @@
+rm -rf HADD/*txt
 sbatch slr/Send_PlotterProducer_TT.slrm
 sbatch slr/Send_PlotterProducer_DY.slrm
 sbatch slr/Send_PlotterProducer_VV.slrm

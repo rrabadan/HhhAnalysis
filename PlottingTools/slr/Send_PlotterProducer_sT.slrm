@@ -15,7 +15,7 @@ source ~/.bashrc
 . /etc/profile.d/modules.sh
 cd /home/lpernie/Hhh_CMSSW/CMSSW_8_0_26/src/HhhAnalysis/PlottingTools/
 echo "job$jobid starts, `date`"
-python PlotterProducer.py -b HaddYes singTop
+python PlotterProducer.py -b HaddYes sT
 echo "job$jobid is done, `date`"
 #-p hepx 
 #-p mpi-core8
