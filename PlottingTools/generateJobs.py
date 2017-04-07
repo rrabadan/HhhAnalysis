@@ -38,7 +38,7 @@ exit 0""".format(jobtype=job))
     jobscript.close()
 
     submitscript.write("""
-sbatch {0}/submit_{1}.slrm""".format(jobdir, job))
+sbatch {0}/Send_PlotterProducer_{1}.slrm""".format(jobdir, job))
 submitscript.close()
 os.system("chmod +x submitallPlotProducer.sh")
 
