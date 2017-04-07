@@ -50,9 +50,9 @@ void TMVARegression_new( TString myMethodList = "" ){
   //#! Parameters
   myMethodList = "BDT";
   TString outfileName( "TMVAReg.root" );  
-  TString fname = "/fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg_FULL.root";
-  TString tree_name="DiHiggsWWBBAna/evtree";
-  TCut mycut = "met_pt>20 && b1jet_pt>30 && TMath::Abs(b1jet_eta)<2.5 && b2jet_pt>30 && TMath::Abs(b2jet_eta)<2.5 && muon1_pt>20 && TMath::Abs(muon1_eta)<2.4 && muon2_pt>20 && TMath::Abs(muon2_eta)<2.4"; 
+  TString fname = "/fdata/hepx/store/user/lpernie/Hhh_For_Regression/TT_1k.root";
+  TString tree_name="DiHiggsWWBBAna/evtree";  
+  TCut mycut = "b1jet_leptonPtRel>0 && b1jet_leptonPtRel<5 && met_pt>20 && muon1_pt>20 && TMath::Abs(muon1_eta)<2.4 && muon2_pt>10 && TMath::Abs(muon2_eta)<2.4 && mass_l1l2>12 && b1jet_pt>20 && TMath::Abs(b1jet_eta)<2.4 && b2jet_pt>20 && TMath::Abs(b2jet_eta)<2.4 && mass_trans>10 && mass_l1l2<76 && mass_b1b2>30 && dR_l1l2b1b2>0.2 && dR_l1l2b1b2<4 && dR_l1l2<3.8 && dR_b1b2<3.8";
   // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
   // if you use your private .rootrc, or run from a different directory, please copy the 
   // corresponding lines from .rootrc
@@ -139,7 +139,7 @@ void TMVARegression_new( TString myMethodList = "" ){
   factory->AddVariable( "b1jet_pt",           "b1jet_pt", "units", 'F' );
   factory->AddVariable( "b1jet_eta",          "b1jet_eta", "units", 'F' );
   factory->AddVariable( "b1jet_mt",           "b1jet_mt", "units", 'F' );
-  //factory->AddVariable( "b1jet_leadTrackPt",  "b1jet_leadTrackPt", "units", 'F' );
+  factory->AddVariable( "b1jet_leadTrackPt",  "b1jet_leadTrackPt", "units", 'F' );
   factory->AddVariable( "b1jet_leptonDeltaR", "b1jet_leptonDeltaR", "units", 'F' );
   //factory->AddVariable( "b1jet_leptonPtRel",  "b1jet_leptonPtRel", "units", 'F' );
   factory->AddVariable( "b1jet_leptonPt",     "b1jet_leptonPt", "units", 'F' );
