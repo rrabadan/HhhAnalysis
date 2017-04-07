@@ -15,10 +15,12 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
-	'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
+	#'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
 	#'/store/mc/RunIISpring16MiniAODv2/DYBBJetsToLL_M-10To70_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14-v3/100000/0072F5C1-5089-E611-8340-D8D385AF8AE4.root'
 	#'/store/data/Run2016H/DoubleMuon/MINIAOD/03Feb2017_ver2-v1/110000/08ADA6AA-D3EC-E611-AF17-B083FED42488.root'
 	#'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
+	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
     )
 )
 
@@ -47,12 +49,13 @@ process.hltfilter = hlt.triggerResultsFilter.clone(
 	l1tResults = '',#not use L1t results
 	throw = cms.bool(False) 
 """
+triggerPaths = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
+			     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+	)
 process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
-	triggerConditions = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
-					 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
-					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
-					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
-	),
+        triggerConditions = triggerPaths,
 	hltResults = cms.InputTag( "TriggerResults","","HLT"),
 	#l1tResults = cms.InputTag( "hltGtDigis" ),
 	l1tResults = cms.InputTag( "" ),
@@ -75,6 +78,13 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   genjets = cms.InputTag("slimmedGenJets"),
   #genjets = cms.InputTag("ak4GenJetsNoNu"),
   #genjets = cms.InputTag("ak4GenJets"),
+
+  #trigger matching
+  hltPaths = triggerPaths,
+  deltaPtRel_trigger = cms.untracked.double(.5),
+  deltaR_trigger  = cms.untracked.double(.1),
+
+  #reco 
   #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
   muons = cms.InputTag("slimmedMuons"),
   #2016data: Run BCDEF use 2016Medium, GH use Medium
@@ -95,13 +105,14 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   beamSpot = cms.InputTag("offlineBeamSpot"),
   triggerEvent = cms.InputTag("patTriggerEvent"),
   tracks = cms.InputTag("generalTracks"),
-  TriggerResults = cms.InputTag("TriggerResults","","RECO"),
+  TriggerResults = cms.InputTag("TriggerResults","","HLT"),
+  TriggerObjects = cms.InputTag("selectedPatTrigger"),
   TrackRefitter = cms.InputTag("TrackRefitter"),
   primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
   Traj = cms.InputTag("TrackRefitter"),
+
   debug = cms.untracked.bool(False),
   onlyGenLevel = cms.bool(False),
-
 
   #simulation = cms.bool(True),
   runMMC = cms.bool(False)

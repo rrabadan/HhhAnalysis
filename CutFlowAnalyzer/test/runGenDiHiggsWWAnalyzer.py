@@ -27,10 +27,13 @@ from HhhAnalysis.MCProduction.InputFileHelpers import *
 #inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/xSM_HeavyHiggs2DiHiggs2bbWW_B3_leptonW_CMSSW80X_13TeV_10k/170330_023219/0000/']
 #inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter/170331_052059/0000/']
 inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter_updatehwidth/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_10k_nobbwwfilter_updatehwidth/170331_053038/0000/']
+inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_2M/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B3_CMSSW80X_13TeV_2M/170405_030548/0000/']
+inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B6_CMSSW80X_13TeV_2M/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B6_CMSSW80X_13TeV_2M/170405_031441/0000/']
+inputdir = ['/fdata/hepx/store/user/tahuang/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B9_CMSSW80X_13TeV_2M/xSM_HeavyHiggs2DiHiggs2bbWW2bbll_B9_CMSSW80X_13TeV_2M/170405_031654/0000/']
 process = useInputDir(process, inputdir)
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(10000) 
+    input = cms.untracked.int32(-1) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 
@@ -62,6 +65,7 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	daqPartitions = cms.uint32( 1 ),
 	throw = cms.bool(True)    
 	)
+triggerPaths = cms.vstring('')
 muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test/MuonEffAndSF_2016Data/"
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     verbose = cms.untracked.int32(0),
@@ -93,6 +97,7 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
     TrackRefitter = cms.InputTag("TrackRefitter"),
     primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     Traj = cms.InputTag("TrackRefitter"),
+    hltPaths = triggerPaths,
     debug = cms.untracked.bool(False),
     #simulation = cms.bool(True),
     runMMC = cms.bool(False)
@@ -102,7 +107,7 @@ process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.TFileService = cms.Service("TFileService",
     #fileName = cms.string("out_ana.root")
-    fileName = cms.string("file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ana_genlevel_B3_10k_nobbwwfilter_updatehiggswidth.root")
+    fileName = cms.string("file:/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ana_genlevel_B9_2M_20160405_Test.root")
 )
 
 #process.phlt = cms.Path(process.hltfilter)

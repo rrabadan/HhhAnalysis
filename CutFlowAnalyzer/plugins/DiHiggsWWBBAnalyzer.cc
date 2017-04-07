@@ -556,6 +556,9 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   bjetDiscrCut_medium_  = iConfig.getUntrackedParameter<double>("bjetDiscrCut_medium",0.7);
   bjetDiscrCut_tight_   = iConfig.getUntrackedParameter<double>("bjetDiscrCut_tight",0.9);
   jetleptonDeltaR_      = iConfig.getUntrackedParameter<double>("jetleptonDeltaR",0.3);
+  hltPaths_             = iConfig.getParameter<std::vector<std::string>>("hltPaths");
+  deltaPtRel_trigger_   = iConfig.getUntrackedParameter<double>("deltaPtRel_trigger",0.5);
+  deltaR_trigger_       = iConfig.getUntrackedParameter<double>("deltaR_trigger",0.1);
 
   onlyGenLevel_         = iConfig.getParameter<bool>("onlyGenLevel");
   triggerSFFile_        = iConfig.getParameter<std::string>("triggerSFFile");
@@ -566,9 +569,6 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   isoSFhist_            = iConfig.getParameter<std::string>("isoSFhist");
   idSFhist_             = iConfig.getParameter<std::string>("idSFhist");
   trackingSFhist_       = iConfig.getParameter<std::string>("trackingSFhist");
-  hltPaths_             = iConfig.getParameter<std::vector<std::string>>("hltPaths");
-  deltaPtRel_trigger_   = iConfig.getParameter<double>("deltaPtRel_trigger");
-  deltaR_trigger_   = iConfig.getParameter<double>("deltaR_trigger");
 
   runMMC_               = iConfig.getParameter<bool>("runMMC");
   /*
