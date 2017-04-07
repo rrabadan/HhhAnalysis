@@ -25,6 +25,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Lepton.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
@@ -76,7 +77,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
     edm::EDGetTokenT<pat::TriggerEvent> triggerEventToken_;
     edm::EDGetTokenT<reco::TrackCollection> tracksToken_;
-    edm::EDGetTokenT<edm::TriggerResults> trigResToken_;
+    edm::EDGetTokenT<edm::TriggerResults> triggerBitsToken_;
+    edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjectsToken_;
     edm::EDGetTokenT<reco::TrackCollection> trackRefToken_;
     //edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
     edm::EDGetTokenT<reco::VertexCollection> primaryVerticesToken_;
@@ -123,7 +125,9 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     std::string isoSFhist_;
     std::string idSFhist_;
     std::string trackingSFhist_;
-
+    std::vector<std::string> hltPaths_;
+    float deltaPtRel_trigger_;
+    float deltaR_trigger_;
     // debuglevel constrol 
     int verbose_; 
     void print();
@@ -522,7 +526,8 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   beamSpotToken_        = consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"));
   triggerEventToken_    = consumes<pat::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerEvent"));
   tracksToken_          = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"));
-  trigResToken_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"));
+  triggerBitsToken_     = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"));
+  triggerObjectsToken_  = consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("TriggerObjects"));
   trackRefToken_        = consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("TrackRefitter"));
   //trajToken_            = consumes< std::vector<Trajectory> >(iConfig.getParameter<edm::InputTag>("Traj"));
   primaryVerticesToken_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"));
@@ -554,13 +559,17 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
 
   onlyGenLevel_         = iConfig.getParameter<bool>("onlyGenLevel");
   triggerSFFile_        = iConfig.getParameter<std::string>("triggerSFFile");
-  isoSFFile_             = iConfig.getParameter<std::string>("isoSFFile");
+  isoSFFile_            = iConfig.getParameter<std::string>("isoSFFile");
   idSFFile_             = iConfig.getParameter<std::string>("idSFFile");
   trackingSFFile_       = iConfig.getParameter<std::string>("trackingSFFile");
   triggerSFhist_        = iConfig.getParameter<std::string>("triggerSFhist");
-  isoSFhist_             = iConfig.getParameter<std::string>("isoSFhist");
+  isoSFhist_            = iConfig.getParameter<std::string>("isoSFhist");
   idSFhist_             = iConfig.getParameter<std::string>("idSFhist");
   trackingSFhist_       = iConfig.getParameter<std::string>("trackingSFhist");
+  hltPaths_             = iConfig.getParameter<std::vector<std::string>>("hltPaths");
+  deltaPtRel_trigger_   = iConfig.getParameter<double>("deltaPtRel_trigger");
+  deltaR_trigger_   = iConfig.getParameter<double>("deltaR_trigger");
+
   runMMC_               = iConfig.getParameter<bool>("runMMC");
   /*
      iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
@@ -580,13 +589,15 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   b1_htobb_cand = NULL;
   b2_htobb_cand = NULL;
   h2tohh_cand = NULL;
-  std::vector<std::string> SFTypes;
-  std::vector<std::string> SFHists;
-  std::vector<std::string> SFFiles;
-  SFTypes.push_back("Trigger"); SFTypes.push_back("ISO"); SFTypes.push_back("ID"); SFTypes.push_back("Tracking");
-  SFFiles.push_back(triggerSFFile_); SFFiles.push_back(isoSFFile_); SFFiles.push_back(idSFFile_); SFFiles.push_back(trackingSFFile_);
-  SFHists.push_back(triggerSFhist_); SFHists.push_back(isoSFhist_); SFHists.push_back(idSFhist_); SFHists.push_back(trackingSFhist_);
-  muonPOGSFs = new POGRecipesRun2::MuonPOGSFManager(SFTypes, SFFiles, SFHists);
+  if (not onlyGenLevel_ and sampleType_ > Data){
+      std::vector<std::string> SFTypes;
+      std::vector<std::string> SFHists;
+      std::vector<std::string> SFFiles;
+      SFTypes.push_back("Trigger"); SFTypes.push_back("ISO"); SFTypes.push_back("ID"); SFTypes.push_back("Tracking");
+      SFFiles.push_back(triggerSFFile_); SFFiles.push_back(isoSFFile_); SFFiles.push_back(idSFFile_); SFFiles.push_back(trackingSFFile_);
+      SFHists.push_back(triggerSFhist_); SFHists.push_back(isoSFhist_); SFHists.push_back(idSFhist_); SFHists.push_back(trackingSFhist_);
+      muonPOGSFs = new POGRecipesRun2::MuonPOGSFManager(SFTypes, SFFiles, SFHists);
+  }
 }
 
 
@@ -990,7 +1001,38 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   std::vector<const reco::Candidate *> nleptons;
   //****************************************************************************
   //                Triggering matching 
+  //                1. find all trigger objects matched to hlt paths
+  //                2. match reco objects to trigger objects 
   //****************************************************************************
+  edm::Handle<edm::TriggerResults> triggerBits;
+  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
+  std::vector<pat::TriggerObjectStandAlone> matchedTriggerObjects;
+  //edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
+
+  iEvent.getByToken(triggerBitsToken_, triggerBits);
+  iEvent.getByToken(triggerObjectsToken_, triggerObjects);
+  //iEvent.getByToken(triggerPrescales_, triggerPrescales);
+
+  const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+  //std::cout << "\nTRIGGER NAMEs, size " << names.size() << " TRIGGER OBJECTS, size "<< (*triggerObjects).size() << std::endl;
+  for (pat::TriggerObjectStandAlone obj : *triggerObjects) { // note: not "const &" since we want to call unpackPathNames
+      obj.unpackPathNames(names);
+      //std::cout << "\tTrigger object:  id "<< obj.pdgId() << " pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
+      // Print trigger object collection and type
+      //std::cout << "\t   Collection: " << obj.collection() << std::endl;
+      for (auto path : hltPaths_)
+      	if (obj.hasPathName(path)) {
+	    matchedTriggerObjects.push_back(obj);
+	    break;
+	}
+  }
+  /*
+  std::cout <<"matched trigger objects, size  "<< matchedTriggerObjects.size() << std::endl; 
+  for (auto obj : matchedTriggerObjects){
+      std::cout << "\tTrigger object:  id "<< obj.pdgId() << " pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
+      // Print trigger object collection and type
+      std::cout << "\t   Collection: " << obj.collection() << std::endl;
+  }*/
 
   //****************************************************************************
   //                MET
@@ -1013,6 +1055,16 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   //****************************************************************************
   //std::cout <<"diMuon "<< std::endl;
   for (const pat::Muon &mu : *muons) {
+    bool triggermatching = false;
+    for (auto obj : matchedTriggerObjects){
+	float dr = deltaR(obj.eta(), obj.phi(), mu.eta(), mu.phi());
+	float dPtRel = std::fabs(obj.pt()-mu.pt())/mu.pt();
+	if (obj.id(trigger::TriggerMuon) and dr < deltaR_trigger_ and dPtRel < deltaPtRel_trigger_){
+		triggermatching = true;
+		break;
+	}
+    }
+    if (not triggermatching) continue;
     bool muonid = false;
     if (mu_id_ == "2016Medium") muonid = POGRecipesRun2::is2016MediumMuon(mu);
     else if (mu_id_ == "Medium") muonid = POGRecipesRun2::isMediumMuon(mu);
