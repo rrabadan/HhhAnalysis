@@ -3,7 +3,7 @@ import os
 import sys
 
 
-benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
+benchmarks =  ["ttV","Wjet","sT","VV","DY","TT","Data"]
 jobdir = "slr"
 os.system("mkdir -p %s" % jobdir)
 submitscript = open("submitallPlotProducer.sh","w")
@@ -32,7 +32,7 @@ source ~/.bashrc
 . /etc/profile.d/modules.sh
 cd $CMSSW_BASE/src/HhhAnalysis/PlottingTools/
 echo "job$jobid starts, `date`"
-python PlotterProducer.py -b HaddYes {jobtype}
+python PlotterProducer.py -b HaddNo {jobtype}
 echo "job$jobid is done, `date`"
 exit 0""".format(jobtype=job))
     jobscript.close()

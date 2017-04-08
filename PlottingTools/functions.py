@@ -199,6 +199,15 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
     if this_format == ".C": Folder = "Plots/C/"
     c1.SaveAs( Folder + logTXT + Norm + "_" + DataOrMC + "_" + pic_name + this_format )
 
+def normalize1D(hist):
+  nbins = hist.GetXaxis().GetNbins()
+  n = 1
+  while n <= nbins:
+    bincontent = hist.GetBinContent(n)
+    integral = hist.Integral(n, n)
+    print "bin ",n, "bincontent ", bincontent," integral ",integral
+    n += 1
+    
 def findNewestDir(directory):
   os.chdir(directory)
   dirs = {}

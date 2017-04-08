@@ -2,10 +2,14 @@ import os, sys, random
 import ROOT
 from ROOT import TFile,TChain,TH1F,TH2F,TLegend
 from math import *
+import numpy as np
 execfile("start.py")
 execfile("functions.py")
 #Creating folders and parameters
+
+doTest = False
 tree_name="DiHiggsWWBBAna/evtree"
+benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
 makeHadd = sys.argv[2]
 whichSample = sys.argv[3]
@@ -99,21 +103,31 @@ with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
     if not line.isspace():
       TCha.Add(str(line[:-1]))
 print whichSample, "TChain has", TCha.GetEntries(), "entries."
-f = ROOT.TFile('/fdata/hepx/store/user/lpernie/Hhh_For_Plotting/' + whichSample + '.root','recreate'); f.cd()
+f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Plotting/'%user + whichSample + '.root','recreate'); f.cd()
+
+ptbinSF= [20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 120.0, 200.0, 300.]
+etabinSF = [0, 0.9, 1.2, 2.1, 2.4]
+myptbinSF = np.asarray(ptbinSF)
+myetabinSF = np.asarray(etabinSF)
+print "ptbinSF len ",len(ptbinSF)," myptbinSF ", myptbinSF
 
 # PRESELECTION
 # Weights
 h_pre_Nev_preHLT         = ROOT.TH1F("h_pre_Nev_preHLT","",1,-0.5,0.5);          h_pre_Nev_preHLT.GetXaxis().SetTitle("#Events (pre HLT)"); h_pre_Nev_preHLT.SetBinContent(1,nTOT_prehlt)
 h_pre_Nev_posHLT         = ROOT.TH1F("h_pre_Nev_posHLT","",1,-0.5,0.5);          h_pre_Nev_posHLT.GetXaxis().SetTitle("#Events (post HLT)"); h_pre_Nev_posHLT.SetBinContent(1,nTOT_posthlt)
 h_pre_XsecBr             = ROOT.TH1F("h_pre_XsecBr","",1,-0.5,0.5);              h_pre_XsecBr.GetXaxis().SetTitle("XsecBr");
-h_pre_muon1_triggerSF    = ROOT.TH1F("h_pre_muon1_triggerSF","",100,0.85,1.15);  h_pre_muon1_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
-h_pre_muon1_isoSF        = ROOT.TH1F("h_pre_muon1_isoSF","",100,0.85,1.15);      h_pre_muon1_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
-h_pre_muon1_idSF         = ROOT.TH1F("h_pre_muon1_idSF","",100,0.85,1.15);       h_pre_muon1_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
-h_pre_muon1_trackingSF   = ROOT.TH1F("h_pre_muon1_trackingSF","",100,0.85,1.15); h_pre_muon1_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
-h_pre_muon2_triggerSF    = ROOT.TH1F("h_pre_muon2_triggerSF","",100,0.85,1.15);  h_pre_muon2_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
-h_pre_muon2_isoSF        = ROOT.TH1F("h_pre_muon2_isoSF","",100,0.85,1.15);      h_pre_muon2_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
-h_pre_muon2_idSF         = ROOT.TH1F("h_pre_muon2_idSF","",100,0.85,1.15);       h_pre_muon2_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
-h_pre_muon2_trackingSF   = ROOT.TH1F("h_pre_muon2_trackingSF","",100,0.85,1.15); h_pre_muon2_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+h_pre_muon1_triggerSF    = ROOT.TH2F("h_pre_muon1_triggerSF","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);  h_pre_muon1_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
+h_pre_muon1_isoSF        = ROOT.TH2F("h_pre_muon1_isoSF","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF); h_pre_muon1_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
+h_pre_muon1_idSF         = ROOT.TH2F("h_pre_muon1_idSF","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);  h_pre_muon1_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
+h_pre_muon1_trackingSF   = ROOT.TH1F("h_pre_muon1_trackingSF","",50,-2.4,2.4); h_pre_muon1_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+h_pre_muon1_SF_bg2       = ROOT.TH2F("h_pre_muon1_SF_bg2","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);  h_pre_muon1_SF_bg2.GetXaxis().SetTitle("#mu SF bg2");
+h_pre_muon1_SF_bg1       = ROOT.TH1F("h_pre_moun1_SF_bg1","",50,-2.4,2.4); h_pre_muon1_SF_bg1.GetXaxis().SetTitle("#mu SF bg1");
+h_pre_muon2_triggerSF    = ROOT.TH2F("h_pre_muon2_triggerSF","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);  h_pre_muon2_triggerSF.GetXaxis().SetTitle("#mu 1 Trigger SF");
+h_pre_muon2_isoSF        = ROOT.TH2F("h_pre_muon2_isoSF","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);      h_pre_muon2_isoSF.GetXaxis().SetTitle("#mu 1 Iso SF");
+h_pre_muon2_idSF         = ROOT.TH2F("h_pre_muon2_idSF","",len(etabinSF)-1,myetabinSF, len(ptbinSF)-1, myptbinSF);       h_pre_muon2_idSF.GetXaxis().SetTitle("#mu 1 ID SF");
+h_pre_muon2_trackingSF   = ROOT.TH1F("h_pre_muon2_trackingSF","",50,-2.4,2.4); h_pre_muon2_trackingSF.GetXaxis().SetTitle("#mu 1 tracking SF");
+h_pre_muon2_SF_bg2       = ROOT.TH2F("h_pre_muon2_SF_bg2","",len(etabinSF)-1,myetabinSF,len(ptbinSF)-1,myptbinSF);  h_pre_muon2_SF_bg2.GetXaxis().SetTitle("#mu SF bg2");
+h_pre_muon2_SF_bg1       = ROOT.TH1F("h_pre_moun2_SF_bg1","",50,-2.4,2.4); h_pre_muon1_SF_bg1.GetXaxis().SetTitle("#mu SF bg1");
 # Regression variables
 h_pre_numOfVertices      = ROOT.TH1F("h_pre_numOfVertices","",50,0.,50.);      h_pre_numOfVertices.GetXaxis().SetTitle("");
 h_pre_b1jet_mt           = ROOT.TH1F("h_pre_b1jet_mt","",50,0.,100.);          h_pre_b1jet_mt.GetXaxis().SetTitle("");
@@ -170,6 +184,13 @@ h_cc_dphi_llmet          = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi
 
 nEv = 0
 for ev in TCha:
+  if (doTest and nEv%1000 == 0 ):
+      print "ev ",nEv
+  elif (nEv%10000 == 0):
+      print "ev ",nEv
+  
+  if (doTest and nEv>=10000):
+      break
   # CUTS
   MET_cut             = (ev.met_pt>20)
   MuMu_cut            = (ev.muon1_pt>20 and fabs(ev.muon1_eta)<2.4 and ev.muon2_pt>10 and fabs(ev.muon2_eta)<2.4 and ev.mass_l1l2>12)
@@ -195,14 +216,18 @@ for ev in TCha:
   # Minimal Selection
   if( preselection ):
     # SF
-    h_pre_muon1_triggerSF.Fill( ev.muon1_triggerSF, weight )
-    h_pre_muon1_isoSF.Fill( ev.muon1_isoSF, weight )
-    h_pre_muon1_idSF.Fill( ev.muon1_idSF, weight )
-    h_pre_muon1_trackingSF.Fill( ev.muon1_trackingSF, weight )
-    h_pre_muon2_triggerSF.Fill( ev.muon2_triggerSF, weight )
-    h_pre_muon2_isoSF.Fill( ev.muon2_isoSF, weight )
-    h_pre_muon2_idSF.Fill( ev.muon2_idSF, weight )
-    h_pre_muon2_trackingSF.Fill( ev.muon2_trackingSF, weight )
+    h_pre_muon1_triggerSF.Fill(abs(ev.muon1_eta), ev.muon1_pt, ev.muon1_triggerSF)
+    h_pre_muon1_isoSF.Fill(abs(ev.muon1_eta), ev.muon1_pt, ev.muon1_isoSF)
+    h_pre_muon1_idSF.Fill(abs(ev.muon1_eta), ev.muon1_pt, ev.muon1_idSF)
+    h_pre_muon1_trackingSF.Fill(ev.muon1_eta, ev.muon1_trackingSF)
+    h_pre_muon1_SF_bg1.Fill(ev.muon1_eta)
+    h_pre_muon1_SF_bg2.Fill(abs(ev.muon1_eta), ev.muon1_pt)
+    h_pre_muon2_triggerSF.Fill(abs(ev.muon2_eta), ev.muon2_pt, ev.muon2_triggerSF)
+    h_pre_muon2_isoSF.Fill(abs(ev.muon2_eta), ev.muon2_pt, ev.muon2_isoSF)
+    h_pre_muon2_idSF.Fill(abs(ev.muon2_eta), ev.muon2_pt, ev.muon2_idSF)
+    h_pre_muon2_trackingSF.Fill(ev.muon2_eta, ev.muon2_trackingSF)
+    h_pre_muon2_SF_bg1.Fill(ev.muon2_eta)
+    h_pre_muon2_SF_bg2.Fill(abs(ev.muon2_eta), ev.muon2_pt)
     # Regression Variables
     h_pre_numOfVertices.Fill( ev.numOfVertices, weight )   
     h_pre_b1jet_mt.Fill( ev.b1jet_mt, weight )
@@ -254,6 +279,15 @@ for ev in TCha:
       h_cc_dphi_llmet.Fill( ev.dphi_llmet, weight )
   nEv = nEv +1
 
+h_pre_muon1_triggerSF.Divide(h_pre_muon1_SF_bg2)
+h_pre_muon1_isoSF.Divide(h_pre_muon1_SF_bg2)
+h_pre_muon1_idSF.Divide(h_pre_muon1_SF_bg2)
+h_pre_muon1_trackingSF.Divide(h_pre_muon1_SF_bg1)
+h_pre_muon2_triggerSF.Divide(h_pre_muon2_SF_bg2)
+h_pre_muon2_isoSF.Divide(h_pre_muon2_SF_bg2)
+h_pre_muon2_idSF.Divide(h_pre_muon2_SF_bg2)
+h_pre_muon2_trackingSF.Divide(h_pre_muon2_SF_bg1)
+#normalize1D(h_pre_muon1_trackingSF)
 # Writing histograms
 f.cd()
 h_pre_XsecBr.Write()
