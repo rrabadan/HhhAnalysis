@@ -15,12 +15,11 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
-	#'/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/02F64C80-990E-E611-A2FE-842B2B185476.root'
-	#'/store/mc/RunIISpring16MiniAODv2/DYBBJetsToLL_M-10To70_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14-v3/100000/0072F5C1-5089-E611-8340-D8D385AF8AE4.root'
-	#'/store/data/Run2016H/DoubleMuon/MINIAOD/03Feb2017_ver2-v1/110000/08ADA6AA-D3EC-E611-AF17-B083FED42488.root'
 	#'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
-	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
+	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/GravitonM400-02DF7FEF-74D9-E611-956A-02163E013746.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
     )
 )
 
@@ -70,8 +69,8 @@ muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   verbose = cms.untracked.int32(0),
   #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
-  SampleType = cms.untracked.int32(13),
-  sampleName = cms.untracked.int32(13),
+  SampleType = cms.untracked.int32(3),
+  sampleName = cms.untracked.int32(3),
   #############gen level
   #genParticles = cms.InputTag("genParticles"),
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
@@ -80,6 +79,7 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   #genjets = cms.InputTag("ak4GenJets"),
 
   #trigger matching
+  doTriggerMatching = cms.bool(True),
   hltPaths = triggerPaths,
   deltaPtRel_trigger = cms.untracked.double(.5),
   deltaR_trigger  = cms.untracked.double(.1),
