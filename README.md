@@ -35,6 +35,10 @@ https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
 
 # Samples Location
 1. Signal:
+Radion:
+/GluGluToRadionToHHTo2B2VTo2L2Nu_M-*_narrow_13TeV-madgraph-v2/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+Graviton:
+/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-*_narrow_13TeV-madgraph-v2/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 2. TT:
 /TTTo2L2Nu_13TeV-powheg/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg
