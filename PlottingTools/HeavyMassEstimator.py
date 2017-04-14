@@ -1,4 +1,3 @@
-
 import ROOT
 import numpy as np
 from math import *
@@ -16,15 +15,17 @@ class HeavyMassEstimator(object):
     iterations = 100
     onshellnuptpdf = ROOT.TH1F()
     onshellWmasspdf = ROOT.TH1F()
+    recobjetrescalec1pdf = ROOT.TH1F()
     onshellnuptpdf_flag = False
     onshellWmasspdf_flag = False
+    recobjetrescalec1pdf_flag = False
     hmetree = ROOT.TTree("hmetree","HME Tree") 
     hme_h2Mass = ROOT.TH1F("hme_h2Mass","h2 mass from HME",1000, 200.0,1200.0)
     hme_h2MassWeight1 = ROOT.TH1F("hme_h2MassWeight1","h2 mass from HME",1000, 200.0,1200.0)
     hme_h2MassWeight4 = ROOT.TH1F("hme_h2MassWeight4","h2 mass from HME",1000, 200.0,1200.0)
     eta_gen  = np.zeros(1, dtype=float);   phi_gen  = np.zeros(1, dtype=float)
     wmass_gen =  np.zeros(1, dtype=float); hmass_gen = np.zeros(1, dtype=float)
-    metpx_gen = np.zeros(1, dtype=float);  metpy_gen = np.zeros(1, dtype=float);
+    metpx_corr = np.zeros(1, dtype=float);  metpy_corr = np.zeros(1, dtype=float);
     nsolutions = np.zeros(1, dtype=int)
     weight = np.zeros(1, dtype=float)
     weight1 = np.zeros(1, dtype=float)
@@ -40,6 +41,7 @@ class HeavyMassEstimator(object):
     met_pt = np.zeros(1, dtype=float); met_phi = np.zeros(1, dtype=float); met_px = np.zeros(1, dtype=float); met_py = np.zeros(1, dtype=float) 
     b1jet_eta = np.zeros(1, dtype=float); b1jet_phi = np.zeros(1, dtype=float); b1jet_pt = np.zeros(1, dtype=float); b1jet_energy = np.zeros(1, dtype=float)
     b2jet_eta = np.zeros(1, dtype=float); b2jet_phi = np.zeros(1, dtype=float); b2jet_pt = np.zeros(1, dtype=float); b2jet_energy = np.zeros(1, dtype=float)
+    b1rescalefactor = np.zeros(1, dtype=float); b2rescalefactor = np.zeros(1, dtype=float)
     htoBB_eta = np.zeros(1, dtype=float); htoBB_phi = np.zeros(1, dtype=float); htoBB_pt = np.zeros(1, dtype=float); htoBB_energy = np.zeros(1, dtype=float)
     htoWW_eta = np.zeros(1, dtype=float); htoWW_phi = np.zeros(1, dtype=float); htoWW_pt = np.zeros(1, dtype=float); htoWW_energy = np.zeros(1, dtype=float)
     htoBB_mass = np.zeros(1, dtype=float); htoWW_mass = np.zeros(1, dtype=float);
@@ -72,10 +74,12 @@ class HeavyMassEstimator(object):
     hmetree.Branch('offshellW_pt', offshellW_pt, 'offshellW_pt/D')  
     hmetree.Branch('offshellW_energy', offshellW_energy, 'offshellW_energy/D')  
     hmetree.Branch('offshellW_mass', offshellW_mass, 'offshellW_mass/D')  
-    hmetree.Branch('met_pt', met_pt, 'met_pt')
-    hmetree.Branch('met_phi', met_phi, 'met_phi')
-    hmetree.Branch('met_px', met_px, 'met_px')
-    hmetree.Branch('met_py', met_py, 'met_py')
+    hmetree.Branch('met_pt', met_pt, 'met_pt/D')
+    hmetree.Branch('met_phi', met_phi, 'met_phi/D')
+    hmetree.Branch('met_px', met_px, 'met_px/D')
+    hmetree.Branch('met_py', met_py, 'met_py/D')
+    hmetree.Branch('metpx_corr', metpx_corr, 'metpx_corr/D')
+    hmetree.Branch('metpy_corr', metpy_corr, 'metpy_corr/D')
     hmetree.Branch('b1jet_eta', b1jet_eta, 'b1jet_eta/D')
     hmetree.Branch('b1jet_phi', b1jet_phi, 'b1jet_phi/D')
     hmetree.Branch('b1jet_pt', b1jet_pt, 'b1jet_pt/D')
@@ -100,7 +104,6 @@ class HeavyMassEstimator(object):
     hmetree.Branch('h2tohh_energy', h2tohh_energy, 'h2tohh_energy/D')
     hmetree.Branch('h2tohh_mass', h2tohh_mass, 'h2tohh_mass/D')
 
-
     lepton1_p4  = ROOT.TLorentzVector()
     lepton2_p4  = ROOT.TLorentzVector()
     b1jet_p4  = ROOT.TLorentzVector()
@@ -123,7 +126,7 @@ class HeavyMassEstimator(object):
 
     def __init__(self):
 	print "  create a HeavyMassEstimator object "
-	#self.lepton1_p4  = ROOT.TLorentzVector()
+
     def setKinematic(self, lepton1_p4, lepton2_p4, jet1_p4, jet2_p4, met):
 	self.lepton1_p4 = lepton1_p4
 	self.lepton2_p4 = lepton2_p4
@@ -140,6 +143,10 @@ class HeavyMassEstimator(object):
     def setonshellnuptpdf(self, hist):
 	self.onshellnuptpdf = hist
 	self.onshellnuptpdf_flag = True
+
+    def setrecobjetrescalec1pdf(self, hist):
+	self.recobjetrescalec1pdf = hist
+	self.recobjetrescalec1pdf_flag = True
 
     def showKinematic(self):
 	print "lepton1 ",self.lepton1_p4.Print()
@@ -163,7 +170,14 @@ class HeavyMassEstimator(object):
 	self.h2tohh_eta[0] = -9.0; self.h2tohh_phi[0] = -9.0; self.h2tohh_pt[0] = -1.0; self.h2tohh_energy[0] = -1.0; self.h2tohh_mass[0] = -1.0
 	self.met_pt[0] = -1.0; self.met_px[0] = -99999.0; self.met_py[0] = -99999.0; self.met_phi[0] = -99999.0
 	self.weight[0] = 1.0; self.weight1[0] = 1.0;  self.weight2[0] = 1.0; self.weight3[0] = 1.0; self.weight4[0] = 1.0
+	self.b1rescalefactor[0] = 1.0; self.b2rescalefactor[0] = 1.0
 	self.nsolutions[0] = 0
+
+    def getWeightFromHist(self, hist, x):
+        binx = hist.FindBin(x)
+        if binx == 0 or binx == hist.GetNbinsX() + 1:
+       	   return 0.0
+        return hist.Interpolate(x)
    
     def getOnshellWMass(self, x0, step, random):
 	
@@ -179,26 +193,9 @@ class HeavyMassEstimator(object):
 	        x1 = x1 - xmax + xmin
 	    if x1 < xmin:
 	        x1 = xmax - (xmin - x1)
-	binx00 = self.onshellWmasspdf.FindBin(x0)
-	binx01 = binx00 + 1
-	binx10 = self.onshellWmasspdf.FindBin(x1)
-	binx11 = binx10 + 1
-        if self.onshellWmasspdf.GetBinCenter(binx00) > x0:
-     	    binx00 = binx00 - 1
-     	    binx01 = binx01 - 1
-        if self.onshellWmasspdf.GetBinCenter(binx10) > x1:
-     	    binx10 = binx10 - 1
-     	    binx11 = binx11 - 1
-        y00 = self.onshellWmasspdf.GetBinContent( binx00 )
-        x00 = self.onshellWmasspdf.GetBinCenter( binx00 )
-        y01 = self.onshellWmasspdf.GetBinContent( binx01 )
-        x01 = self.onshellWmasspdf.GetBinCenter( binx01 )
-        y10 = self.onshellWmasspdf.GetBinContent( binx10 )
-        x10 = self.onshellWmasspdf.GetBinCenter( binx10 )
-        y11 = self.onshellWmasspdf.GetBinContent( binx11 )
-        x11 = self.onshellWmasspdf.GetBinCenter( binx11 )
-        w0  = (x0 - x00)*(y00 - y01)/(x00 - x01) + y00;
-        w1  = (x1 - x10)*(y10 - y11)/(x10 - x11) + y10;
+	w0  = self.onshellWmasspdf.Interpolate(x0)
+	w1  = self.onshellWmasspdf.Interpolate(x1)
+	#print "w0 ",w0," interpolate x0 ",self.onshellWmasspdf.Interpolate(x0)," w1 ",w1, " interpolate x1 ",self.onshellWmasspdf.Interpolate(x1)
 	#w1/w0: transition probability 
 	if (w1/w0 >= random):
 	    return x1
@@ -207,7 +204,48 @@ class HeavyMassEstimator(object):
         else:	
             print "error in getOnshellWMass "
             return 80.3
-            
+    
+    def bjetsCorrection(self):
+	if not (self.recobjetrescalec1pdf_flag):
+	    #print "failed to have recobjetrescalec1pdf_flag , no Correction"
+	    return True
+	rescalec1 = self.recobjetrescalec1pdf.GetRandom()
+        leadingbjet_p4 = self.b1jet_p4
+        trailingbjet_p4 = self.b2jet_p4
+        b1jetleadingjet = True
+        if self.b1jet_p4.Pt() < self.b2jet_p4.Pt():
+	    b1jetleadingjet = False
+	    leadingbjet_p4 = self.b2jet_p4
+	    trailingbjet_p4 = self.b1jet_p4
+	x1 = trailingbjet_p4.M2()
+	x2 = 2*rescalec1*(leadingbjet_p4*trailingbjet_p4)
+	x3 = rescalec1*rescalec1*leadingbjet_p4.M2() - 125.0*125.0
+	if x2<0:
+	    print "error bjets lorentzvector dot product less than 0"
+	    return False
+        if ((x2*x2 - 4*x1*x3) < 0 or x1 == 0):
+	    print "error ! there is no soluations for bjetsCorrection "
+	    return False
+	rescalec2 = (-x2 + sqrt(x2*x2 - 4*x1*x3))/(2*x1)
+	if rescalec2 < .0:
+	    #print "negative rescalec2: ",rescalec2
+	    return False
+	#print "rescalec1 ",rescalec1," rescalec2 ",rescalec2
+	if b1jetleadingjet:
+	    self.b1rescalefactor[0] = rescalec1
+	    self.b2rescalefactor[0] = rescalec2
+	else:
+	    self.b1rescalefactor[0] = rescalec2
+	    self.b2rescalefactor[0] = rescalec1
+        return True	
+
+    def metCorrection(self):
+        if self.b1rescalefactor[0] < 0.0 or self.b2rescalefactor[0] < 0.0:
+	    print "bjet elaborate correction is working properly, b1rescalefactor ",self.b1rescalefactor[0]," b2rescalefactor ",self.b2rescalefactor[0]
+	    return ROOT.TVector2(0.0, 0.0)	
+	metpx_tmp = - (self.b1rescalefactor[0] - 1.0)*self.b1jet_p4.Px() - (self.b2rescalefactor[0] - 1.0)*self.b2jet_p4.Px()
+	metpy_tmp = - (self.b1rescalefactor[0] - 1.0)*self.b1jet_p4.Py() - (self.b2rescalefactor[0] - 1.0)*self.b2jet_p4.Py()
+	return ROOT.TVector2(metpx_tmp, metpy_tmp)
     
     def assignMuP4(self, case):
 	"""lepton+nu permutation
@@ -264,7 +302,6 @@ class HeavyMassEstimator(object):
 	if not(self.onshellWmasspdf_flag):
 	    print "no onshellWmasspdf, error!!! "
 	    return  False
-	self.htoBB_p4 = self.b1jet_p4 + self.b2jet_p4
 	self.eta_gen[0] = 0.0 ; self.phi_gen[0] = 0.0
 	#initial wmass_gen
 	self.wmass_gen[0] = 70.0
@@ -273,6 +310,8 @@ class HeavyMassEstimator(object):
 	genRandom = ROOT.TRandom3(0)
         #PUSample: 25.2, PU0: 14.8
         met_sigma = 25.2
+        if not self.recobjetrescalec1pdf_flag:
+		met_sigma = 0.0	
         #genRandom.SetSeed()
 	while (it < self.iterations ):
 	    it += 1
@@ -285,11 +324,20 @@ class HeavyMassEstimator(object):
 	    self.wmass_gen[0] = self.getOnshellWMass(self.wmass_gen[0], step, rand01)
 	    #print "it ",it," self.eta_gen[0] ",self.eta_gen[0]," wmass_gen ",self.wmass_gen[0]
 	    #update met 
-	    met_dpx = genRandom.Gaus(0.0, met_sigma)
-	    met_dpy = genRandom.Gaus(0.0, met_sigma)
-            met_corr = self.met + ROOT.TVector2(met_dpx, met_dpy)
-	    self.metpx_gen[0]= met_corr.Px()
-	    self.metpy_gen[0] = met_corr.Py()
+	    if self.recobjetrescalec1pdf_flag:
+		while not self.bjetsCorrection():
+		    #print "fail to get bjetcorrection, try to get next one "
+		    pass
+		met_dpx = genRandom.Gaus(0.0, met_sigma)
+		met_dpy = genRandom.Gaus(0.0, met_sigma)
+		met_corr = self.met + ROOT.TVector2(met_dpx, met_dpy)+ self.metCorrection()
+            else:
+		met_corr = self.met
+		self.b1rescalefactor[0] = 1.0
+		self.b2rescalefactor[0] = 1.0
+	    self.htoBB_p4 = self.b1jet_p4 * self.b1rescalefactor[0] + self.b2jet_p4 * self.b2rescalefactor[0]
+	    self.metpx_corr[0]= met_corr.Px()
+	    self.metpy_corr[0] = met_corr.Py()
             #print "met_px ",self.met.Px()," met_py ",self.met.Py()," after correction px ",met_corr.Px()," py ",met_corr.Py()
 	    self.nsolutions[0] = 0
 	    isolution = 0
@@ -379,6 +427,9 @@ class HeavyMassEstimator(object):
 		else:
 		    self.h2tohh_eta[0] = self.h2tohh_p4.Eta(); self.h2tohh_phi[0] = self.h2tohh_p4.Phi()
 		self.hme_h2Mass.Fill(self.h2tohh_mass[0], self.weight[0])
+	        if self.onshellnuptpdf_flag:
+		    self.weight1[0] = self.weight[0] * self.getWeightFromHist(self.onshellnuptpdf, self.nu_onshellW_pt[0]) 
+    		self.hme_h2MassWeight1.Fill(self.h2tohh_mass[0], self.weight1[0])
 	 	isolution += 1 
 	##### end of iteration
 

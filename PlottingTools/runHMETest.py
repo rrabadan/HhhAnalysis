@@ -12,6 +12,7 @@ doTest = True
 refPDF = ROOT.TFile("REFPDFPU40.root","READ")
 onshellWmasspdf = refPDF.Get("onshellWmasspdf")
 onshellnuptpdf = refPDF.Get("onshellnuptpdf")
+recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
 tree_name="DiHiggsWWBBAna/evtree"
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
@@ -227,6 +228,10 @@ for ev in TCha:
       hme_gen.runHME()
       if hme_gen.hme_h2Mass.GetEntries()>0:
 	  print "Gen Level most probable reco mass ",hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())," entries ",hme_gen.hme_h2Mass.GetEntries()
+	  hme_gen.hme_h2Mass.SetName("hme_h2Mass_ev%d_genlevel"%nEv)
+	  hme_gen.hme_h2Mass.Write()
+          hme_gen.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_genlevel"%nEv)
+	  hme_gen.hme_h2MassWeight1.Write()
   
   if (cleaning_cuts):
       muon1_p4 	  = ROOT.TLorentzVector(ev.muon1_px, ev.muon1_py, ev.muon1_pz, ev.muon1_energy)
@@ -238,10 +243,15 @@ for ev in TCha:
       hme.setKinematic(muon1_p4, muon2_p4, b1jet_p4, b2jet_p4, met_vec2)
       hme.setonshellWmasspdf(onshellWmasspdf)
       hme.setonshellnuptpdf(onshellnuptpdf)
+      hme.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
       #hme.showKinematic()
       hme.runHME()
       if hme.hme_h2Mass.GetEntries()>0:
 	  print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()
+	  hme.hme_h2Mass.SetName("hme_h2Mass_ev%d_recolevel"%nEv)
+	  hme.hme_h2Mass.Write()
+          hme.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_recolevel"%nEv)
+	  hme.hme_h2MassWeight1.Write()
   # WEIGHTS
   weight = 1.
   if( whichSample!="Data" ):
