@@ -33,3 +33,4 @@ Regression/plots/*
 MVA_Studies/weights*
 MVA_Studies/*.root
 MVA_Studies/files/
+Regression/*.txt

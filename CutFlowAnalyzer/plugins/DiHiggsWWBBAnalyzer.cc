@@ -83,7 +83,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     //edm::EDGetTokenT< std::vector<Trajectory> > trajToken_;
     edm::EDGetTokenT<reco::VertexCollection> primaryVerticesToken_;
     bool debug_;
-    enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
+    enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu};//add other background
+    enum {Rad_260=100, Rad_270, Rad_300, Rad_350, Rad_400, Rad_450, Rad_500, Rad_550, Rad_600, Rad_650, Rad_750, Rad_800, Rad_900,  Rad_1000, Grav_260, Grav_270, Grav_300, Grav_350, Grav_400, Grav_450, Grav_500, Grav_550, Grav_600, Grav_650, Grav_750, Grav_800, Grav_900,  Grav_1000}
     int sampleType_;
     //bool runMCMatch;//select physics objects by matching them to gen information
     int jetSelectionAlgo_;
@@ -961,24 +962,24 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   else if(sampleType_==WZTo1L3Nu)                XsecBr = 3.033;
   else if(sampleType_==WZTo1L1Nu2Q)              XsecBr = 10.71;
   else if(sampleType_==WZTo3LNu)                 XsecBr = 4.42965;
-  else if(sampleType_==ST_tchannel_top)         XsecBr = 136.02;
-  else if(sampleType_==ST_tchannel_antitop)     XsecBr = 80.95;
-  else if(sampleType_==ST_schannel)             XsecBr = 3.36;
+  else if(sampleType_==ST_tchannel_top)          XsecBr = 136.02;
+  else if(sampleType_==ST_tchannel_antitop)      XsecBr = 80.95;
+  else if(sampleType_==ST_schannel)              XsecBr = 3.36;
   else if(sampleType_==ST_tW_antitop)            XsecBr = 19.5545;
   else if(sampleType_==ST_tW_top)                XsecBr = 19.5545;
   else if(sampleType_==WJetsToLNu)               XsecBr = 61526.7;
-  else if(sampleType_==WJetsToLNu_HT100To200)   XsecBr = 1627.45;
-  else if(sampleType_==WJetsToLNu_HT200To400)   XsecBr = 435.237;
-  else if(sampleType_==WJetsToLNu_HT400To600)   XsecBr = 59.181;
-  else if(sampleType_==WJetsToLNu_HT600To800)   XsecBr = 14.580;
-  else if(sampleType_==WJetsToLNu_HT800To1200)  XsecBr = 6.656;
-  else if(sampleType_==WJetsToLNu_HT1200To2500) XsecBr = 1.608;
-  else if(sampleType_==WJetsToLNu_HT2500ToInf)  XsecBr = 0.0389;
+  else if(sampleType_==WJetsToLNu_HT100To200)    XsecBr = 1627.45;
+  else if(sampleType_==WJetsToLNu_HT200To400)    XsecBr = 435.237;
+  else if(sampleType_==WJetsToLNu_HT400To600)    XsecBr = 59.181;
+  else if(sampleType_==WJetsToLNu_HT600To800)    XsecBr = 14.580;
+  else if(sampleType_==WJetsToLNu_HT800To1200)   XsecBr = 6.656;
+  else if(sampleType_==WJetsToLNu_HT1200To2500)  XsecBr = 1.608;
+  else if(sampleType_==WJetsToLNu_HT2500ToInf)   XsecBr = 0.0389;
   else if(sampleType_==TTWJetsToQQ)              XsecBr = 0.4062;
   else if(sampleType_==TTWJetsToLNu)             XsecBr = 0.2043;
   else if(sampleType_==TTZToQQ)                  XsecBr = 0.5297;
   else if(sampleType_==TTZToLLNuNu)              XsecBr = 0.2529;
-
+  else if(sampleType_>=Rad_260)                  XsecBr = 1.;// To be added
 
   //****************************************************************************
   //                GENERATOR LEVEL                       
