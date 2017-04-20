@@ -32,7 +32,7 @@ source ~/.bashrc
 . /etc/profile.d/modules.sh
 cd $CMSSW_BASE/src/HhhAnalysis/PlottingTools/
 echo "job$jobid starts, `date`"
-python PlotterProducer.py -b HaddNo {jobtype}
+python runHMETest.py -jt {jobtype}
 echo "job$jobid is done, `date`"
 exit 0""".format(jobtype=job))
     jobscript.close()
@@ -42,5 +42,6 @@ sbatch {0}/Send_PlotterProducer_{1}.slrm""".format(jobdir, job))
 submitscript.close()
 os.system("chmod +x submitallPlotProducer.sh")
 
-#os.system("./submitallPlotProducer.sh")
+os.system("./submitallPlotProducer.sh")
+#python PlotterProducer.py -b HaddYes {jobtype}
 

@@ -3,12 +3,15 @@ import ROOT
 from ROOT import TFile,TChain,TH1F,TH2F,TLegend
 from math import *
 from HeavyMassEstimator import *
+import argparse
 import numpy as np
+
+import Samplelist 
 execfile("start.py")
 execfile("functions.py")
 #Creating folders and parameters
 
-doTest = True
+doTest = False
 refPDF = ROOT.TFile("REFPDFPU40.root","READ")
 onshellWmasspdf = refPDF.Get("onshellWmasspdf")
 onshellnuptpdf = refPDF.Get("onshellnuptpdf")
@@ -16,89 +19,45 @@ recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
 tree_name="DiHiggsWWBBAna/evtree"
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
-whichSample = "Graviton"
+#whichSample = "Graviton_0419"
+
+parser = argparse.ArgumentParser(description='runHME')
+parser.add_argument("-n", "--njobs", dest="njobs", type=int, default=100, help="total splitted jobs. [Default: 100]")
+parser.add_argument("-i", "--ijob", dest="ijob", type=int, default=0, help="ith job in splitting. [Default: 0]")
+parser.add_argument("-jt", "--jobtype", dest="jobtype", default="radion", help="sample type to run. [Default: radion]")
+args = parser.parse_args()
+whichSample = args.jobtype
+makeHadd = "HaddYes"
+
 """
 print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
 makeHadd = sys.argv[2]
 whichSample = sys.argv[3]
 if( makeHadd!="HaddYes" and makeHadd!="HaddNo" ): print "WARNING! 1st argument has to be HaddYes or HaddNo"; sys.exit()
 if( whichSample!="TT" and whichSample!="DY" and whichSample!="VV" and whichSample!="sT" and whichSample!="Wjet" and whichSample!="ttV" and whichSample!="Data" ):  print "WARNING! 2nd argument have to be TT, DY, VV, singTop, Wjet, ttV, or Data"; sys.exit()
-
+######################################
+## define shell commands
+######################################
 Find_str = []; this_cat = ""; this_hadd = ""; this_NtotPath = ""
-# MC
-if( whichSample == "TT" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170405_172215 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
-  this_cat      = "cat HADD/TT_* > HADD/TT.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg.root @HADD/TT.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg.root"
-if( whichSample == "DY" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170405_172231 | grep root | grep -v failed > HADD/DY_DYJetsToLLM-10to50.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_0J_13TeV-amcatnloFXFX-pythia8/170405_172248 | grep root | grep -v failed > HADD/DY_DYToLL0J.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DYToLL_1J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_1J_13TeV-amcatnloFXFX-pythia8/170405_172303 | grep root | grep -v failed > HADD/DY_DYToLL1J.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8/170405_172320 | grep root | grep -v failed > HADD/DY_DYToLL2J.txt")
-  this_cat      = "cat HADD/DY_* > HADD/DY.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8.root @HADD/DY.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/crab_DYToLL_2J_13TeV-amcatnloFXFX-pythia8.root"
-if( whichSample == "VV" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170405_172338 | grep root | grep -v failed > HADD/VV_ZZTo2L2Q13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ZZTo2L2Nu_13TeV_powheg_pythia8/crab_ZZTo2L2Nu_13TeV_powheg_pythia8/170405_172352 | grep root | grep -v failed > HADD/VV_ZZTo2L2Nu13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8/170405_172407 | grep root | grep -v failed > HADD/VV_ZZTo4L13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/crab_WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/170405_172423 | grep root | grep -v failed > HADD/VV_WWToLNuQQaTGC.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/crab_WWTo2L2Nu_MWW-600To800_aTGC_13TeV-amcatnloFXFX-madspin-pythia8/170405_172438 | grep root | grep -v failed > HADD/VV_WWTo2L2NuMWW-600To800.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/170405_172452 | grep root | grep -v failed > HADD/VV_WZTo2L2Q13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/170405_172508 | grep root | grep -v failed > HADD/VV_WZTo1L3Nu13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/170405_172522 | grep root | grep -v failed > HADD/VV_WZTo1L1Nu2Q13TeV.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/170405_172539 | grep root | grep -v failed > HADD/VV_WZTo3LNuTuneCUETP8M1.txt")
-  this_cat      = "cat HADD/VV_* > HADD/VV.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8.root @HADD/VV.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/crab_WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8.root"
-if( whichSample == "sT" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170405_172553 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/170405_172612 | grep root | grep -v failed > HADD/sT_STt-channel.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/crab_ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/170405_172627 | grep root | grep -v failed > HADD/sT_STs-channel.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170405_172642 | grep root | grep -v failed > HADD/sT_STtW.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/170405_172656 | grep root | grep -v failed > HADD/sT_STtW.txt")
-  this_cat      = "cat HADD/sT_* > HADD/sT.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1.root @HADD/sT.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/crab_ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1.root"
-if( whichSample == "Wjet" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/170405_172710 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuTuneCUETP8M1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172724 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-100To200.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172740 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-200To400.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172757 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-400To600.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172813 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-600To800.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172829 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-800To1200.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172846 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-1200To2500.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/170405_172904 | grep root | grep -v failed > HADD/Wjet_WJetsToLNuHT-2500ToInf.txt")
-  this_cat      = "cat HADD/Wjet_* > HADD/Wjet.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root @HADD/Wjet.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root"
-if( whichSample == "ttV" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170405_172925 | grep root | grep -v failed > HADD/ttV_TTWJetsToQQTuneCUETP8M1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170405_172942 | grep root | grep -v failed > HADD/ttV_TTWJetsToLNuTuneCUETP8M1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170405_173009 | grep root | grep -v failed > HADD/ttV_TTZToQQTuneCUETP8M1.txt")
-  this_cat      = "cat HADD/ttV_* > HADD/ttV.txt"
-  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root @HADD/ttV.txt"
-  this_NtotPath = "/fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8.root"
-  Find_str.append("find /fdata/hepx/store/user/lpernie/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170405_173034 | grep root | grep -v failed > HADD/ttV_TTZToLLNuNuM-10.txt")
-# Data
-if( whichSample == "Data" ):
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016B-23Sep2016-v3/170405_170709 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016B-23Sep2016-v3.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016C-23Sep2016-v1/170405_170722 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016C-23Sep2016-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016D-23Sep2016-v1/170405_170736 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016D-23Sep2016-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016E-23Sep2016-v1/170405_031502 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016E-23Sep2016-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016F-23Sep2016-v1/170405_170803 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016F-23Sep2016-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016G-23Sep2016-v1/170405_170817 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016G-23Sep2016-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016H-03Feb2017_ver2-v1/170405_170831 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016H-03Feb2017_ver2-v1.txt")
-  Find_str.append("find /fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016H-03Feb2017_ver3-v1/170405_170845 | grep root | grep -v failed > HADD/DATA_Hhh_Run2016H-03Feb2017_ver3-v1.txt")
-  this_cat      = "cat HADD/DATA_* > HADD/DATA.txt"
-# Running
+for i in range(len(Samplelist.outAnalist[whichSample])):
+  Find_str.append("find %s | grep root | grep -v failed > HADD/%s_%d.txt"%(Samplelist.outAnalist[whichSample][i], Samplelist.sampleFullName[whichSample], i))
+    #Find_str.append("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170405_172215 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
+this_cat = "cat HADD/%s_* > HADD/%s.txt"%(Samplelist.sampleFullName[whichSample], whichSample)
+if whichSample != "DATA":
+    this_NtotPath = "/fdata/hepx/store/user/%s/%s/crab_%s.root"%(user,Samplelist.sampleFullName[whichSample], Samplelist.sampleFullName[whichSample])
+    this_hadd     = "hadd -T -f -k %s @HADD/%s.txt"%(this_NtotPath, whichSample)
+
+######################################
+# Running commands
+######################################
 for this_find in Find_str:
   os.system(this_find)
 os.system(this_cat)
 if (makeHadd=="HaddYes" and whichSample!="Data"): os.system(this_hadd)
+######################################
 """
-this_NtotPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root"
+#this_NtotPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root"
+this_NtotPath = "/fdata/hepx/store/user/taohuang/DiHiggsAnalysisSample/out_ann_%s_20160411.root"%whichSample
 if( whichSample != "Data" ):
   Ntot_path = this_NtotPath
   MyFile =  ROOT.TFile.Open(Ntot_path,"read");
@@ -107,20 +66,27 @@ if( whichSample != "Data" ):
 else:
   nTOT_prehlt = 0.; nTOT_posthlt = 0.
 
-#with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
-#  for line in f:
-#    if not line.isspace():
-#      TCha.Add(str(line[:-1]))
 TCha = ROOT.TChain(tree_name)
-TCha.Add("/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root")
+"""
+with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
+  for line in f:
+    if not line.isspace():
+      TCha.Add(str(line[:-1]))
+"""
+#TCha.Add("/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root")
+TCha.Add(this_NtotPath)
 print whichSample, "TChain has", TCha.GetEntries(), "entries."
-f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Plotting/'%user + whichSample + '.root','recreate'); f.cd()
+TotalEv = TCha.GetEntries()
+nStart = TotalEv/args.njobs*args.ijob
+nEnd = TotalEv/args.njobs*(args.ijob+1)
+if args.ijob == args.njobs-1:
+    nEnd = -1
+f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Plotting/'%user + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
 
 ptbinSF= [20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 120.0, 200.0, 300.]
 etabinSF = [0, 0.9, 1.2, 2.1, 2.4]
 myptbinSF = np.asarray(ptbinSF)
 myetabinSF = np.asarray(etabinSF)
-print "ptbinSF len ",len(ptbinSF)," myptbinSF ", myptbinSF
 
 # PRESELECTION
 # Weights
@@ -193,12 +159,21 @@ h_cc_mass_trans          = ROOT.TH1F("h_cc_mass_trans","",50,0.,250.); h_cc_mass
 h_cc_dR_l1l2b1b2         = ROOT.TH1F("h_cc_dR_l1l2b1b2","",50,0.,6.);  h_cc_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");
 h_cc_dphi_llmet          = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
 
+h_h2mass_weight_gen          = ROOT.TH1F("h_h2mass_weight_gen","",60,200.,800.);  h_h2mass_weight_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
+h_h2mass_weight1_gen          = ROOT.TH1F("h_h2mass_weight1_gen","",60,200.,800.);  h_h2mass_weight1_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
+h_h2mass_weight_reco          = ROOT.TH1F("h_h2mass_weight_reco","",60,200.,800.);  h_h2mass_weight_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
+h_h2mass_weight1_reco          = ROOT.TH1F("h_h2mass_weight1_reco","",60,200.,800.);  h_h2mass_weight1_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
+
 nEv = 0
 for ev in TCha:
+  if nEv < nStart or (nEnd > 0 and nEv >= nEnd):
+      #print "nEv ",nEv," nstart ",nStart," nEnd ",nEnd
+      nEv = nEv +1
+      continue
   if (doTest and nEv%10 == 0 ):
-      print "ev ",nEv
+      print "nEv ",nEv
   elif (nEv%10000 == 0):
-      print "ev ",nEv
+      print "nEv ",nEv
   
   if (doTest and nEv>=10000):
       break
@@ -214,7 +189,7 @@ for ev in TCha:
   dR_ll_cleancut      = (ev.dR_l1l2<3.8)
   dR_jj_cleancut      = (ev.dR_b1b2<3.8)
   cleaning_cuts       = (mt_cleancut and NoZ_cleancut and mJJ_cleancut and dR_lljj_cleancut and dR_ll_cleancut and dR_jj_cleancut)
-  if (cleaning_cuts and doTest and ev.findAllGenParticles):
+  if (cleaning_cuts and ev.findAllGenParticles):
       mu1_p4 	      = ROOT.TLorentzVector(ev.mu1_px, ev.mu1_py, ev.mu1_pz, ev.mu1_energy)
       mu2_p4 	      = ROOT.TLorentzVector(ev.mu2_px, ev.mu2_py, ev.mu2_pz, ev.mu2_energy)
       b1jet_p4 	      = ROOT.TLorentzVector(ev.b1_px, ev.b1_py, ev.b1_pz, ev.b1_energy)
@@ -229,9 +204,12 @@ for ev in TCha:
       if hme_gen.hme_h2Mass.GetEntries()>0:
 	  print "Gen Level most probable reco mass ",hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())," entries ",hme_gen.hme_h2Mass.GetEntries()
 	  hme_gen.hme_h2Mass.SetName("hme_h2Mass_ev%d_genlevel"%nEv)
-	  hme_gen.hme_h2Mass.Write()
           hme_gen.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_genlevel"%nEv)
-	  hme_gen.hme_h2MassWeight1.Write()
+	  if nEv%100 == 0:
+	      hme_gen.hme_h2Mass.Write()
+	      hme_gen.hme_h2MassWeight1.Write()
+          h_h2mass_weight_gen.Fill(hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin()))
+          h_h2mass_weight1_gen.Fill(hme_gen.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme_gen.hme_h2MassWeight1.GetMaximumBin()))
   
   if (cleaning_cuts):
       muon1_p4 	  = ROOT.TLorentzVector(ev.muon1_px, ev.muon1_py, ev.muon1_pz, ev.muon1_energy)
@@ -249,9 +227,12 @@ for ev in TCha:
       if hme.hme_h2Mass.GetEntries()>0:
 	  print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()
 	  hme.hme_h2Mass.SetName("hme_h2Mass_ev%d_recolevel"%nEv)
-	  hme.hme_h2Mass.Write()
           hme.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_recolevel"%nEv)
-	  hme.hme_h2MassWeight1.Write()
+	  if nEv%100 == 0:
+	      hme.hme_h2Mass.Write()
+	      hme.hme_h2MassWeight1.Write()
+          h_h2mass_weight_reco.Fill(hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin()))
+          h_h2mass_weight1_reco.Fill(hme.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme.hme_h2MassWeight1.GetMaximumBin()))
   # WEIGHTS
   weight = 1.
   if( whichSample!="Data" ):
@@ -396,5 +377,9 @@ h_cc_met_pt.Write()
 h_cc_mass_trans.Write()
 h_cc_dR_l1l2b1b2.Write()
 h_cc_dphi_llmet.Write()
+h_h2mass_weight_gen.Write()
+h_h2mass_weight1_gen.Write()
+h_h2mass_weight_reco.Write()
+h_h2mass_weight1_reco.Write()
 f.Close()
 print "Done."
