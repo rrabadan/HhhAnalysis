@@ -1153,8 +1153,6 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     muon1_energy = selectedleadinglep->energy();
     muon1_pt = selectedleadinglep->pt(); muon1_eta = selectedleadinglep->eta(); muon1_phi = selectedleadinglep->phi();
     muon1_dxy = dxy(selectedleadinglep, &PV); muon1_dz = dz(selectedleadinglep, &PV);
-    //const reco::GenParticle * genp = .genParticle();
-    //if (genp)
     muon2_px = selectedsubleadinglep->px(); muon2_py = selectedsubleadinglep->py(); muon2_pz = selectedsubleadinglep->pz(); 
     muon2_energy = selectedsubleadinglep->energy();
     muon2_pt = selectedsubleadinglep->pt(); muon2_eta = selectedsubleadinglep->eta(); muon2_phi = selectedsubleadinglep->phi();
@@ -1175,7 +1173,14 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     }
 
     hastwomuons = true;
-    if (sampleType_>Data){//apply SF for MC samplpes 
+    if (sampleType_>Data){
+	float dR_gen_reco11 = deltaR(mu1_eta, mu1_phi, muon1_eta, muon1_phi);
+	float dR_gen_reco12 = deltaR(mu1_eta, mu1_phi, muon2_eta, muon2_phi);
+	float dR_gen_reco21 = deltaR(mu2_eta, mu2_phi, muon1_eta, muon1_phi);
+	float dR_gen_reco22 = deltaR(mu2_eta, mu2_phi, muon2_eta, muon2_phi);
+	dR_mu1 = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
+	dR_mu2 = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+	//apply SF for MC samplpes 
 	//float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
 	//float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
 	//float idSF1 =  POGRecipesRun2::getMuonIDSF(std::abs(muon1_eta), muon1_pt, idSFFile_, idSFhist_);
@@ -1350,6 +1355,15 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b2jet_vtxPt = sqrt(b2jet_vtxPx*b2jet_vtxPx + b2jet_vtxPy*b2jet_vtxPy);
     b2jet_vtx3DSig = allbjets[jet2].userFloat("vtx3DSig"); b2jet_vtx3DVal = allbjets[jet2].userFloat("vtx3DVal");
     b2jet_vtxPosX = allbjets[jet2].userFloat("vtxPosX"); b2jet_vtxPosY = allbjets[jet2].userFloat("vtxPosY"); b2jet_vtxPosZ = allbjets[jet2].userFloat("vtxPosZ");
+
+    if (sampleType_>Data){
+	float dR_gen_reco11 = deltaR(b1_eta, b1_phi, b1jet_eta, b1jet_phi);
+	float dR_gen_reco12 = deltaR(b1_eta, b1_phi, b2jet_eta, b2jet_phi);
+	float dR_gen_reco21 = deltaR(b2_eta, b2_phi, b1jet_eta, b1jet_phi);
+	float dR_gen_reco22 = deltaR(b2_eta, b2_phi, b2jet_eta, b2jet_phi);
+	dR_b1jet = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
+	dR_b2jet = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+    }
     
     printf("Jet1: pt %5.1f, eta %+4.2f, mt %5.1f, btag_var %+1.2f, \n", b1jet_pt, b1jet_eta, b1jet_mt, b1jet_bDiscVar);
     printf("Jet2: pt %5.1f, eta %+4.2f, mt %5.1f, btag_var %+1.2f, \n", b2jet_pt, b2jet_eta, b2jet_mt, b2jet_bDiscVar);
