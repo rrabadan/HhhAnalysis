@@ -1175,7 +1175,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     }
 
     hastwomuons = true;
-    if (sampleType_>0){//apply SF for MC samplpes 
+    if (sampleType_>Data){//apply SF for MC samplpes 
 	//float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
 	//float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
 	//float idSF1 =  POGRecipesRun2::getMuonIDSF(std::abs(muon1_eta), muon1_pt, idSFFile_, idSFhist_);
@@ -2135,7 +2135,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     b2_px = b2cand->px();
     b2_py = b2cand->py();
     b2_pz = b2cand->pz();
-    if (sampleType_<=12 and sampleType_>0){
+    if ((sampleType_>Data and sampleType_<=B12) or sampleType_>=Rad_260 ){
 	htoWW_energy = htoWWcand->energy();
 	htoWW_px = htoWWcand->px();
 	htoWW_py = htoWWcand->py();
@@ -2157,7 +2157,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
 	h2tohh_mass = h2tohhcand->mass();
 
 
-    }else if (sampleType_==13){
+    }else if (sampleType_==TTbar){
 	t1_energy = t1cand->energy();
 	t1_px = t1cand->px();
 	t1_py = t1cand->py();
