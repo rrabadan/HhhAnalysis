@@ -12,7 +12,7 @@ class HeavyMassEstimator(object):
         root fils contains all PDFs
     hmetree should contain full information from  HME
     """
-    iterations = 100
+    iterations = 1000000
     onshellnuptpdf = ROOT.TH1F()
     onshellWmasspdf = ROOT.TH1F()
     recobjetrescalec1pdf = ROOT.TH1F()
