@@ -21,7 +21,7 @@ config.Data.publication     = False
 config.section_("Site")
 config.Site.storageSite     = 'T3_US_TAMU'
 # Submit or write the Plotter files
-OnlySubmitCRAB = True
+OnlySubmitCRAB = False
 
 import os
 import glob
@@ -36,7 +36,8 @@ def findNewestDir(directory):
   return lister[-1][0]
 
 datasets  = []; NumSample = []; sampleN_short = []
-doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False; doRadion=True; doGravition=True;
+#doTT=False; doDY=False; doVV=False; doSingleT=False; doWjets=False; dottV=False; doRadion=True; doGravition=True;
+doTT=True; doDY=True; doVV=True; doSingleT=True; doWjets=True; dottV=True; doRadion=True; doGravition=True;
 # SIGNAL
 if doRadion:
   datasets.append('/GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM')

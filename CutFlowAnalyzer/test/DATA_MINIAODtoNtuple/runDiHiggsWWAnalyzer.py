@@ -38,19 +38,26 @@ process.eventCounterFilter = cms.EDFilter("EventCounterFilter")
 import HLTrigger.HLTfilters.triggerResultsFilter_cfi as hlt
 #print hlt," hlt.triggerResultsFilter ",hlt.triggerResultsFilter
 # accept if any path succeeds (explicit OR)
+"""
+process.hltfilter = hlt.triggerResultsFilter.clone(
+	HLTPaths = ('HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*','HLT_Mu17*'),
+	l1tResults = '',#not use L1t results
+	throw = cms.bool(False) 
+"""
+triggerPaths = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
+			     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+	)
 process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
-	triggerConditions = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
-					 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
-					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
-					 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
-	),
+        triggerConditions = triggerPaths,
 	hltResults = cms.InputTag( "TriggerResults","","HLT"),
 	#l1tResults = cms.InputTag( "hltGtDigis" ),
 	l1tResults = cms.InputTag( "" ),
 	l1tIgnoreMask = cms.bool( False ),
 	l1techIgnorePrescales = cms.bool( False ),
 	daqPartitions = cms.uint32( 1 ),
-	throw = cms.bool(True)   
+	throw = cms.bool(True)    
 )
 print sys.argv
 sample = 0#int(sys.argv[1])
@@ -62,6 +69,17 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   SampleType = cms.untracked.int32(sample),
   #genParticles = cms.InputTag("genParticles"),
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
+  genjets = cms.InputTag("slimmedGenJets"),
+  #genjets = cms.InputTag("ak4GenJetsNoNu"),
+  #genjets = cms.InputTag("ak4GenJets"),
+
+  #trigger matching
+  doTriggerMatching = cms.bool(True),
+  hltPaths = triggerPaths,
+  deltaPtRel_trigger = cms.untracked.double(.5),
+  deltaR_trigger  = cms.untracked.double(.1),
+
+  #reco 
   #muons = cms.InputTag("cleanPatPFMuonsTriggerMatch"),
   muons = cms.InputTag("slimmedMuons"),
   #2016data: Run BCDEF use 2016Medium, GH use Medium
@@ -77,20 +95,19 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   trackingSFhist = cms.string("ratio_eff_eta3_dr030e030_corr"),
 
   electrons = cms.InputTag("slimmedElectrons"),
-  genjets = cms.InputTag("slimmedGenJets"), # For miniAOD
-  #genjets = cms.InputTag("ak4GenJetsNoNu"),
-  #genjets = cms.InputTag("ak4GenJets"),
   jets = cms.InputTag("slimmedJets"),
   mets = cms.InputTag("slimmedMETs"),
   beamSpot = cms.InputTag("offlineBeamSpot"),
   triggerEvent = cms.InputTag("patTriggerEvent"),
   tracks = cms.InputTag("generalTracks"),
-  TriggerResults = cms.InputTag("TriggerResults","","RECO"),
+  TriggerResults = cms.InputTag("TriggerResults","","HLT"),
+  TriggerObjects = cms.InputTag("selectedPatTrigger"),
   TrackRefitter = cms.InputTag("TrackRefitter"),
   primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
   Traj = cms.InputTag("TrackRefitter"),
-  onlyGenLevel = cms.bool(False),
+
   debug = cms.untracked.bool(False),
+  onlyGenLevel = cms.bool(False),
   runMMC = cms.bool(False)
 )
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')

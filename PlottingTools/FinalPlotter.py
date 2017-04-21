@@ -4,25 +4,25 @@ import sys, os, random
 execfile("start.py")
 
 #Creating folders and parameters
-#Filefolder   = "/fdata/hepx/store/user/lpernie/Hhh_For_Plotting/"
 Filefolder   = "/fdata/hepx/store/user/%s/Hhh_For_Plotting/"%user
 Lumi     = 36.42#fb-1
-Samples  = ["ttV","Wjet","sT","VV","DY","TT","Data"]
-#Samples  = ["TT"]
+Samples  = ["ttV","Wjet","sT","VV","DY","TT","Rad_260","Rad_500","Rad_900","Data"]
+DataSignal_startAt = 6 # The index where you want to start not doing a StackPlot (for Signal and Data).
 
-DataMC = False
-Norm     = "uni"#"uni"
-log      = "lin"#"lin"
+DataMC   = True
+Norm     = "lumi"#"uni"
+log      = "log"#"lin"
 Format   = [".pdf",".png",".C"]
 VetoList = ["h_XsecBr","h_muon1_triggerSF","h_muon1_isoSF","h_muon1_idSF","h_muon1_trackingSF","h_muon2_triggerSF","h_muon2_isoSF","h_muon2_idSF","h_muon2_trackingSF","h_Nev_preHLT","h_Nev_posHLT"]
 SFtodraw = ["h_pre_muon1_triggerSF","h_pre_muon1_isoSF","h_pre_muon1_idSF","h_pre_muon1_trackingSF","h_pre_muon2_triggerSF","h_pre_muon2_isoSF","h_pre_muon2_idSF","h_pre_muon2_trackingSF"]
 if( (Norm!="uni" and Norm!="lumi") or (log!="log" and log!="lin") ): print "WARNING!!! Wrong paramters."; sys.exit()
-print "You are producing plots in", log, "scale. Normalized to:", Norm, ". Format:", Format
+DataOrMC = "DataMC"
+if (not DataMC): DataOrMC = "OverImposed"
+if DataMC: print "You are producing Starck plots in", log, "scale. Normalized to:", Norm, ". Format:", Format
+else:      print "You are producing OverImposed plots in", log, "scale. Normalized to:", Norm, ". Format:", Format
 
 # List of files
 print "Loading files in:", Filefolder
-DataOrMC = "DataMC"
-if (not DataMC): DataOrMC = "OverImposed"
 Folder   = "Plots_" + DataOrMC + "_" + Norm + "_" + log + "/"
 os.system("mkdir -p " + Folder + "/C")
 File_List = []
@@ -40,7 +40,6 @@ def drawVariabes():
     c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky(); c1.cd()
     if(log=="log"): c1.SetLogy(1)
     else:           c1.SetLogy(0)
-
     hdata = []
     hstack = []; hstack_max = []; Xaxis = []; Yaxis = []
     nFile = 0
