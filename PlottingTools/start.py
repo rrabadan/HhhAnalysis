@@ -24,8 +24,8 @@ legend.SetFillColor(ROOT.kWhite)
 legend.SetTextSize(0.05)
 legend.SetTextFont(62)
 
-color  = {"TT":ROOT.kRed, "DY":ROOT.kBlue, "VV":ROOT.kGreen+2, "sT":ROOT.kMagenta+2, "Wjet":ROOT.kOrange+2, "ttV":ROOT.kViolet-1, "Data": 0 }
-marker = {"TT":21, "DY":22, "VV":23, "sT":34, "Wjet":33, "ttV":29, "Data": 0 }
+color  = {"TT":ROOT.kRed, "DY":ROOT.kBlue, "VV":ROOT.kGreen+2, "sT":ROOT.kMagenta+2, "Wjet":ROOT.kOrange+2, "ttV":ROOT.kViolet-1, "Rad_260":9, "Rad_500":28, "Rad_900":12, "Data": 0 }
+marker = {"TT":21, "DY":22, "VV":23, "sT":34, "Wjet":33, "ttV":29 }
 
 import getpass
 user = getpass.getuser()

@@ -10,7 +10,6 @@ execfile("functions.py")
 
 doTest = False
 tree_name="DiHiggsWWBBAna/evtree"
-#benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
 makeHadd = sys.argv[2]
 whichSample = sys.argv[3]
@@ -24,71 +23,71 @@ if( whichSample == "Rad_260" ):
   this_cat      = "cat HADD/Rad_260_* > HADD/Rad_260.txt"
   this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2.root @HADD/Rad_260.txt"
   this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_270" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/170420_233008 | grep root | grep -v failed > HADD/Rad_270_GluGluToRadionToHHTo2B2VTo2L2NuM-270.txt")
-#  this_cat      = "cat HADD/Rad_270_* > HADD/Rad_270.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2.root @HADD/Rad_270.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_300" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/170420_233022 | grep root | grep -v failed > HADD/Rad_300_GluGluToRadionToHHTo2B2VTo2L2NuM-300.txt")
-#  this_cat      = "cat HADD/Rad_300_* > HADD/Rad_300.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2.root @HADD/Rad_300.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_350" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/170420_233035 | grep root | grep -v failed > HADD/Rad_350_GluGluToRadionToHHTo2B2VTo2L2NuM-350.txt")
-#  this_cat      = "cat HADD/Rad_350_* > HADD/Rad_350.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2.root @HADD/Rad_350.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_400" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/170420_233048 | grep root | grep -v failed > HADD/Rad_400_GluGluToRadionToHHTo2B2VTo2L2NuM-400.txt")
-#  this_cat      = "cat HADD/Rad_400_* > HADD/Rad_400.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2.root @HADD/Rad_400.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_450" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/170420_233102 | grep root | grep -v failed > HADD/Rad_450_GluGluToRadionToHHTo2B2VTo2L2NuM-450.txt")
-#  this_cat      = "cat HADD/Rad_450_* > HADD/Rad_450.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2.root @HADD/Rad_450.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_270" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/170420_233008 | grep root | grep -v failed > HADD/Rad_270_GluGluToRadionToHHTo2B2VTo2L2NuM-270.txt")
+  this_cat      = "cat HADD/Rad_270_* > HADD/Rad_270.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2.root @HADD/Rad_270.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_300" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/170420_233022 | grep root | grep -v failed > HADD/Rad_300_GluGluToRadionToHHTo2B2VTo2L2NuM-300.txt")
+  this_cat      = "cat HADD/Rad_300_* > HADD/Rad_300.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2.root @HADD/Rad_300.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_350" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/170420_233035 | grep root | grep -v failed > HADD/Rad_350_GluGluToRadionToHHTo2B2VTo2L2NuM-350.txt")
+  this_cat      = "cat HADD/Rad_350_* > HADD/Rad_350.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2.root @HADD/Rad_350.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_400" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/170420_233048 | grep root | grep -v failed > HADD/Rad_400_GluGluToRadionToHHTo2B2VTo2L2NuM-400.txt")
+  this_cat      = "cat HADD/Rad_400_* > HADD/Rad_400.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2.root @HADD/Rad_400.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_450" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/170420_233102 | grep root | grep -v failed > HADD/Rad_450_GluGluToRadionToHHTo2B2VTo2L2NuM-450.txt")
+  this_cat      = "cat HADD/Rad_450_* > HADD/Rad_450.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2.root @HADD/Rad_450.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2.root"
 if( whichSample == "Rad_500" ):
   Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/170420_233115 | grep root | grep -v failed > HADD/Rad_500_GluGluToRadionToHHTo2B2VTo2L2NuM-500.txt")
   this_cat      = "cat HADD/Rad_500_* > HADD/Rad_500.txt"
   this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2.root @HADD/Rad_500.txt"
   this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_550" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/170420_233129 | grep root | grep -v failed > HADD/Rad_550_GluGluToRadionToHHTo2B2VTo2L2NuM-550.txt")
-#  this_cat      = "cat HADD/Rad_550_* > HADD/Rad_550.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2.root @HADD/Rad_550.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_600" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/170420_233142 | grep root | grep -v failed > HADD/Rad_600_GluGluToRadionToHHTo2B2VTo2L2NuM-600.txt")
-#  this_cat      = "cat HADD/Rad_600_* > HADD/Rad_600.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2.root @HADD/Rad_600.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_650" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/170420_233156 | grep root | grep -v failed > HADD/Rad_650_GluGluToRadionToHHTo2B2VTo2L2NuM-650.txt")
-#  this_cat      = "cat HADD/Rad_650_* > HADD/Rad_650.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2.root @HADD/Rad_650.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_750" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/170420_233209 | grep root | grep -v failed > HADD/Rad_750_GluGluToRadionToHHTo2B2VTo2L2NuM-750.txt")
-#  this_cat      = "cat HADD/Rad_750_* > HADD/Rad_750.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2.root @HADD/Rad_750.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_800" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/170420_233222 | grep root | grep -v failed > HADD/Rad_800_GluGluToRadionToHHTo2B2VTo2L2NuM-800.txt")
-#  this_cat      = "cat HADD/Rad_800_* > HADD/Rad_800.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2.root @HADD/Rad_800.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_550" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/170420_233129 | grep root | grep -v failed > HADD/Rad_550_GluGluToRadionToHHTo2B2VTo2L2NuM-550.txt")
+  this_cat      = "cat HADD/Rad_550_* > HADD/Rad_550.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2.root @HADD/Rad_550.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_600" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/170420_233142 | grep root | grep -v failed > HADD/Rad_600_GluGluToRadionToHHTo2B2VTo2L2NuM-600.txt")
+  this_cat      = "cat HADD/Rad_600_* > HADD/Rad_600.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2.root @HADD/Rad_600.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_650" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/170420_233156 | grep root | grep -v failed > HADD/Rad_650_GluGluToRadionToHHTo2B2VTo2L2NuM-650.txt")
+  this_cat      = "cat HADD/Rad_650_* > HADD/Rad_650.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2.root @HADD/Rad_650.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_750" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/170420_233209 | grep root | grep -v failed > HADD/Rad_750_GluGluToRadionToHHTo2B2VTo2L2NuM-750.txt")
+  this_cat      = "cat HADD/Rad_750_* > HADD/Rad_750.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2.root @HADD/Rad_750.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_800" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/170420_233222 | grep root | grep -v failed > HADD/Rad_800_GluGluToRadionToHHTo2B2VTo2L2NuM-800.txt")
+  this_cat      = "cat HADD/Rad_800_* > HADD/Rad_800.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2.root @HADD/Rad_800.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2.root"
 if( whichSample == "Rad_900" ):
   Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/170420_233235 | grep root | grep -v failed > HADD/Rad_900_GluGluToRadionToHHTo2B2VTo2L2NuM-900.txt")
   this_cat      = "cat HADD/Rad_900_* > HADD/Rad_900.txt"
   this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2.root @HADD/Rad_900.txt"
   this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2.root"
-#if( whichSample == "Rad_1000" ):
-#  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/170420_233248 | grep root | grep -v failed > HADD/Rad_1000_GluGluToRadionToHHTo2B2VTo2L2NuM-1000.txt")
-#  this_cat      = "cat HADD/Rad_1000_* > HADD/Rad_1000.txt"
-#  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2.root @HADD/Rad_1000.txt"
-#  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2.root"
+if( whichSample == "Rad_1000" ):
+  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/170420_233248 | grep root | grep -v failed > HADD/Rad_1000_GluGluToRadionToHHTo2B2VTo2L2NuM-1000.txt")
+  this_cat      = "cat HADD/Rad_1000_* > HADD/Rad_1000.txt"
+  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2.root @HADD/Rad_1000.txt"
+  this_NtotPath = "/fdata/hepx/store/user/lpernie/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2.root"
 #if( whichSample == "Grav_260" ):
 #  Find_str.append("find /fdata/hepx/store/user/lpernie/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/170420_233302 | grep root | grep -v failed > HADD/Grav_260_GluGluToBulkGravitonToHHTo2B2VTo2L2NuM-260.txt")
 #  this_cat      = "cat HADD/Grav_260_* > HADD/Grav_260.txt"
@@ -347,10 +346,9 @@ for ev in TCha:
   weight = 1.
   if( whichSample!="Data" ):
     # Cross section (We only weights to 1fb-1, the real normalization for xsec will be placed into FinalPlotter.py)
-    xSec = ev.XsecBr
-    if(nEv==0): h_pre_XsecBr.SetBinContent(1, xSec)
+    if(nEv==0): h_pre_XsecBr.SetBinContent(1, ev.XsecBr)
     Lumi    = 1. * 1000 # Convert from 1fb-1 to 1pb-1
-    weight = weight * (Lumi*xSec)/nTOT_prehlt
+    weight = weight * (Lumi*ev.XsecBr)/nTOT_prehlt
     # Scale factors
     weight = weight * ev.muon1_pogSF * ev.muon2_pogSF
   # Minimal Selection
