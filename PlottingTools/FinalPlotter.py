@@ -32,7 +32,6 @@ for sample in Samples:
   os.system("mkdir -p " + Folder + "/" + sample)
 
 # For each root file you loop over the histograms it contains
-print "Looping over Files and Histograms."
 ROOT.gStyle.SetOptStat(0)
 
 def drawSF():
@@ -66,8 +65,9 @@ hstack = []; hstack_max = []; Xaxis = []; Yaxis = []
 nFile = 0
 LastHisto = 0
 # Find the total number of histos to plot
-for h in File_List[0].GetListOfKeys():
-  if( h.ClassName()=="TH1F" and not h.GetName() in VetoList ): LastHisto += 1
+for ht in File_List[1].GetListOfKeys():
+  ht = ht.ReadObj()
+  if( ht.ClassName()=="TH1F" and not ht.GetName() in VetoList ): LastHisto += 1
 # For each file
 for ThisFile in File_List:
   ThisFile.cd()
@@ -97,12 +97,12 @@ for ThisFile in File_List:
           if( h.GetMaximum() > hstack_max[nHist] ): hstack_max[nHist] = h.GetMaximum()
         # IF is SIGNAL (and you want a stack plot)
         if( nFile>=DataSignal_startAt and nFile!=int(len(File_List)-1) and DataMC ):
-          if(Norm=="lumi"): h.Scale(Lumi*50)
-          if( nHist==0 ): legend.AddEntry(h, Samples[nFile], "l") # One entry per file
+          if(Norm=="lumi"): h.Scale(Lumi*10)
+          if( nHist==0 ): legend.AddEntry(h, Samples[nFile]+" x 10", "l") # One entry per file
           hSign.append(h)
           hSign[nHist].SetLineColor(color[Samples[nFile]]); hSign[nHist].SetLineStyle(2); hSign[nHist].SetLineWidth(2);
           if( hSign[nHist].GetMaximum() > hstack_max[nHist] ): hstack_max[nHist] = hSign[nHist].GetMaximum()
-          if (nHist==LastHisto-1) : hSignAll.append(hSign); 
+          if (nHist==LastHisto-1) : hSignAll.append(hSign);
         # IF is Data (ALWAYS the last one, and you want a stack plot)
         if( nFile==int(len(File_List)-1) and DataMC ):
           hdata.append(h)
@@ -131,14 +131,14 @@ for this_stack in hstack:
     this_stack.Draw("hist");
     hdata[nHist].SetMarkerStyle(0); hdata[nHist].SetMarkerColor(ROOT.kBlack);
     hdata[nHist].Draw("PEsame");
-    for iS in range(len(hSignAll)): hSignAll[iS][nHist].Draw("same")
+    for iS in range(len(hSignAll)): hSignAll[iS][nHist].Draw("same");
   legend.Draw("same")
   this_stack.GetXaxis().SetTitle(Xaxis[nHist]); this_stack.GetXaxis().SetTitleSize(1.);
   this_stack.GetYaxis().SetTitle(Yaxis[nHist]); this_stack.GetYaxis().SetTitleSize(1.);
   c1.cd(); # Go back to the main canvas before defining pad2
   pad2 = ROOT.TPad("pad2", "", 0, 0.05, 1, 0.2)
   pad2.SetTopMargin(0)
-  pad2.SetBottomMargin(0.2)
+  pad2.SetBottomMargin(0.4)
   pad2.SetGridx(); pad2.SetGridy();
   pad2.Draw()
   pad2.cd() # pad2 becomes the current pad
@@ -148,8 +148,8 @@ for this_stack in hstack:
   h3.SetMinimum(0.5); h3.SetMaximum(1.5);
   h3.Sumw2()
   h3.SetStats(0);
-  h3.GetXaxis().SetTitle(Xaxis[nHist]); h3.GetXaxis().SetTitleOffset(0.5); h3.GetXaxis().SetTitleSize(0.2);
-  h3.GetYaxis().SetTitle("Data/MC ratio"); h3.GetXaxis().SetTitleOffset(0.5); h3.GetYaxis().SetTitleSize(0.2);
+  h3.GetXaxis().SetTitle(Xaxis[nHist]); h3.GetXaxis().SetTitleOffset(0.7); h3.GetXaxis().SetTitleSize(0.2);
+  h3.GetYaxis().SetTitle("Data/MC ratio"); h3.GetXaxis().SetTitleOffset(0.7); h3.GetYaxis().SetTitleSize(0.2);
   h3.GetYaxis().SetLabelSize(0.08) 
   h3.GetXaxis().SetLabelSize(0.1)
   h_tot = ROOT.TH1F()
