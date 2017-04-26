@@ -15,7 +15,7 @@ config.section_("Data")
 config.Data.inputDBS        = 'global'
 config.Data.splitting       = 'FileBased'
 config.Data.unitsPerJob     = 1
-config.Data.outLFNDirBase   =  '/store/user/lpernie/'
+config.Data.outLFNDirBase   =  '/store/user/lpernie/MC_Hhh_analysis'
 config.Data.publication     = False
 
 config.section_("Site")
@@ -187,15 +187,15 @@ if __name__ == '__main__':
     # To plot easily the datasets
     if not OnlySubmitCRAB:
       sampleN   = dataset.split('/')[1].split('_')[0]+dataset.split('/')[1].split('_')[1]
-      path      = "/fdata/hepx/store/user/lpernie/" + dataset.split('/')[1] + "/crab_" + dataset.split('/')[1] + "/"
+      path      = "/fdata/hepx/store/user/lpernie/MC_Hhh_analysis/" + dataset.split('/')[1] + "/crab_" + dataset.split('/')[1] + "/"
       NewestDir = findNewestDir(path)
       path      = path + NewestDir
       newSample = True
       if(sampleN_short[i]==lastSampleShort): newSample = False
       if((newSample and lastSampleShort!="NOSAMPLESHORT") or i==int(len(NumSample)-1) ):
         plotter_f.write('  this_cat      = "cat HADD/' + sampleN_short[i-1] + '_*' ' > HADD/' + sampleN_short[i-1] + '.txt"\n')
-        plotter_f.write('  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt"\n')
-        plotter_f.write('  this_NtotPath = "/fdata/hepx/store/user/lpernie/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
+        plotter_f.write('  this_hadd     = "hadd -T -f -k /fdata/hepx/store/user/lpernie/MC_Hhh_analysis/' + oldDataset + '/crab_' + oldDataset + '.root @HADD/' + sampleN_short[i-1] + '.txt"\n')
+        plotter_f.write('  this_NtotPath = "/fdata/hepx/store/user/lpernie/MC_Hhh_analysis/' + oldDataset + '/crab_' + oldDataset + '.root"\n')
       if(newSample):
         plotter_f.write('if( whichSample == "' + sampleN_short[i] + '" ):\n')
       plotter_f.write('  Find_str.append("find ' + path + ' | grep root | grep -v failed > HADD/' + sampleN_short[i] + "_" + sampleN + '.txt")\n')

@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH -J runGrav_270
+#SBATCH -p stakeholder
+#SBATCH -n1
+#SBATCH --mem-per-cpu=2000
+#SBATCH -o batchjobs_Grav_270-%A-%a.out
+#SBATCH -e batchjobs_Grav_270-%A-%a.err
+#SBATCH --ntasks-per-core=1
+
+echo "starting at `date` on `hostname`"
+echo "SLURM_JOBID=$SLURM_JOBID"
+jobid=$SLURM_JOBID
+source ~/.bashrc
+. /etc/profile.d/modules.sh
+cd $CMSSW_BASE/src/HhhAnalysis/PlottingTools/
+python PlotterProducer.py -b HaddYes Grav_270
+echo "job$jobid starts, `date`"
+echo "job$jobid is done, `date`"
+exit 0
