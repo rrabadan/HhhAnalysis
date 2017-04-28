@@ -14,14 +14,14 @@ config.JobType.inputFiles   = ["Files/EfficienciesAndSF_BCDEFGH_Tracking.root","
 config.section_("Data")
 config.Data.inputDBS        = 'global'
 config.Data.splitting       = 'LumiBased'
-config.Data.unitsPerJob     = 10
+config.Data.unitsPerJob     = 20
 config.Data.lumiMask        = 'Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
 config.Data.outLFNDirBase   = '/store/user/lpernie/'
 config.Data.publication     = False
 
 config.section_("Site")
 config.Site.storageSite     = 'T3_US_TAMU'
-OnlySubmitCRAB = False
+OnlySubmitCRAB = True
 
 import os
 import glob

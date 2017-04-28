@@ -932,9 +932,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   using namespace edm;
   initBranches(); 
   ievent++;
-  //if (debug_) 
-  std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
-  //Compute weight
+  if (debug_) std::cout << "event  " << iEvent.id().event()<<" ievent "<< ievent << std::endl;
+  //Compute weight [Xsec is in pb]
   float BR_h_bb   = 0.577;
   float BR_h_WW   = 0.215;
   float BR_W_lnu  = 0.3257;

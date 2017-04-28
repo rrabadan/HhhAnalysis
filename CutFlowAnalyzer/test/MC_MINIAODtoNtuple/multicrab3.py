@@ -14,7 +14,7 @@ config.JobType.inputFiles   = ["Files/EfficienciesAndSF_BCDEFGH_Tracking.root","
 config.section_("Data")
 config.Data.inputDBS        = 'global'
 config.Data.splitting       = 'FileBased'
-config.Data.unitsPerJob     = 1
+config.Data.unitsPerJob     = 10
 config.Data.outLFNDirBase   =  '/store/user/lpernie/MC_Hhh_analysis'
 config.Data.publication     = False
 

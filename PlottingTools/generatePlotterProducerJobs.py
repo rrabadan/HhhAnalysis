@@ -46,4 +46,4 @@ exit 0""".format(sample, HaddYes))
 submitscript.close()
 os.system("chmod +x Send_PlotterProducer.sh")
 
-#os.system("./Send_PlotterProducer.sh")
+os.system("./Send_PlotterProducer.sh")
