@@ -15,17 +15,19 @@ ROOT.gStyle.SetTitleH(0.058)
 ROOT.gStyle.SetTitleBorderSize(0)
 
 ROOT.gStyle.SetPadLeftMargin(0.126)
-ROOT.gStyle.SetPadRightMargin(0.14)
+ROOT.gStyle.SetPadRightMargin(0.04)
 ROOT.gStyle.SetPadTopMargin(0.06)
 ROOT.gStyle.SetPadBottomMargin(0.13)
 
-legend = ROOT.TLegend(0.75,0.6,0.86,0.94)
+ROOT.gStyle.SetLegendBorderSize(0)
+ROOT.gStyle.SetLegendFillColor(0)
+legend = ROOT.TLegend(0.85,0.6,0.95,0.94)
 legend.SetFillColor(ROOT.kWhite)
-legend.SetTextSize(0.05)
+legend.SetTextSize(0.02)
 legend.SetTextFont(62)
 
-color  = {"TT":ROOT.kRed, "DY":ROOT.kBlue, "VV":ROOT.kGreen+2, "sT":ROOT.kMagenta+2, "Wjet":ROOT.kOrange+2, "ttV":ROOT.kViolet-1, "Data": 0 }
-marker = {"TT":21, "DY":22, "VV":23, "sT":34, "Wjet":33, "ttV":29, "Data": 0 }
+color  = {"TT":ROOT.kRed, "DY":ROOT.kBlue, "VV":ROOT.kGreen+2, "sT":ROOT.kMagenta+2, "Wjet":ROOT.kOrange+2, "ttV":ROOT.kViolet-1, "Rad_260":9, "Rad_500":28, "Rad_900":12, "Data": 0 }
+marker = {"TT":21, "DY":22, "VV":23, "sT":34, "Wjet":33, "ttV":29 }
 
 import getpass
 user = getpass.getuser()

@@ -36,9 +36,8 @@ python runHMETest.py -jt {jobtype}
 echo "job$jobid is done, `date`"
 exit 0""".format(jobtype=job))
     jobscript.close()
+    submitscript.write("""sbatch {0}/Send_PlotterProducer_{1}.slrm""".format(jobdir, job))
 
-    submitscript.write("""
-sbatch {0}/Send_PlotterProducer_{1}.slrm""".format(jobdir, job))
 submitscript.close()
 os.system("chmod +x submitallPlotProducer.sh")
 

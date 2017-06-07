@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J runsplit
-#SBATCH -p hepx
+#SBATCH -J runData
+#SBATCH -p stakeholder
 #SBATCH -n1
-#SBATCH --mem-per-cpu=12000
+#SBATCH --mem-per-cpu=2000
 #SBATCH -o batchjobs_Data-%A-%a.out
 #SBATCH -e batchjobs_Data-%A-%a.err
 #SBATCH --ntasks-per-core=1
@@ -10,16 +10,10 @@
 echo "starting at `date` on `hostname`"
 echo "SLURM_JOBID=$SLURM_JOBID"
 jobid=$SLURM_JOBID
-
 source ~/.bashrc
 . /etc/profile.d/modules.sh
-cd /home/lpernie/Hhh_CMSSW/CMSSW_8_0_26/src/HhhAnalysis/PlottingTools/
-echo "job$jobid starts, `date`"
+cd $CMSSW_BASE/src/HhhAnalysis/PlottingTools/
 python PlotterProducer.py -b HaddYes Data
+echo "job$jobid starts, `date`"
 echo "job$jobid is done, `date`"
-#-p hepx 
-#-p mpi-core8
-#--time=72:00:00
-
 exit 0
-
