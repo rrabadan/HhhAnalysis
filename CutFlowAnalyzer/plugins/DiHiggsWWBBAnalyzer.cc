@@ -85,6 +85,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     bool debug_;
     enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu};//add other background
     enum {Rad_260=100, Rad_270, Rad_300, Rad_350, Rad_400, Rad_450, Rad_500, Rad_550, Rad_600, Rad_650, Rad_750, Rad_800, Rad_900,  Rad_1000, Grav_260, Grav_270, Grav_300, Grav_350, Grav_400, Grav_450, Grav_500, Grav_550, Grav_600, Grav_650, Grav_750, Grav_800, Grav_900,  Grav_1000};
+    enum {Rad_260_ZZbb=300 };
+
     int sampleType_;
     //bool runMCMatch;//select physics objects by matching them to gen information
     int jetSelectionAlgo_;
@@ -168,6 +170,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     void printallDecendants(const reco::Candidate* );
     void printallAncestors(const reco::Candidate* );
     void checkGenParticlesSignal(edm::Handle<reco::GenParticleCollection> genParticleColl);
+    void checkGenParticlesZZbb(edm::Handle<reco::GenParticleCollection> genParticleColl);
     void checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl);
     void checkGenParticlesDY(edm::Handle<reco::GenParticleCollection> genParticleColl);
     void matchGenJet2Parton(edm::Handle<std::vector<reco::GenJet>> genjetColl);
@@ -201,6 +204,11 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     const reco::Candidate* t2cand;
     const reco::GenJet* b1genjet;
     const reco::GenJet* b2genjet;
+
+    //ZZbb
+    const reco::Candidate* z1cand;
+    const reco::Candidate* z2cand;
+    const reco::Candidate* htoZZcand;
 
     POGRecipesRun2::MuonPOGSFManager* muonPOGSFs;
   private:
@@ -273,6 +281,32 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float htoWW_py;
     float htoWW_pz; 
     float htoWW_mass;
+
+    //ZZbb
+    float z1_energy;
+    float z1_pt;
+    float z1_eta;
+    float z1_phi;
+    float z1_px;
+    float z1_py;
+    float z1_pz;
+    float z1_mass;
+    float z2_energy;
+    float z2_pt;
+    float z2_eta;
+    float z2_phi;
+    float z2_px;
+    float z2_py;
+    float z2_pz;
+    float z2_mass;
+    float htoZZ_energy;
+    float htoZZ_pt;
+    float htoZZ_eta;
+    float htoZZ_phi;
+    float htoZZ_px;
+    float htoZZ_py;
+    float htoZZ_pz; 
+    float htoZZ_mass;
 
     float b1_energy;
     float b1_pt;
@@ -684,6 +718,30 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   htoWW_pz = -999999;
   htoWW_mass = -999999;
 
+  //ZZbb
+  z1_energy = -1;
+  z1_pt = -1;
+  z1_eta = -9;
+  z1_phi = -9;
+  z1_px = -999999;
+  z1_py = -999999;
+  z1_pz = -999999;
+  z1_mass = -999999;
+  z2_energy = -1;
+  z2_pt = -1;
+  z2_eta = -9;
+  z2_phi = -9;
+  z2_px = -999999;
+  z2_py = -999999;
+  z2_pz = -999999;
+  z2_mass = -999999;
+  htoZZ_energy = -1;
+  htoZZ_pt = -1;
+  htoZZ_px = -999999;
+  htoZZ_py = -999999;
+  htoZZ_pz = -999999;
+  htoZZ_mass = -999999;
+
   b1_energy = -1;
   b1_pt = -1;
   b1_eta = -9;
@@ -993,7 +1051,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   	std::cout <<"no Gen information "<< std::endl;
   }
 
-  if ((sampleType_>Data and sampleType_<=B12) or sampleType_>=Rad_260 ) checkGenParticlesSignal(genParticleColl);
+  if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) ) checkGenParticlesSignal(genParticleColl);
+  else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
   else if (sampleType_==TTbar)                                          checkGenParticlesTTbar(genParticleColl);
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets)                checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles)  matchGenJet2Parton( genjetColl );
@@ -1099,6 +1158,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	}
 	if (not triggermatching) continue;
     }
+
     bool muonid = false;
     if (mu_id_ == "2016Medium") muonid = POGRecipesRun2::is2016MediumMuon(mu);
     else if (mu_id_ == "Medium") muonid = POGRecipesRun2::isMediumMuon(mu);
@@ -1119,10 +1179,13 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     if(debug_) printf("muon with pt %4.1f, charge %d, IsoVar %5.3f, dz(PV) %+5.3f, dxy(PV)%+5.3f, POG loose id %d, tight id %d\n",
 	  mu.pt(), mu.charge(), isoVar, mu.muonBestTrack()->dz(PV.position()), fabs(mu.muonBestTrack()->dxy(PV.position())),mu.isLooseMuon(), mu.isTightMuon(PV));
   }
+
   //Ignore electron now
   for (const pat::Electron &el : *electrons) {
     if (el.pt()>1000000) continue;
   }
+
+
   const reco::Candidate * selectedPlep = NULL;
   const reco::Candidate * selectedNlep = NULL;
   const reco::Candidate * selectedleadinglep = NULL;
@@ -1147,7 +1210,9 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	}
     }
   }
+
   //bool hastwomuons = false;
+  //two leptons and adding SFs
   if (sumPt>=30){
     muon1_px = selectedleadinglep->px(); muon1_py = selectedleadinglep->py(); muon1_pz = selectedleadinglep->pz(); 
     muon1_energy = selectedleadinglep->energy();
@@ -1272,6 +1337,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	}
     }
   }
+
+
   if (allbjets.size() >= 2 and hastwojets){
     b1jet_px = allbjets[jet1].px(); b1jet_py = allbjets[jet1].py(); b1jet_pz = allbjets[jet1].pz(); b1jet_energy = allbjets[jet1].energy();
     b1jet_pt = allbjets[jet1].pt(); b1jet_eta = allbjets[jet1].eta(); b1jet_phi = allbjets[jet1].phi();
@@ -1468,7 +1535,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("w2_eta",&w2_eta, "w2_eta/F");
   evtree->Branch("w2_phi",&w2_phi, "w2_phi/F");
 
-  evtree->Branch("htoWW_energy",&htoWW_energy);
+  evtree->Branch("htoWW_energy",&htoWW_energy,"htoWW_energy/F");
   evtree->Branch("htoWW_px",&htoWW_px,"htoWW_px/F");
   evtree->Branch("htoWW_py",&htoWW_py,"htoWW_px/F");
   evtree->Branch("htoWW_pz",&htoWW_pz,"htoWW_pz/F");
@@ -1476,6 +1543,29 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   //evtree->Branch("Wtomu1nu1",&Wtomu1nu1,"Wtomu1nu1/B");
   //evtree->Branch("Wtomu2nu2",&Wtomu2nu2,"Wtomu2nu2/B");
   //evtree->Branch("htoWW",&htoWW,"htoWW/B");
+
+  //ZZbb
+  evtree->Branch("z1_mass",&z1_mass, "z1_mass/F");
+  evtree->Branch("z1_px",&z1_px, "z1_px/F");
+  evtree->Branch("z1_py",&z1_py, "z1_py/F");
+  evtree->Branch("z1_pz",&z1_pz, "z1_pz/F");
+  evtree->Branch("z1_energy",&z1_energy, "z1_energy/F");
+  evtree->Branch("z1_pt",&z1_pt, "z1_pt/F");
+  evtree->Branch("z1_eta",&z1_eta, "z1_eta/F");
+  evtree->Branch("z1_phi",&z1_phi, "z1_phi/F");
+  evtree->Branch("z2_mass",&z2_mass, "z2_mass/F");
+  evtree->Branch("z2_px",&z2_px, "z2_px/F");
+  evtree->Branch("z2_py",&z2_py, "z2_py/F");
+  evtree->Branch("z2_pz",&z2_pz, "z2_pz/F");
+  evtree->Branch("z2_energy",&z2_energy, "z2_energy/F");
+  evtree->Branch("z2_pt",&z2_pt, "z2_pt/F");
+  evtree->Branch("z2_eta",&z2_eta, "z2_eta/F");
+  evtree->Branch("z2_phi",&z2_phi, "z2_phi/F");
+  evtree->Branch("htoZZ_energy",&htoZZ_energy,"htoZZ_energy/F");
+  evtree->Branch("htoZZ_px",&htoZZ_px,"htoZZ_px/F");
+  evtree->Branch("htoZZ_py",&htoZZ_py,"htoZZ_px/F");
+  evtree->Branch("htoZZ_pz",&htoZZ_pz,"htoZZ_pz/F");
+  evtree->Branch("htoZZ_mass",&htoZZ_mass,"htoZZ_mass/F");
 
   evtree->Branch("b1_px",&b1_px, "b1_px/F");
   evtree->Branch("b1_py",&b1_py, "b1_py/F");
@@ -1868,6 +1958,165 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
   std::cout <<"*********** end in checking GenParticles for Signal sample ***********"<< std::endl;
 }
 
+// ------------ method called to check singal genParticles   ------------
+void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb(edm::Handle<reco::GenParticleCollection> genParticleColl){
+
+  std::vector<reco::GenParticle*> b1Coll; 
+  std::vector<reco::GenParticle*> b2Coll;
+  std::vector<reco::GenParticle*> ZColl;
+  std::vector<const reco::Candidate*> htoZZColl;
+  std::vector<const reco::Candidate*> htoBBColl;
+
+  std::cout <<"*********** start to check GenParticles for Signal sample ***********"<< std::endl;
+  bool h2tohh = false;
+  for (reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
+    //particle id, (electron12)(muon13),(b5),(W+24),(SM higgs25), (Z 23)
+    // particle id  it->pdgId()
+    //std::cout << "Gen paticles: id " << it->pdgId() << std::endl; 
+    //if (it->pdgId() == 24 && hasDaughter(it->clone(), -13) )
+    if (it->pdgId() == 23){
+	const reco::Candidate* tmpz = it->mother();
+	//while (tmpz->pdgId() == 23 && tmpz->numberOfMothers() == 1) tmpz = tmpw1->mother();
+	if (tmpz->pdgId() == 25)  ZColl.push_back(it->clone());
+    }
+    else if (it->pdgId() == 5 && it->mother()->pdgId() == 25 )
+    {
+	if (it->numberOfMothers() != 1) std::cout << "bquark has more than one mother particle" << std::endl;
+	//   std::cout << "find bquark candidate" << std::endl;
+	b1Coll.push_back(it->clone());
+    }
+    else if (it->pdgId() == -5 && it->mother()->pdgId() == 25 )
+    {
+	if (it->numberOfMothers() != 1) std::cout << "bquark has more than one mother particle" << std::endl;
+	// std::cout << "find bbarquark candidate" << std::endl;
+	b2Coll.push_back(it->clone());
+    }
+
+  }// all Gen particles
+
+  std::cout <<"size ZColl "<< ZColl.size() <<" b1Coll "<< b1Coll.size()<<" b2Coll "<< b2Coll.size()<< std::endl;
+  //htoWW
+  if (ZColl.size()>=2){
+    //for (auto Z1_cand : W1Coll)
+    //	for (auto Z2_cand : W2Coll){
+    for (unsigned i=0; i < ZColl.size()-1; i++){
+	auto Z1_cand = ZColl.at(i);
+	for (unsigned j=i+1; j < ZColl.size(); j++){
+	  auto Z2_cand = ZColl.at(j);
+	  const reco::Candidate* Z1_mother = Z1_cand->mother();
+	  const reco::Candidate* Z2_mother = Z2_cand->mother();
+	  while (Z1_mother->pdgId() == 23) Z1_mother = Z1_mother->mother();
+	  while (Z2_mother->pdgId() == 23) Z2_mother = Z2_mother->mother();
+	  if (Z1_mother == Z2_mother && Z1_mother->pdgId() == 25) {
+	    htoZZColl.push_back(Z1_mother);
+	    break;
+	  }
+	}
+    }
+  }
+
+  //htoBB
+  if (b1Coll.size() && b2Coll.size()){
+    for(auto b1_cand : b1Coll)
+	for (auto b2_cand : b2Coll) {
+	  const reco::Candidate* b1_mother = b1_cand->mother();
+	  const reco::Candidate* b2_mother = b2_cand->mother();
+	  if (b1_mother == b2_mother && b1_mother->pdgId() == 25) {
+	    htoBBColl.push_back(b1_mother);
+	    break;
+	  }
+	}
+  }
+  //h2tohh
+  if (htoZZColl.size() && htoBBColl.size()){
+    for (auto htoZZ_cand : htoZZColl){
+	for (auto htoBB_cand : htoBBColl){
+	  const reco::Candidate* htoZZ_mother = htoZZ_cand->mother();
+	  const reco::Candidate* htoBB_mother = htoBB_cand->mother();
+	  while (htoZZ_mother->pdgId() == 25)  htoZZ_mother = htoZZ_mother->mother();
+	  while (htoBB_mother->pdgId() == 25)  htoBB_mother = htoBB_mother->mother();
+	  //if (htoWW_mother == htoBB_mother && (htoBB_mother->pdgId()==99927 || htoBB_mother->pdgId()==99926)){ 
+	  //release the pdgId requirement to use other signal samples: graviton, radion
+	  if (htoZZ_mother == htoBB_mother){ 
+	    h2tohhcand = htoZZ_mother;
+	    htoZZcand = htoZZ_cand;
+	    htoBBcand = htoBB_cand;
+	    h2tohh = true;
+	    break;
+	  }
+	}
+	if (h2tohh) break;
+
+    }
+    if (h2tohh)
+	std::cout << "find h2 candidate, id "<< h2tohhcand->pdgId() <<" mass "<< h2tohhcand->mass() << std::endl;
+    else std::cout <<"failed to find h2tohh "<< std::endl;
+  }
+
+  if (h2tohh){
+    b1cand = finddecendant(htoBBcand, 5, false);
+    b2cand = finddecendant(htoBBcand, -5, false);
+    //not working here 
+    const reco::Candidate* htoZZtmp = htoZZcand;
+    while (htoZZtmp->numberOfDaughters() == 1 and htoZZtmp->daughter(0)->pdgId() == 25) htoZZtmp = htoZZtmp->daughter(0);
+    for (unsigned i=0; i < htoZZtmp->numberOfDaughters(); i++){
+    	const reco::Candidate* tmp = htoZZtmp->daughter(i);
+	if (tmp->pdgId() == 23 and hasDaughter(tmp, -13) and hasDaughter(tmp, 13))
+	    z1cand = tmp;
+	//else if (tmp->pdgId() == 23 and hasDaughter(tmp, -11) and hasDaughter(tmp, 11))
+	else if (tmp->pdgId() == 23 and ((hasDaughter(tmp, -12) and hasDaughter(tmp, 12)) or
+		    			  (hasDaughter(tmp, -14) and hasDaughter(tmp, 14)) or 
+					  (hasDaughter(tmp, -16) and hasDaughter(tmp, 16))
+		    ))
+	    z2cand = tmp;
+
+    }
+
+    if (not (z1cand and z2cand)){
+	std::cout <<"Failed to two Zs decaying mu mu and nu nu"<< std::endl;
+	return ;
+    }
+
+
+    if (debug_){
+	if (hasDaughter(z1cand, -13) and hasDaughter(z1cand, 13)) std::cout <<" find two muons "<< std::endl;
+	if (hasDaughter(z1cand, -11) and hasDaughter(z1cand, 11)) std::cout <<" find two electrons "<< std::endl;
+	//if ((hasDaughter(zcand, -13) and hasDaughter(w2cand, 11)) or (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 13))) std::cout <<" find two electron+muon "<< std::endl;
+    }
+    if (hasDaughter(z1cand, -13) and hasDaughter(z1cand, 13)){
+	mu1cand = findmudaughter(z1cand);
+	nu1cand = findnudaughter(z2cand);
+	mu2cand = findmudaughter(z1cand);
+	nu2cand = findnudaughter(z2cand);
+	//make sure all candiates are in same frame
+	while (mu1cand->numberOfDaughters()==1 and  mu1cand->daughter(0)->pdgId()==mu1cand->pdgId())
+	  mu1cand = mu1cand->daughter(0);
+	while (nu1cand->numberOfDaughters()==1 and  nu1cand->daughter(0)->pdgId()==nu1cand->pdgId())
+	  nu1cand = nu1cand->daughter(0);
+	while (mu2cand->numberOfDaughters()==1 and  mu2cand->daughter(0)->pdgId()==mu2cand->pdgId())
+	  mu2cand = mu2cand->daughter(0);
+	while (nu2cand->numberOfDaughters()==1 and  nu2cand->daughter(0)->pdgId()==nu2cand->pdgId())
+	  nu2cand = nu2cand->daughter(0);
+	findAllGenParticles = true;
+	std::cout <<" mu1 " ; printCandidate(mu1cand);
+	std::cout <<" nu1 " ; printCandidate(nu1cand);
+	std::cout <<" mu2 " ; printCandidate(mu2cand);
+	std::cout <<" nu2 " ; printCandidate(nu2cand);
+    }else{
+	findAllGenParticles = false;
+	std::cout <<"failed to two muons from  Z decays "<< std::endl;
+    }
+    if (debug_){
+	std::cout <<" z1 " ; printCandidate(z1cand);
+	std::cout <<" z2 " ; printCandidate(z2cand);
+	std::cout <<" b1 " ; printCandidate(b1cand);
+	std::cout <<" b2 " ; printCandidate(b2cand);
+    }
+  }
+  std::cout <<"*********** end in checking GenParticles for ZZbb sample ***********"<< std::endl;
+}
+
+
 // ------------ method called to check ttbar genParticles   ------------
 void DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCollection> genParticleColl){
 
@@ -2103,14 +2352,6 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     nu1_px = nu1cand->px();
     nu1_py = nu1cand->py();
     nu1_pz = nu1cand->pz();
-    w1_energy = w1cand->energy();
-    w1_pt = w1cand->pt();
-    w1_eta = w1cand->eta();
-    w1_phi = w1cand->phi();
-    w1_px = w1cand->px();
-    w1_py = w1cand->py();
-    w1_pz = w1cand->pz();
-    w1_mass = w1cand->mass();
 
     mu2_energy = mu2cand->energy();
     mu2_pt = mu2cand->pt();
@@ -2126,14 +2367,6 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     nu2_pz = nu2cand->pz();
     nu2_eta = nu2cand->eta();
     nu2_phi = nu2cand->phi();
-    w2_energy = w2cand->energy();
-    w2_pt = w2cand->pt();
-    w2_eta = w2cand->eta();
-    w2_phi = w2cand->phi();
-    w2_px = w2cand->px();
-    w2_py = w2cand->py();
-    w2_pz = w2cand->pz();
-    w2_mass = w2cand->mass();
 
     b1_energy = b1cand->energy();
     b1_pt = b1cand->pt();
@@ -2149,13 +2382,30 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     b2_px = b2cand->px();
     b2_py = b2cand->py();
     b2_pz = b2cand->pz();
-    if ((sampleType_>Data and sampleType_<=B12) or sampleType_>=Rad_260 ){
+    if (sampleType_ < Rad_260_ZZbb){
+	w1_energy = w1cand->energy();
+	w1_pt = w1cand->pt();
+	w1_eta = w1cand->eta();
+	w1_phi = w1cand->phi();
+	w1_px = w1cand->px();
+	w1_py = w1cand->py();
+	w1_pz = w1cand->pz();
+	w1_mass = w1cand->mass();
+	w2_energy = w2cand->energy();
+	w2_pt = w2cand->pt();
+	w2_eta = w2cand->eta();
+	w2_phi = w2cand->phi();
+	w2_px = w2cand->px();
+	w2_py = w2cand->py();
+	w2_pz = w2cand->pz();
+	w2_mass = w2cand->mass();
+    }
+    if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260  and sampleType_<Rad_260_ZZbb)){
 	htoWW_energy = htoWWcand->energy();
 	htoWW_px = htoWWcand->px();
 	htoWW_py = htoWWcand->py();
 	htoWW_pz = htoWWcand->pz();
 	htoWW_mass = htoWWcand->mass();
-
 
 	htobb_energy = htoBBcand->energy();
 	htobb_px = htoBBcand->px();
@@ -2163,13 +2413,11 @@ DiHiggsWWBBAnalyzer::fillbranches(){
 	htobb_pz = htoBBcand->pz();
 	htobb_mass = htoBBcand->mass();
 
-
 	h2tohh_energy = h2tohhcand->energy();
 	h2tohh_px = h2tohhcand->px();
 	h2tohh_py = h2tohhcand->py();
 	h2tohh_pz = h2tohhcand->pz();
 	h2tohh_mass = h2tohhcand->mass();
-
 
     }else if (sampleType_==TTbar){
 	t1_energy = t1cand->energy();
@@ -2180,6 +2428,35 @@ DiHiggsWWBBAnalyzer::fillbranches(){
 	t2_px = t2cand->px();
 	t2_py = t2cand->py();
 	t2_pz = t2cand->pz();
+    }else if (sampleType_ >= Rad_260_ZZbb){
+	z1_energy = w1cand->energy();
+	z1_pt = w1cand->pt();
+	z1_eta = w1cand->eta();
+	z1_phi = w1cand->phi();
+	z1_px = w1cand->px();
+	z1_py = w1cand->py();
+	z1_pz = w1cand->pz();
+	z1_mass = w1cand->mass();
+	z2_energy = w2cand->energy();
+	z2_pt = w2cand->pt();
+	z2_eta = w2cand->eta();
+	z2_phi = w2cand->phi();
+	z2_px = w2cand->px();
+	z2_py = w2cand->py();
+	z2_pz = w2cand->pz();
+	z2_mass = w2cand->mass();
+    
+	htobb_energy = htoBBcand->energy();
+	htobb_px = htoBBcand->px();
+	htobb_py = htoBBcand->py();
+	htobb_pz = htoBBcand->pz();
+	htobb_mass = htoBBcand->mass();
+
+	h2tohh_energy = h2tohhcand->energy();
+	h2tohh_px = h2tohhcand->px();
+	h2tohh_py = h2tohhcand->py();
+	h2tohh_pz = h2tohhcand->pz();
+	h2tohh_mass = h2tohhcand->mass();
     }
 
     if (hastwogenjets){
@@ -2356,6 +2633,7 @@ DiHiggsWWBBAnalyzer::hasDaughter(const reco::Candidate* cand, int id){
 
   //for (unsigned int i=0; i < cand->numberOfDaughters(); i++)
   //	   std::cout <<"candidate id "<< cand->pdgId()<<" daughter i "<< i <<" id "<<(cand->daughter(i))->pdgId()<< std::endl;
+  if (not(cand)) return false;
   for (unsigned int i=0; i < cand->numberOfDaughters(); i++)
     if ((cand->daughter(i))->pdgId() == id) return true;
   return false;
