@@ -10,21 +10,9 @@ import Samplelist
 execfile("start.py")
 execfile("functions.py")
 #Creating folders and parameters
-def AddFiles(chain, inputDir):
-    theInputFiles = []
-    for d in range(len(inputDir)):
-        my_dir = inputDir[d]
-        if not os.path.isdir(my_dir):
-            print "ERROR: This is not a valid directory: ", my_dir
-            if d==len(inputDir)-1:
-                print "ERROR: No input files were selected"
-                exit()
-            continue
-        print "Proceed to next directory"
-        ls = os.listdir(my_dir)
-        chain.Add(my_dir[:] + x for x in ls if x.endswith('root'))
 
 doTest = False
+doOnlyRefPDF = True
 refPDF = ROOT.TFile("REFPDFPU40.root","READ")
 onshellWmasspdf = refPDF.Get("onshellWmasspdf")
 onshellnuptpdf = refPDF.Get("onshellnuptpdf")
@@ -32,22 +20,28 @@ recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
 tree_name="DiHiggsWWBBAna/evtree"
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
+for mass in [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900, 1000]:
+    benchmarks.append("graviton_M%d"%mass)
+    benchmarks.append("radion_M%d"%mass)
+
 #whichSample = "Graviton_0419"
 
 parser = argparse.ArgumentParser(description='runHME')
 parser.add_argument("-n", "--njobs", dest="njobs", type=int, default=100, help="total splitted jobs. [Default: 100]")
 parser.add_argument("-i", "--ijob", dest="ijob", type=int, default=0, help="ith job in splitting. [Default: 0]")
-parser.add_argument("-jt", "--jobtype", dest="jobtype", default="radion", help="sample type to run. [Default: radion]")
-parser.add_argument("-it", "--iterations", dest="iterations", default=10000, help="iteration number used HME [Default: 100000]")
+parser.add_argument("-jt", "--jobtype", dest="jobtype", default="radion_M260", help="sample type to run. [Default: radion]")
 args = parser.parse_args()
 whichSample = args.jobtype
-makeHadd = "HaddNo"
+makeHadd = "HaddYes"
 
-#print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
-#makeHadd = sys.argv[2]
-#whichSample = sys.argv[3]
+"""
+print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
+makeHadd = sys.argv[2]
+whichSample = sys.argv[3]
 if( makeHadd!="HaddYes" and makeHadd!="HaddNo" ): print "WARNING! 1st argument has to be HaddYes or HaddNo"; sys.exit()
-#if( whichSample!="TT" and whichSample!="DY" and whichSample!="VV" and whichSample!="sT" and whichSample!="Wjet" and whichSample!="ttV" and whichSample!="Data" ):  print "WARNING! 2nd argument have to be TT, DY, VV, singTop, Wjet, ttV, or Data"; sys.exit()
+if( whichSample!="TT" and whichSample!="DY" and whichSample!="VV" and whichSample!="sT" and whichSample!="Wjet" and whichSample!="ttV" and whichSample!="Data" ):  print "WARNING! 2nd argument have to be TT, DY, VV, singTop, Wjet, ttV, or Data"; sys.exit()
+
+"""
 ######################################
 ## define shell commands
 ######################################
@@ -56,21 +50,19 @@ for i in range(len(Samplelist.outAnalist[whichSample])):
   Find_str.append("find %s | grep root | grep -v failed > HADD/%s_%d.txt"%(Samplelist.outAnalist[whichSample][i], Samplelist.sampleFullName[whichSample], i))
     #Find_str.append("find /fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_TTTo2L2Nu_13TeV-powheg/170405_172215 | grep root | grep -v failed > HADD/TT_TTTo2L2Nu13TeV-powheg.txt")
 this_cat = "cat HADD/%s_* > HADD/%s.txt"%(Samplelist.sampleFullName[whichSample], whichSample)
+this_NtotDir  = "/fdata/hepx/store/user/%s/%s/"%(user,Samplelist.sampleFullName[whichSample])
+if not(os.path.exists(this_NtotDir)):
+    os.system("mkdir %s"%this_NtotDir)
 if whichSample != "DATA":
-    this_NtotPath = "/fdata/hepx/store/user/%s/%s/crab_%s.root"%(user,Samplelist.sampleFullName[whichSample], Samplelist.sampleFullName[whichSample])
+    this_NtotPath = this_NtotDir+"crab_%s.root"%(Samplelist.sampleFullName[whichSample])
     this_hadd     = "hadd -T -f -k %s @HADD/%s.txt"%(this_NtotPath, whichSample)
-    outpath = "/fdata/hepx/store/user/%s/%s"%(user,Samplelist.sampleFullName[whichSample])
-    os.system("mkdir -p %s" % outpath)
 
 ######################################
 # Running commands
 ######################################
 for this_find in Find_str:
-  print "this find ",this_find
   os.system(this_find)
-
 os.system(this_cat)
-print "this_hadd ", this_hadd
 if (makeHadd=="HaddYes" and whichSample!="Data"): os.system(this_hadd)
 ######################################
 #this_NtotPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root"
@@ -96,7 +88,11 @@ nStart = TotalEv/args.njobs*args.ijob
 nEnd = TotalEv/args.njobs*(args.ijob+1)
 if args.ijob == args.njobs-1:
     nEnd = -1
-f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Plotting/'%user + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
+
+histdir = '/fdata/hepx/store/user/%s/Hhh_For_Plotting/%s_REFPDF/'%(user, whichSample)
+if not(os.path.exists(histdir)):
+    os.system("mkdir %s"%histdir)
+f = ROOT.TFile(histdir + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
 
 ptbinSF= [20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 120.0, 200.0, 300.]
 etabinSF = [0, 0.9, 1.2, 2.1, 2.4]
@@ -134,6 +130,33 @@ h_pre_b1jet_vtxPt        = ROOT.TH1F("h_pre_b1jet_vtxPt","",50,0.,100.);       h
 h_pre_b1jet_vtxMass      = ROOT.TH1F("h_pre_b1jet_vtxMass","",50,0.,50.);      h_pre_b1jet_vtxMass.GetXaxis().SetTitle("");
 h_pre_b1jet_vtx3DSig     = ROOT.TH1F("h_pre_b1jet_vtx3DSig","",50,0.,5.);      h_pre_b1jet_vtx3DSig.GetXaxis().SetTitle("");
 h_pre_b1jet_vtx3DVal     = ROOT.TH1F("h_pre_b1jet_vtx3DVal","",50,0.,5.);      h_pre_b1jet_vtx3DVal.GetXaxis().SetTitle("");
+
+# Muons gen
+h_gen_pre_MU1_pt             = ROOT.TH1F("h_gen_pre_MU1_pt","",50,10.,350.);    h_gen_pre_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
+h_gen_pre_MU2_pt             = ROOT.TH1F("h_gen_pre_MU2_pt","",50,10.,350.);    h_gen_pre_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
+h_gen_pre_MU1_eta            = ROOT.TH1F("h_gen_pre_MU1_eta","",50,-3.,3.);     h_gen_pre_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          
+h_gen_pre_MU2_eta            = ROOT.TH1F("h_gen_pre_MU2_eta","",50,-3.,3.);     h_gen_pre_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       
+h_gen_pre_mass_l1l2          = ROOT.TH1F("h_gen_pre_mass_l1l2","",40,20.,150.); h_gen_pre_mass_l1l2.GetXaxis().SetTitle("m(l,l)");               
+h_gen_pre_dR_l1l2            = ROOT.TH1F("h_gen_pre_dR_l1l2","",50,0.,5.);      h_gen_pre_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           
+# B-jets Reco
+h_gen_pre_J1_pt              = ROOT.TH1F("h_gen_pre_J1_pt","",50,20.,350.);     h_gen_pre_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     
+h_gen_pre_J2_pt              = ROOT.TH1F("h_gen_pre_J2_pt","",50,20.,350.);     h_gen_pre_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  
+h_gen_pre_J1_eta             = ROOT.TH1F("h_gen_pre_J1_eta","",50,-3.,3.);      h_gen_pre_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           
+h_gen_pre_J2_eta             = ROOT.TH1F("h_gen_pre_J2_eta","",50,-3.,3.);      h_gen_pre_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        
+h_gen_pre_mass_b1b2          = ROOT.TH1F("h_gen_pre_mass_b1b2","",40,40.,400.); h_gen_pre_mass_b1b2.GetXaxis().SetTitle("m(j,j)");      
+h_gen_pre_dR_b1b2            = ROOT.TH1F("h_gen_pre_dR_b1b2","",50,0.,6.);      h_gen_pre_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           
+# Mix Reco
+h_gen_pre_met_pt             = ROOT.TH1F("h_gen_pre_met_pt","",50,10.,400.);    h_gen_pre_met_pt.GetXaxis().SetTitle("MET [GeV]");                
+h_gen_pre_mass_trans         = ROOT.TH1F("h_gen_pre_mass_trans","",50,0.,250.); h_gen_pre_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");     
+h_gen_pre_dR_l1l2b1b2        = ROOT.TH1F("h_gen_pre_dR_l1l2b1b2","",50,0.,6.);  h_gen_pre_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");     
+h_gen_pre_dphi_llmet         = ROOT.TH1F("h_gen_pre_dphi_llmet","",50,-4.,4.);  h_gen_pre_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
+h_gen_pre_onshellWmass       = ROOT.TH1F("h_gen_pre_onshellWmass","",70,30.,100.);  h_gen_pre_onshellWmass.GetXaxis().SetTitle("W^{onshell} mass [GeV]");
+h_gen_pre_offshellWmass       = ROOT.TH1F("h_gen_pre_offshellWmass","",70,30.,100.);  h_gen_pre_offshellWmass.GetXaxis().SetTitle("W^{onshell} mass [GeV]");
+h_gen_pre_onshellnupt        = ROOT.TH1F("h_gen_pre_onshellnupt","",500,0.,500.);  h_gen_pre_onshellnupt.GetXaxis().SetTitle("p_{T} of #nu^{onshellW} [GeV]");
+h_gen_pre_onoffshellWmass    = ROOT.TH2F("h_gen_pre_onoffshellWmass","",70,30.,100.,70,0.0,70.0);  h_gen_pre_onoffshellWmass.GetXaxis().SetTitle(" W^{onshell} mass [GeV]"); h_gen_pre_onoffshellWmass.GetYaxis().SetTitle(" W^{offshell} mass [GeV]");
+h_gen_pre_bjetrescalec1dR4   = ROOT.TH1F("h_gen_pre_bjetrescalec1dR4","",600,0.,6);  h_gen_pre_bjetrescalec1dR4.GetXaxis().SetTitle("#frac{p_{T}(b)}{p_{T}(bjet)}, leading bjet");
+h_gen_pre_bjetrescalec2dR4   = ROOT.TH1F("h_gen_pre_bjetrescalec2dR4","",600,0.,6);  h_gen_pre_bjetrescalec2dR4.GetXaxis().SetTitle("#frac{p_{T}(b)}{p_{T}(bjet)}, subleading bjet");
+
 # Muons Reco
 h_pre_MU1_pt             = ROOT.TH1F("h_pre_MU1_pt","",50,10.,350.);    h_pre_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
 h_pre_MU2_pt             = ROOT.TH1F("h_pre_MU2_pt","",50,10.,350.);    h_pre_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
@@ -154,6 +177,32 @@ h_pre_mass_trans         = ROOT.TH1F("h_pre_mass_trans","",50,0.,250.); h_pre_ma
 h_pre_dR_l1l2b1b2        = ROOT.TH1F("h_pre_dR_l1l2b1b2","",50,0.,6.);  h_pre_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");     
 h_pre_dphi_llmet         = ROOT.TH1F("h_pre_dphi_llmet","",50,-4.,4.);  h_pre_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
 # CLEANING CUT
+# Muons gen
+h_gen_cc_MU1_pt              = ROOT.TH1F("h_gen_cc_MU1_pt","",50,10.,350.);    h_gen_cc_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
+h_gen_cc_MU2_pt              = ROOT.TH1F("h_gen_cc_MU2_pt","",50,10.,350.);    h_gen_cc_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
+h_gen_cc_MU1_eta             = ROOT.TH1F("h_gen_cc_MU1_eta","",50,-3.,3.);     h_gen_cc_MU1_eta.GetXaxis().SetTitle("Lead. #mu #eta");          
+h_gen_cc_MU2_eta             = ROOT.TH1F("h_gen_cc_MU2_eta","",50,-3.,3.);     h_gen_cc_MU2_eta.GetXaxis().SetTitle("Sublead. #mu #eta");       
+h_gen_cc_mass_l1l2           = ROOT.TH1F("h_gen_cc_mass_l1l2","",40,20.,150.); h_gen_cc_mass_l1l2.GetXaxis().SetTitle("m(l,l)");             
+h_gen_cc_dR_l1l2             = ROOT.TH1F("h_gen_cc_dR_l1l2","",50,0.,5.);      h_gen_cc_dR_l1l2.GetXaxis().SetTitle("#Delta R(l,l)");           
+# B-jets gen
+h_gen_cc_J1_pt               = ROOT.TH1F("h_gen_cc_J1_pt","",50,20.,350.);     h_gen_cc_J1_pt.GetXaxis().SetTitle("Lead. jet P_{T} [GeV]");     
+h_gen_cc_J2_pt               = ROOT.TH1F("h_gen_cc_J2_pt","",50,20.,350.);     h_gen_cc_J2_pt.GetXaxis().SetTitle("Sublead. jet P_{T} [GeV]");  
+h_gen_cc_J1_eta              = ROOT.TH1F("h_gen_cc_J1_eta","",50,-3.,3.);      h_gen_cc_J1_eta.GetXaxis().SetTitle("Lead. jet #eta");           
+h_gen_cc_J2_eta              = ROOT.TH1F("h_gen_cc_J2_eta","",50,-3.,3.);      h_gen_cc_J2_eta.GetXaxis().SetTitle("Sublead. jet #eta");        
+h_gen_cc_mass_b1b2           = ROOT.TH1F("h_gen_cc_mass_b1b2","",40,40.,400.); h_gen_cc_mass_b1b2.GetXaxis().SetTitle("m(j,j)");              
+h_gen_cc_dR_b1b2             = ROOT.TH1F("h_gen_cc_dR_b1b2","",50,0.,6.);      h_gen_cc_dR_b1b2.GetXaxis().SetTitle("#Delta R(j,j)");           
+# Mix gen
+h_gen_cc_met_pt              = ROOT.TH1F("h_gen_cc_met_pt","",50,10.,400.);    h_gen_cc_met_pt.GetXaxis().SetTitle("MET [GeV]");                
+h_gen_cc_mass_trans          = ROOT.TH1F("h_gen_cc_mass_trans","",50,0.,250.); h_gen_cc_mass_trans.GetXaxis().SetTitle("M_{trans} [GeV]");   
+h_gen_cc_dR_l1l2b1b2         = ROOT.TH1F("h_gen_cc_dR_l1l2b1b2","",50,0.,6.);  h_gen_cc_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");
+h_gen_cc_dphi_llmet          = ROOT.TH1F("h_gen_cc_dphi_llmet","",50,-4.,4.);  h_gen_cc_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
+h_gen_cc_onshellWmass       = ROOT.TH1F("h_gen_cc_onshellWmass","",70,30.,100.);  h_gen_cc_onshellWmass.GetXaxis().SetTitle("W^{onshell} mass [GeV]");
+h_gen_cc_offshellWmass       = ROOT.TH1F("h_gen_cc_offshellWmass","",70,30.,100.);  h_gen_cc_offshellWmass.GetXaxis().SetTitle("W^{onshell} mass [GeV]");
+h_gen_cc_onshellnupt        = ROOT.TH1F("h_gen_cc_onshellnupt","",500,0.,500.);  h_gen_cc_onshellnupt.GetXaxis().SetTitle("p_{T} of #nu^{onshellW} [GeV]");
+h_gen_cc_onoffshellWmass    = ROOT.TH2F("h_gen_cc_onoffshellWmass","",70,30.,100.,70,0.0,70.0);  h_gen_cc_onoffshellWmass.GetXaxis().SetTitle(" W^{onshell} mass [GeV]"); h_gen_cc_onoffshellWmass.GetYaxis().SetTitle(" W^{offshell} mass [GeV]");
+h_gen_cc_bjetrescalec1dR4   = ROOT.TH1F("h_gen_cc_bjetrescalec1dR4","",600,0.,6);  h_gen_cc_bjetrescalec1dR4.GetXaxis().SetTitle("#frac{p_{T}(b)}{p_{T}(bjet)}, leading bjet");
+h_gen_cc_bjetrescalec2dR4   = ROOT.TH1F("h_gen_cc_bjetrescalec2dR4","",600,0.,6);  h_gen_cc_bjetrescalec2dR4.GetXaxis().SetTitle("#frac{p_{T}(b)}{p_{T}(bjet)}, subleading bjet");
+
 # Muons Reco
 h_cc_MU1_pt              = ROOT.TH1F("h_cc_MU1_pt","",50,10.,350.);    h_cc_MU1_pt.GetXaxis().SetTitle("Lead. #mu P_{T} [GeV]");    
 h_cc_MU2_pt              = ROOT.TH1F("h_cc_MU2_pt","",50,10.,350.);    h_cc_MU2_pt.GetXaxis().SetTitle("Sublead. #mu P_{T} [GeV]"); 
@@ -174,10 +223,6 @@ h_cc_mass_trans          = ROOT.TH1F("h_cc_mass_trans","",50,0.,250.); h_cc_mass
 h_cc_dR_l1l2b1b2         = ROOT.TH1F("h_cc_dR_l1l2b1b2","",50,0.,6.);  h_cc_dR_l1l2b1b2.GetXaxis().SetTitle("#Delta R(lljj)");
 h_cc_dphi_llmet          = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi_llmet.GetXaxis().SetTitle("#Delta #phi (ll,MET)");
 
-h_h2mass_weight_gen          = ROOT.TH1F("h_h2mass_weight_gen","",60,200.,800.);  h_h2mass_weight_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
-h_h2mass_weight1_gen          = ROOT.TH1F("h_h2mass_weight1_gen","",60,200.,800.);  h_h2mass_weight1_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
-h_h2mass_weight_reco          = ROOT.TH1F("h_h2mass_weight_reco","",60,200.,800.);  h_h2mass_weight_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
-h_h2mass_weight1_reco          = ROOT.TH1F("h_h2mass_weight1_reco","",60,200.,800.);  h_h2mass_weight1_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
 
 nEv = 0
 for ev in TCha:
@@ -204,52 +249,6 @@ for ev in TCha:
   dR_ll_cleancut      = (ev.dR_l1l2<3.8)
   dR_jj_cleancut      = (ev.dR_b1b2<3.8)
   cleaning_cuts       = (mt_cleancut and NoZ_cleancut and mJJ_cleancut and dR_lljj_cleancut and dR_ll_cleancut and dR_jj_cleancut)
-  if (cleaning_cuts and ev.findAllGenParticles):
-      mu1_p4 	      = ROOT.TLorentzVector(ev.mu1_px, ev.mu1_py, ev.mu1_pz, ev.mu1_energy)
-      mu2_p4 	      = ROOT.TLorentzVector(ev.mu2_px, ev.mu2_py, ev.mu2_pz, ev.mu2_energy)
-      b1jet_p4 	      = ROOT.TLorentzVector(ev.b1_px, ev.b1_py, ev.b1_pz, ev.b1_energy)
-      b2jet_p4 	      = ROOT.TLorentzVector(ev.b2_px, ev.b2_py, ev.b2_pz, ev.b2_energy)
-      met_vec2        = ROOT.TVector2(ev.nu1_px + ev.nu2_px, ev.nu1_py + ev.nu2_py)
-      hme_gen = HeavyMassEstimator()
-      hme_gen.setKinematic(mu1_p4, mu2_p4, b1jet_p4, b2jet_p4, met_vec2)
-      hme_gen.setonshellWmasspdf(onshellWmasspdf)
-      hme_gen.setonshellnuptpdf(onshellnuptpdf)
-      #hme.showKinematic()
-      hme_gen.setIterations(args.iterations)
-      hme_gen.runHME()
-      if hme_gen.hme_h2Mass.GetEntries()>0:
-	  print "Gen Level most probable reco mass ",hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())," entries ",hme_gen.hme_h2Mass.GetEntries()
-	  hme_gen.hme_h2Mass.SetName("hme_h2Mass_ev%d_genlevel"%nEv)
-          hme_gen.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_genlevel"%nEv)
-	  if nEv%100 == 0:
-	      hme_gen.hme_h2Mass.Write()
-	      hme_gen.hme_h2MassWeight1.Write()
-          h_h2mass_weight_gen.Fill(hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin()))
-          h_h2mass_weight1_gen.Fill(hme_gen.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme_gen.hme_h2MassWeight1.GetMaximumBin()))
-  
-  if (cleaning_cuts):
-      muon1_p4 	  = ROOT.TLorentzVector(ev.muon1_px, ev.muon1_py, ev.muon1_pz, ev.muon1_energy)
-      muon2_p4 	  = ROOT.TLorentzVector(ev.muon2_px, ev.muon2_py, ev.muon2_pz, ev.muon2_energy)
-      b1jet_p4 	  = ROOT.TLorentzVector(ev.b1jet_px, ev.b1jet_py, ev.b1jet_pz, ev.b1jet_energy)
-      b2jet_p4 	  = ROOT.TLorentzVector(ev.b2jet_px, ev.b2jet_py, ev.b2jet_pz, ev.b2jet_energy)
-      met_vec2    = ROOT.TVector2(ev.met_px, ev.met_py)
-      hme = HeavyMassEstimator()
-      hme.setKinematic(muon1_p4, muon2_p4, b1jet_p4, b2jet_p4, met_vec2)
-      hme.setonshellWmasspdf(onshellWmasspdf)
-      hme.setonshellnuptpdf(onshellnuptpdf)
-      hme.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
-      #hme.showKinematic()
-      hme.setIterations(args.iterations)
-      hme.runHME()
-      if hme.hme_h2Mass.GetEntries()>0:
-	  print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()
-	  hme.hme_h2Mass.SetName("hme_h2Mass_ev%d_recolevel"%nEv)
-          hme.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_recolevel"%nEv)
-	  if nEv%100 == 0:
-	      hme.hme_h2Mass.Write()
-	      hme.hme_h2MassWeight1.Write()
-          h_h2mass_weight_reco.Fill(hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin()))
-          h_h2mass_weight1_reco.Fill(hme.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme.hme_h2MassWeight1.GetMaximumBin()))
   # WEIGHTS
   weight = 1.
   if( whichSample!="Data" ):
@@ -290,6 +289,49 @@ for ev in TCha:
     h_pre_b1jet_vtx3DSig.Fill( ev.b1jet_vtx3DSig, weight )
     h_pre_b1jet_vtx3DVal.Fill( ev.b1jet_vtx3DVal, weight )
     # Kinematic Variables
+    if ev.findAllGenParticles: 
+	# Gen
+        if ev.w1_mass > ev.w2_mass:
+		h_gen_pre_onshellWmass.Fill( ev.w1_mass )
+		h_gen_pre_offshellWmass.Fill( ev.w2_mass )
+		h_gen_pre_onoffshellWmass.Fill( ev.w1_mass, ev.w2_mass )
+		h_gen_pre_onshellnupt.Fill( ev.nu1_pt )
+        else:
+		h_gen_pre_onshellWmass.Fill( ev.w2_mass )
+		h_gen_pre_offshellWmass.Fill( ev.w1_mass )
+		h_gen_pre_onoffshellWmass.Fill( ev.w2_mass, ev.w1_mass )
+		h_gen_pre_onshellnupt.Fill( ev.nu2_pt )
+	h_gen_pre_MU1_pt.Fill( ev.mu1_pt, weight )
+	h_gen_pre_MU2_pt.Fill( ev.mu2_pt, weight )
+	h_gen_pre_MU2_eta.Fill( ev.mu2_eta, weight )
+	h_gen_pre_MU1_eta.Fill( ev.mu1_eta, weight )
+	h_gen_pre_mass_l1l2.Fill( ev.mass_genl1l2, weight )
+	h_gen_pre_dR_l1l2.Fill( ev.dR_genl1l2, weight )
+	h_gen_pre_J1_pt.Fill( ev.b1_pt, weight )
+	h_gen_pre_J2_pt.Fill( ev.b2_pt, weight )
+	h_gen_pre_J1_eta.Fill( ev.b1_eta, weight )
+	h_gen_pre_J2_eta.Fill( ev.b2_eta, weight )
+	h_gen_pre_mass_b1b2.Fill( ev.mass_genb1b2, weight )
+	h_gen_pre_dR_b1b2.Fill( ev.dR_genb1b2, weight )
+        dR_jet11 = deltaR(ev.b1jet_eta, ev.b1jet_phi, ev.b1_eta, ev.b1_phi)
+        dR_jet12 = deltaR(ev.b1jet_eta, ev.b1jet_phi, ev.b2_eta, ev.b2_phi)
+        dR_jet21 = deltaR(ev.b2jet_eta, ev.b2jet_phi, ev.b1_eta, ev.b1_phi)
+        dR_jet22 = deltaR(ev.b2jet_eta, ev.b2jet_phi, ev.b2_eta, ev.b2_phi)
+        if dR_jet11 < dR_jet12 and dR_jet11 < 0.4:
+	   h_gen_pre_bjetrescalec1dR4.Fill( ev.b1_pt/ev.b1jet_pt, weight ) 
+        elif dR_jet11 > dR_jet12 and dR_jet12 < 0.4:
+	   h_gen_pre_bjetrescalec1dR4.Fill( ev.b2_pt/ev.b1jet_pt, weight ) 
+        if dR_jet22 < dR_jet21 and dR_jet22 < 0.4:
+	   h_gen_pre_bjetrescalec2dR4.Fill( ev.b2_pt/ev.b2jet_pt, weight ) 
+        elif dR_jet22 > dR_jet21 and dR_jet21 < 0.4:
+	  h_gen_pre_bjetrescalec2dR4.Fill( ev.b1_pt/ev.b2jet_pt, weight ) 
+        #print "dR_jet11 ",dR_jet11," dR_jet12 ",dR_jet12, " ev.dR_b1jet ",ev.dR_b1jet
+        #print "dR_jet21 ",dR_jet21," dR_jet22 ",dR_jet22, " ev.dR_b2jet ",ev.dR_b2jet
+	h_gen_pre_met_pt.Fill( ev.genmet_pt, weight )
+	h_gen_pre_mass_trans.Fill( ev.mass_gentrans, weight )
+	h_gen_pre_dR_l1l2b1b2.Fill( ev.dR_genl1l2b1b2, weight )
+	h_gen_pre_dphi_llmet.Fill( ev.dphi_genllmet, weight )
+    #Reco
     h_pre_MU1_pt.Fill( ev.muon1_pt, weight )
     h_pre_MU2_pt.Fill( ev.muon2_pt, weight )
     h_pre_MU2_eta.Fill( ev.muon2_eta, weight )
@@ -306,8 +348,50 @@ for ev in TCha:
     h_pre_mass_trans.Fill( ev.mass_trans, weight )
     h_pre_dR_l1l2b1b2.Fill( ev.dR_l1l2b1b2, weight )
     h_pre_dphi_llmet.Fill( ev.dphi_llmet, weight )
+
     if( cleaning_cuts ):
       # Kinematic Variables
+      if ev.findAllGenParticles: 
+	  #Gen
+          if ev.w1_mass > ev.w2_mass:
+		h_gen_cc_onshellWmass.Fill( ev.w1_mass)
+		h_gen_cc_offshellWmass.Fill( ev.w2_mass)
+		h_gen_cc_onoffshellWmass.Fill( ev.w1_mass, ev.w2_mass )
+		h_gen_cc_onshellnupt.Fill( ev.nu1_pt, weight)
+          else:
+		h_gen_cc_onshellWmass.Fill( ev.w2_mass)
+		h_gen_cc_offshellWmass.Fill( ev.w1_mass)
+		h_gen_cc_onoffshellWmass.Fill( ev.w2_mass, ev.w1_mass )
+		h_gen_cc_onshellnupt.Fill( ev.nu2_pt )
+	  h_gen_cc_MU1_pt.Fill( ev.mu1_pt, weight )
+	  h_gen_cc_MU2_pt.Fill( ev.mu2_pt, weight )
+	  h_gen_cc_MU2_eta.Fill( ev.mu2_eta, weight )
+	  h_gen_cc_MU1_eta.Fill( ev.mu1_eta, weight )
+	  h_gen_cc_mass_l1l2.Fill( ev.mass_genl1l2, weight )
+	  h_gen_cc_dR_l1l2.Fill( ev.dR_genl1l2, weight )
+	  h_gen_cc_J1_pt.Fill( ev.b1_pt, weight )
+	  h_gen_cc_J2_pt.Fill( ev.b2_pt, weight )
+	  h_gen_cc_J1_eta.Fill( ev.b1_eta, weight )
+	  h_gen_cc_J2_eta.Fill( ev.b2_eta, weight )
+	  h_gen_cc_mass_b1b2.Fill( ev.mass_genb1b2, weight )
+	  h_gen_cc_dR_b1b2.Fill( ev.dR_genb1b2, weight )
+	  h_gen_cc_met_pt.Fill( ev.genmet_pt, weight )
+	  h_gen_cc_mass_trans.Fill( ev.mass_gentrans, weight )
+	  h_gen_cc_dR_l1l2b1b2.Fill( ev.dR_genl1l2b1b2, weight )
+	  h_gen_cc_dphi_llmet.Fill( ev.dphi_genllmet, weight )
+          dR_jet11 = deltaR(ev.b1jet_eta, ev.b1jet_phi, ev.b1_eta, ev.b1_phi)
+          dR_jet12 = deltaR(ev.b1jet_eta, ev.b1jet_phi, ev.b2_eta, ev.b2_phi)
+          dR_jet21 = deltaR(ev.b2jet_eta, ev.b2jet_phi, ev.b1_eta, ev.b1_phi)
+          dR_jet22 = deltaR(ev.b2jet_eta, ev.b2jet_phi, ev.b2_eta, ev.b2_phi)
+          if dR_jet11 < dR_jet12 and dR_jet11 < 0.4:
+	   h_gen_cc_bjetrescalec1dR4.Fill( ev.b1_pt/ev.b1jet_pt, weight ) 
+          elif dR_jet11 > dR_jet12 and dR_jet12 < 0.4:
+	   h_gen_cc_bjetrescalec1dR4.Fill( ev.b2_pt/ev.b1jet_pt, weight ) 
+          if dR_jet22 < dR_jet21 and dR_jet22 < 0.4:
+	   h_gen_cc_bjetrescalec2dR4.Fill( ev.b2_pt/ev.b2jet_pt, weight ) 
+          elif dR_jet22 > dR_jet21 and dR_jet21 < 0.4:
+	   h_gen_cc_bjetrescalec2dR4.Fill( ev.b1_pt/ev.b2jet_pt, weight ) 
+      #REco
       h_cc_MU1_pt.Fill( ev.muon1_pt, weight )
       h_cc_MU2_pt.Fill( ev.muon2_pt, weight )
       h_cc_MU2_eta.Fill( ev.muon2_eta, weight )
@@ -337,6 +421,7 @@ h_pre_muon2_trackingSF.Divide(h_pre_muon2_SF_bg1)
 #normalize1D(h_pre_muon1_trackingSF)
 # Writing histograms
 f.cd()
+ 
 h_pre_XsecBr.Write()
 h_pre_muon1_triggerSF.Write()
 h_pre_muon1_isoSF.Write()
@@ -361,6 +446,31 @@ h_pre_b1jet_vtxPt.Write()
 h_pre_b1jet_vtxMass.Write()
 h_pre_b1jet_vtx3DSig.Write()
 h_pre_b1jet_vtx3DVal.Write()
+
+if whichSample != "DATA":
+    h_gen_pre_MU1_pt.Write()
+    h_gen_pre_MU1_pt.Write()
+    h_gen_pre_MU2_pt.Write()
+    h_gen_pre_MU1_eta.Write()
+    h_gen_pre_MU2_eta.Write()
+    h_gen_pre_mass_l1l2.Write()
+    h_gen_pre_dR_l1l2.Write()
+    h_gen_pre_J1_pt.Write()
+    h_gen_pre_J2_pt.Write()
+    h_gen_pre_J1_eta.Write()
+    h_gen_pre_J2_eta.Write()
+    h_gen_pre_mass_b1b2.Write()
+    h_gen_pre_dR_b1b2.Write()
+    h_gen_pre_met_pt.Write()
+    h_gen_pre_mass_trans.Write()
+    h_gen_pre_dR_l1l2b1b2.Write()
+    h_gen_pre_onshellWmass.Write()
+    h_gen_pre_offshellWmass.Write()
+    h_gen_pre_onshellnupt.Write()
+    h_gen_pre_onoffshellWmass.Write()
+    h_gen_pre_bjetrescalec1dR4.Write()
+    h_gen_pre_bjetrescalec2dR4.Write()
+h_pre_MU1_pt.Write()
 h_pre_MU1_pt.Write()
 h_pre_MU2_pt.Write()
 h_pre_MU1_eta.Write()
@@ -378,6 +488,29 @@ h_pre_mass_trans.Write()
 h_pre_dR_l1l2b1b2.Write()
 h_pre_dphi_llmet.Write()
 # Cleaning Cuts
+if whichSample != "DATA":
+    h_gen_cc_MU1_pt.Write()
+    h_gen_cc_MU2_pt.Write()
+    h_gen_cc_MU2_eta.Write()
+    h_gen_cc_MU1_eta.Write()
+    h_gen_cc_mass_l1l2.Write()
+    h_gen_cc_dR_l1l2.Write()
+    h_gen_cc_J1_pt.Write()
+    h_gen_cc_J2_pt.Write()
+    h_gen_cc_J1_eta.Write()
+    h_gen_cc_J2_eta.Write()
+    h_gen_cc_mass_b1b2.Write()
+    h_gen_cc_dR_b1b2.Write()
+    h_gen_cc_met_pt.Write()
+    h_gen_cc_mass_trans.Write()
+    h_gen_cc_dR_l1l2b1b2.Write()
+    h_gen_cc_dphi_llmet.Write()
+    h_gen_cc_onshellWmass.Write()
+    h_gen_cc_offshellWmass.Write()
+    h_gen_cc_onshellnupt.Write()
+    h_gen_cc_onoffshellWmass.Write()
+    h_gen_cc_bjetrescalec1dR4.Write()
+    h_gen_cc_bjetrescalec2dR4.Write()
 h_cc_MU1_pt.Write()
 h_cc_MU2_pt.Write()
 h_cc_MU2_eta.Write()
@@ -394,9 +527,5 @@ h_cc_met_pt.Write()
 h_cc_mass_trans.Write()
 h_cc_dR_l1l2b1b2.Write()
 h_cc_dphi_llmet.Write()
-h_h2mass_weight_gen.Write()
-h_h2mass_weight1_gen.Write()
-h_h2mass_weight_reco.Write()
-h_h2mass_weight1_reco.Write()
 f.Close()
 print "Done."

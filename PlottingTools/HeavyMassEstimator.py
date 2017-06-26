@@ -12,7 +12,7 @@ class HeavyMassEstimator(object):
         root fils contains all PDFs
     hmetree should contain full information from  HME
     """
-    iterations = 1000000
+    iterations = 100
     onshellnuptpdf = ROOT.TH1F()
     onshellWmasspdf = ROOT.TH1F()
     recobjetrescalec1pdf = ROOT.TH1F()
@@ -20,9 +20,6 @@ class HeavyMassEstimator(object):
     onshellWmasspdf_flag = False
     recobjetrescalec1pdf_flag = False
     hmetree = ROOT.TTree("hmetree","HME Tree") 
-    hme_h2Mass = ROOT.TH1F("hme_h2Mass","h2 mass from HME",1000, 200.0,1200.0)
-    hme_h2MassWeight1 = ROOT.TH1F("hme_h2MassWeight1","h2 mass from HME",1000, 200.0,1200.0)
-    hme_h2MassWeight4 = ROOT.TH1F("hme_h2MassWeight4","h2 mass from HME",1000, 200.0,1200.0)
     eta_gen  = np.zeros(1, dtype=float);   phi_gen  = np.zeros(1, dtype=float)
     wmass_gen =  np.zeros(1, dtype=float); hmass_gen = np.zeros(1, dtype=float)
     metpx_corr = np.zeros(1, dtype=float);  metpy_corr = np.zeros(1, dtype=float);
@@ -104,28 +101,38 @@ class HeavyMassEstimator(object):
     hmetree.Branch('h2tohh_energy', h2tohh_energy, 'h2tohh_energy/D')
     hmetree.Branch('h2tohh_mass', h2tohh_mass, 'h2tohh_mass/D')
 
-    lepton1_p4  = ROOT.TLorentzVector()
-    lepton2_p4  = ROOT.TLorentzVector()
-    b1jet_p4  = ROOT.TLorentzVector()
-    b2jet_p4  = ROOT.TLorentzVector()
-    met = ROOT.TVector2()
-    wmasshist = ROOT.TH1F()
-    onshellnupthist = ROOT.TH1F()
 
-    lepton1_onshellW_p4 = ROOT.TLorentzVector()
-    lepton1_offshellW_p4 = ROOT.TLorentzVector()
-    nu_onshellW_p4 = ROOT.TLorentzVector()
-    nu_offshellW_p4 = ROOT.TLorentzVector()
-    onshellW_p4 = ROOT.TLorentzVector()
-    onshellW_p4 = ROOT.TLorentzVector()
-    htoWW_p4 =  ROOT.TLorentzVector()
-    htoBB_p4 =  ROOT.TLorentzVector()
-    h2tohh_p4 = ROOT.TLorentzVector()
 
 
 
     def __init__(self):
 	print "  create a HeavyMassEstimator object "
+        self.hme_h2Mass = ROOT.TH1F("hme_h2Mass","h2 mass from HME",1000, 200.0,1200.0)
+	self.hme_h2MassWeight1 = ROOT.TH1F("hme_h2MassWeight1","h2 mass from HME",1000, 200.0,1200.0)
+	self.hme_h2MassWeight4 = ROOT.TH1F("hme_h2MassWeight4","h2 mass from HME",1000, 200.0,1200.0)
+
+	self.lepton1_p4  = ROOT.TLorentzVector()
+	self.lepton2_p4  = ROOT.TLorentzVector()
+	self.b1jet_p4  = ROOT.TLorentzVector()
+	self.b2jet_p4  = ROOT.TLorentzVector()
+	self.met = ROOT.TVector2()
+	self.wmasshist = ROOT.TH1F()
+	self.onshellnupthist = ROOT.TH1F()
+	self.lepton1_onshellW_p4 = ROOT.TLorentzVector()
+	self.lepton1_offshellW_p4 = ROOT.TLorentzVector()
+	self.nu_onshellW_p4 = ROOT.TLorentzVector()
+	self.nu_offshellW_p4 = ROOT.TLorentzVector()
+	self.onshellW_p4 = ROOT.TLorentzVector()
+	self.onshellW_p4 = ROOT.TLorentzVector()
+	self.htoWW_p4 =  ROOT.TLorentzVector()
+	self.htoBB_p4 =  ROOT.TLorentzVector()
+	self.h2tohh_p4 = ROOT.TLorentzVector()
+	#print "self.hme_h2Mass entries ",self.hme_h2Mass.GetEntries()," hmetree entries ",self.hmetree.GetEntries()
+	#print "hme_h2MassWeight1 entries ",self.hme_h2MassWeight1.GetEntries()
+	
+
+    def setIterations(self, n):
+	self.iterations = n
 
     def setKinematic(self, lepton1_p4, lepton2_p4, jet1_p4, jet2_p4, met):
 	self.lepton1_p4 = lepton1_p4
