@@ -1065,7 +1065,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   }
 
   if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) ) checkGenParticlesSignal(genParticleColl);
-  else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
+  //else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
+  else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
   else if (sampleType_==TTbar)                                          checkGenParticlesTTbar(genParticleColl);
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets)                checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles)  matchGenJet2Parton( genjetColl );
@@ -2071,6 +2072,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb(edm::Handle<reco::GenParticleCol
     else std::cout <<"failed to find h2tohh "<< std::endl;
   }
 
+  int neutrino_id = 0;
   if (h2tohh){
     b1cand = finddecendant(htoBBcand, 5, false);
     b2cand = finddecendant(htoBBcand, -5, false);
@@ -2082,11 +2084,16 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb(edm::Handle<reco::GenParticleCol
 	if (tmp->pdgId() == 23 and hasDaughter(tmp, -13) and hasDaughter(tmp, 13))
 	    z1cand = tmp;
 	//else if (tmp->pdgId() == 23 and hasDaughter(tmp, -11) and hasDaughter(tmp, 11))
-	else if (tmp->pdgId() == 23 and ((hasDaughter(tmp, -12) and hasDaughter(tmp, 12)) or
-		    			  (hasDaughter(tmp, -14) and hasDaughter(tmp, 14)) or 
-					  (hasDaughter(tmp, -16) and hasDaughter(tmp, 16))
-		    ))
+	else if (tmp->pdgId() == 23 and hasDaughter(tmp, -12) and hasDaughter(tmp, 12)){
+	    neutrino_id = 12 ;
 	    z2cand = tmp;
+	}else if (tmp->pdgId() == 23 and hasDaughter(tmp, -14) and hasDaughter(tmp, 14)){
+	    neutrino_id = 14 ;
+	    z2cand = tmp;
+	}else if (tmp->pdgId() == 23 and hasDaughter(tmp, -16) and hasDaughter(tmp, 16)){
+	    neutrino_id = 16 ;
+	    z2cand = tmp;
+	}
 
     }
 
@@ -2101,11 +2108,11 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb(edm::Handle<reco::GenParticleCol
 	if (hasDaughter(z1cand, -11) and hasDaughter(z1cand, 11)) std::cout <<" find two electrons "<< std::endl;
 	//if ((hasDaughter(zcand, -13) and hasDaughter(w2cand, 11)) or (hasDaughter(w1cand, -11) and hasDaughter(w2cand, 13))) std::cout <<" find two electron+muon "<< std::endl;
     }
-    if (hasDaughter(z1cand, -13) and hasDaughter(z1cand, 13)){
-	mu1cand = findmudaughter(z1cand);
-	nu1cand = findnudaughter(z2cand);
-	mu2cand = findmudaughter(z1cand);
-	nu2cand = findnudaughter(z2cand);
+    if (hasDaughter(z1cand, -13) and hasDaughter(z1cand, 13) and z2cand){
+	mu1cand = stabledecendant(z1cand, -13);
+	mu2cand = stabledecendant(z1cand, 13);
+	nu1cand = stabledecendant(z2cand, neutrino_id);
+	nu2cand = stabledecendant(z2cand, neutrino_id*(-1));
 	//make sure all candiates are in same frame
 	while (mu1cand->numberOfDaughters()==1 and  mu1cand->daughter(0)->pdgId()==mu1cand->pdgId())
 	  mu1cand = mu1cand->daughter(0);
@@ -2782,12 +2789,12 @@ DiHiggsWWBBAnalyzer::stabledecendant(const reco::Candidate* cand, int id){
 //if first it false, then return the candidate farthest to seed
 const reco::Candidate* 
 DiHiggsWWBBAnalyzer::finddecendant(const reco::Candidate* cand, int id, bool first){
-  const reco::Candidate* tmp1 = cand;
+  /*const reco::Candidate* tmp1 = cand;
   while (tmp1->numberOfDaughters() == 1 and tmp1->daughter(0)->pdgId() == cand->pdgId()) tmp1 = tmp1->daughter(0);
   std::cout <<"In Findecentdant daughters of cand, id "<< cand->pdgId() << std::endl;
   for (unsigned int i=0; i < tmp1->numberOfDaughters(); i++){
       printCandidate(tmp1->daughter(i));
-  }
+  }*/
  
   const reco::Candidate* tmp = NULL;
   for (unsigned int i=0; i < cand->numberOfDaughters(); i++){
