@@ -282,6 +282,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float htoWW_py;
     float htoWW_pz; 
     float htoWW_mass;
+    bool htoWW;
 
     //ZZbb
     float z1_energy;
@@ -308,6 +309,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float htoZZ_py;
     float htoZZ_pz; 
     float htoZZ_mass;
+    float htoZZ;
 
     float b1_energy;
     float b1_pt;
@@ -368,6 +370,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float h2tohh_pz;
     float h2tohh_mass;
     //for ttbar
+    bool ttbar;
     float t1_energy;
     float t1_px;
     float t1_py;
@@ -725,6 +728,7 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   htoWW_py = -999999;
   htoWW_pz = -999999;
   htoWW_mass = -999999;
+  htoWW =false;
 
   //ZZbb
   z1_energy = -1;
@@ -749,6 +753,7 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   htoZZ_py = -999999;
   htoZZ_pz = -999999;
   htoZZ_mass = -999999;
+  htoZZ = false;
 
   b1_energy = -1;
   b1_pt = -1;
@@ -805,6 +810,7 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   genmet_py = -999999.;
 
   //ttar
+  ttbar = false;
   t1_px = -999999.0;
   t1_py = -999999.0;
   t1_pz = -999999.0;
@@ -1064,9 +1070,13 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   	std::cout <<"no Gen information "<< std::endl;
   }
 
-  if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) ) checkGenParticlesSignal(genParticleColl);
+  if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) ) {
+      checkGenParticlesSignal(genParticleColl);
+      if (not findAllGenParticles)
+	  checkGenParticlesZZbb(genParticleColl);
+  }
   //else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
-  else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
+  ///else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
   else if (sampleType_==TTbar)                                          checkGenParticlesTTbar(genParticleColl);
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets)                checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles)  matchGenJet2Parton( genjetColl );
@@ -1556,7 +1566,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("htoWW_mass",&htoWW_mass,"htoWW_mass/F");
   //evtree->Branch("Wtomu1nu1",&Wtomu1nu1,"Wtomu1nu1/B");
   //evtree->Branch("Wtomu2nu2",&Wtomu2nu2,"Wtomu2nu2/B");
-  //evtree->Branch("htoWW",&htoWW,"htoWW/B");
+  evtree->Branch("htoWW",&htoWW,"htoWW/B");
 
   //ZZbb
   evtree->Branch("z1_mass",&z1_mass, "z1_mass/F");
@@ -1580,6 +1590,7 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("htoZZ_py",&htoZZ_py,"htoZZ_px/F");
   evtree->Branch("htoZZ_pz",&htoZZ_pz,"htoZZ_pz/F");
   evtree->Branch("htoZZ_mass",&htoZZ_mass,"htoZZ_mass/F");
+  evtree->Branch("htoZZ",&htoZZ,"htoZZ/B");
 
   evtree->Branch("b1_px",&b1_px, "b1_px/F");
   evtree->Branch("b1_py",&b1_py, "b1_py/F");
@@ -1892,6 +1903,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
 	  while (W2_mother->pdgId() ==  24) W2_mother = W2_mother->mother();
 	  if (W1_mother == W2_mother && W1_mother->pdgId() == 25) {
 	    htoWWColl.push_back(W1_mother);
+	    htoWW = true;
 	    break;
 	  }
 	}
@@ -2028,6 +2040,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb(edm::Handle<reco::GenParticleCol
 	  while (Z2_mother->pdgId() == 23) Z2_mother = Z2_mother->mother();
 	  if (Z1_mother == Z2_mother && Z1_mother->pdgId() == 25) {
 	    htoZZColl.push_back(Z1_mother);
+	    htoZZ = true;
 	    break;
 	  }
 	}
@@ -2194,6 +2207,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesZZbb_2L2J(edm::Handle<reco::GenPartic
 	  while (Z2_mother->pdgId() == 23) Z2_mother = Z2_mother->mother();
 	  if (Z1_mother == Z2_mother && Z1_mother->pdgId() == 25) {
 	    htoZZColl.push_back(Z1_mother);
+	    htoZZ = true;
 	    break;
 	  }
 	}
@@ -2412,6 +2426,7 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesTTbar(edm::Handle<reco::GenParticleCo
 	while (nu2cand->numberOfDaughters()==1 and  nu2cand->daughter(0)->pdgId()==nu2cand->pdgId())
 	  nu2cand = nu2cand->daughter(0);
 	findAllGenParticles = true;
+	ttbar = true;
 	std::cout <<" mu1 " ; printCandidate(mu1cand);
 	std::cout <<" nu1 " ; printCandidate(nu1cand);
 	std::cout <<" mu2 " ; printCandidate(mu2cand);
@@ -2583,7 +2598,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
     b2_px = b2cand->px();
     b2_py = b2cand->py();
     b2_pz = b2cand->pz();
-    if (sampleType_ < Rad_260_ZZbb){
+    if (sampleType_ < Rad_260_ZZbb and (htoWW or ttbar)){
 	w1_energy = w1cand->energy();
 	w1_pt = w1cand->pt();
 	w1_eta = w1cand->eta();
@@ -2601,7 +2616,7 @@ DiHiggsWWBBAnalyzer::fillbranches(){
 	w2_pz = w2cand->pz();
 	w2_mass = w2cand->mass();
     }
-    if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260  and sampleType_<Rad_260_ZZbb)){
+    if (((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260  and sampleType_<Rad_260_ZZbb)) and htoWW){
 	htoWW_energy = htoWWcand->energy();
 	htoWW_px = htoWWcand->px();
 	htoWW_py = htoWWcand->py();
@@ -2629,7 +2644,8 @@ DiHiggsWWBBAnalyzer::fillbranches(){
 	t2_px = t2cand->px();
 	t2_py = t2cand->py();
 	t2_pz = t2cand->pz();
-    }else if (sampleType_ >= Rad_260_ZZbb){
+    //}else if (sampleType_ >= Rad_260_ZZbb){
+    }else if (((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260  and sampleType_<Rad_260_ZZbb) or sampleType_ >= Rad_260_ZZbb) and htoZZ){
 	z1_energy = z1cand->energy();
 	z1_pt = z1cand->pt();
 	z1_eta = z1cand->eta();
