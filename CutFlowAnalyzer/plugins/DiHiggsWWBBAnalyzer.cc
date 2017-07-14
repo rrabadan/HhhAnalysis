@@ -54,7 +54,7 @@ float dz(const reco::Candidate *cand, const reco::Vertex *point){
   return ((cand->vz() - point->z()) - ((cand->vx() - point->x()) * cand->px() + (cand->vy() - point->y()) * cand->py()) /cand->pt()) * cand->pz() /cand->pt();
 };
 
-class MMC;
+//class MMC;
 //#define WMass 80.385   // W mass
 //#define SMHMass 125.03 // SM module higgs mass
 class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
@@ -309,7 +309,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float htoZZ_py;
     float htoZZ_pz; 
     float htoZZ_mass;
-    float htoZZ;
+    bool htoZZ;
 
     float b1_energy;
     float b1_pt;
@@ -556,8 +556,8 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float dphi_llmet;
     float mass_trans;
   private:
-    bool runMMC_;
-    MMC* thismmc;
+    //bool runMMC_;
+    //MMC* thismmc;
     // MMC tree branches
 };
 
@@ -626,7 +626,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   idSFhist_             = iConfig.getParameter<std::string>("idSFhist");
   trackingSFhist_       = iConfig.getParameter<std::string>("trackingSFhist");
 
-  runMMC_               = iConfig.getParameter<bool>("runMMC");
+  //runMMC_               = iConfig.getParameter<bool>("runMMC");
   /*
      iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
      seed_ = iConfig.getParameter<int>("seed");
@@ -635,6 +635,7 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
    */
   // initilize candidates pointer
   //now do what ever initialization is needed
+  std::cout  <<"DiHiggs sampletype_ "<< sampleType_ << std::endl;
   ievent = 0;
   mu1_W1_cand = NULL;
   nu1_W1_cand = NULL;
@@ -1074,13 +1075,20 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
       checkGenParticlesSignal(genParticleColl);
       if (not findAllGenParticles)
 	  checkGenParticlesZZbb(genParticleColl);
+      if (findAllGenParticles) std::cout <<"find all gen particles "<< std::endl;
+      else std::cout <<"Not all gen particles "<< std::endl;
   }
-  //else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
+  else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
   ///else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
   else if (sampleType_==TTbar)                                          checkGenParticlesTTbar(genParticleColl);
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets)                checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles)  matchGenJet2Parton( genjetColl );
-  if (findAllGenParticles)                       fillbranches(); //fill Gen info into tree
+
+  if (findAllGenParticles) {
+      fillbranches(); //fill Gen info into tree
+      std::cout <<"find all gen particles "<< std::endl;
+  }
+ 
 
   if (onlyGenLevel_ and sampleType_>Data){
         if (findAllGenParticles)
@@ -1496,7 +1504,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     //There are two possible Lepton-Bquark pairings. We compute MT2 for both and pick the smallest value.
 
   }
-  if(hastwomuons and hastwojets) evtree->Fill();
+  if((hastwomuons and hastwojets) or findAllGenParticles) evtree->Fill();
 }
 
 void DiHiggsWWBBAnalyzer::beginJob(){

@@ -9,6 +9,55 @@ outAnalist = {"TT":["/fdata/hepx/store/user/lpernie/TTTo2L2Nu_13TeV-powheg/crab_
 	      "ttV":["/fdata/hepx/store/user/lpernie/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170405_172925","/fdata/hepx/store/user/lpernie/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/crab_TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/170405_172942","/fdata/hepx/store/user/lpernie/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/170405_173009"],
 	      "Data":["/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016B-23Sep2016-v3/170405_170709","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016C-23Sep2016-v1/170405_170722","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016D-23Sep2016-v1/170405_170736","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016E-23Sep2016-v1/170405_031502","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016F-23Sep2016-v1/170405_170803","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016G-23Sep2016-v1/170405_170817","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016H-03Feb2017_ver2-v1/170405_170831","/fdata/hepx/store/user/lpernie/DoubleMuon/crab_Hhh_Run2016H-03Feb2017_ver3-v1/170405_170845"]
 		}
+
+
+outAnalist["radion_M260"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/170626_120012/"]
+outAnalist["radion_M270"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/170626_120027/"]
+outAnalist["radion_M300"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/170626_120045/"]
+outAnalist["radion_M350"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/170626_120104/"]
+outAnalist["radion_M400"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/170626_120127/"]
+outAnalist["radion_M450"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/170626_120144/"]
+outAnalist["radion_M500"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/170626_120158/"]
+outAnalist["radion_M550"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/170626_120214/"]
+outAnalist["radion_M600"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/170626_120232/"]
+outAnalist["radion_M650"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/170626_120248/"]
+outAnalist["radion_M750"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/170626_120303/"]
+outAnalist["radion_M800"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/170626_120318/"]
+outAnalist["radion_M900"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/170626_120337/"]
+outAnalist["radion_M1000"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/170626_120352/"]
+
+
+outAnalist["graviton_M260"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph-v2/170626_120407/"]
+outAnalist["graviton_M270"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-270_narrow_13TeV-madgraph-v2/170626_120422/"]
+outAnalist["graviton_M300"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph-v2/170626_120442/"]
+outAnalist["graviton_M350"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph-v2/170626_120456/"]
+outAnalist["graviton_M400"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/170626_120511/"]
+outAnalist["graviton_M450"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph-v2/170626_120527/"]
+outAnalist["graviton_M500"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-500_narrow_13TeV-madgraph-v2/170626_120546/"]
+outAnalist["graviton_M550"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-550_narrow_13TeV-madgraph-v2/170626_120601/"]
+outAnalist["graviton_M600"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-600_narrow_13TeV-madgraph-v2/170626_120617/"]
+outAnalist["graviton_M650"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph-v2/170626_120632/"]
+outAnalist["graviton_M700"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-700_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-700_narrow_13TeV-madgraph-v2/170626_120651/"]
+#outAnalist["graviton_M750"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/170626_120706/"]
+outAnalist["graviton_M800"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-800_narrow_13TeV-madgraph-v2/170626_120706/"]
+outAnalist["graviton_M900"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-900_narrow_13TeV-madgraph-v2/170626_120722/"]
+outAnalist["graviton_M1000"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-1000_narrow_13TeV-madgraph-v2/170626_120737/"]
+
+outAnalist["RadionToHHTo2B2ZTo2L2J_M260"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-260_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-260_narrow_13TeV-madgraph-v2/170626_081732/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M270"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-270_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-270_narrow_13TeV-madgraph-v2/170626_081752/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M300"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-300_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-300_narrow_13TeV-madgraph-v2/170626_081812/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M350"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-350_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-350_narrow_13TeV-madgraph-v2/170626_081831/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M400"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-400_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-400_narrow_13TeV-madgraph-v2/170626_081846/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M450"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-450_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-450_narrow_13TeV-madgraph-v2/170626_081905/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M500"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-500_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-500_narrow_13TeV-madgraph-v2/170626_081920/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M550"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-550_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-550_narrow_13TeV-madgraph-v2/170626_081936/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M600"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-600_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-600_narrow_13TeV-madgraph-v2/170626_081955/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M650"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-650_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-650_narrow_13TeV-madgraph-v2/170626_082011/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M800"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-800_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-800_narrow_13TeV-madgraph-v2/170626_082026/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M900"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-900_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-900_narrow_13TeV-madgraph-v2/170626_082042/0000/"]
+outAnalist["RadionToHHTo2B2ZTo2L2J_M1000"] = ["/fdata/hepx/store/user/tahuang/MC_Hhh_analysis/GluGluToRadionToHHTo2B2ZTo2L2J_M-1000_narrow_13TeV-madgraph-v2/crab_GluGluToRadionToHHTo2B2ZTo2L2J_M-1000_narrow_13TeV-madgraph-v2/170626_082100/0000/"]
+
+masses = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 800, 900, 1000]
 sampleFullName = {"TT":"TTTo2L2Nu_13TeV-powheg",
     		  "DY":"DYToLL_2J_13TeV-amcatnloFXFX-pythia8",
 		  "VV":"WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8",
@@ -16,3 +65,10 @@ sampleFullName = {"TT":"TTTo2L2Nu_13TeV-powheg",
 		  "Wjet":"WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8",
 		  "ttV":"TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8"
 		}
+
+for mass in masses:
+   sampleFullName["radion_M%d"%mass] = "GluGluToRadionToHHTo2B2VTo2L2Nu_M-%d_v2"%mass
+   sampleFullName["graviton_M%d"%mass] = "GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-%d_v2"%mass
+   sampleFullName["RadionToHHTo2B2ZTo2L2J_M%d"%mass] = "RadionToHHTo2B2ZTo2L2J_M%d"%mass
+
+
