@@ -19,11 +19,11 @@ class HeavyMassEstimator(object):
     onshellnuptpdf_flag = False
     onshellWmasspdf_flag = False
     recobjetrescalec1pdf_flag = False
-    hmetree = ROOT.TTree("hmetree","HME Tree") 
     eta_gen  = np.zeros(1, dtype=float);   phi_gen  = np.zeros(1, dtype=float)
     wmass_gen =  np.zeros(1, dtype=float); hmass_gen = np.zeros(1, dtype=float)
     metpx_corr = np.zeros(1, dtype=float);  metpy_corr = np.zeros(1, dtype=float);
     nsolutions = np.zeros(1, dtype=int)
+    leptonNuPair = np.zeros(1, dtype=bool)
     weight = np.zeros(1, dtype=float)
     weight1 = np.zeros(1, dtype=float)
     weight2 = np.zeros(1, dtype=float)
@@ -44,6 +44,7 @@ class HeavyMassEstimator(object):
     htoBB_mass = np.zeros(1, dtype=float); htoWW_mass = np.zeros(1, dtype=float);
     h2tohh_eta = np.zeros(1, dtype=float); h2tohh_phi = np.zeros(1, dtype=float); h2tohh_pt = np.zeros(1, dtype=float); h2tohh_energy = np.zeros(1, dtype=float); h2tohh_mass = np.zeros(1, dtype=float)
 
+    """
     hmetree.Branch('nsolutions', nsolutions, 'nsolutions/I')
     hmetree.Branch('l_onshellW_eta', l_onshellW_eta, 'l_onshellW_eta/D')  
     hmetree.Branch('l_onshellW_phi', l_onshellW_phi, 'l_onshellW_phi/D')  
@@ -64,12 +65,12 @@ class HeavyMassEstimator(object):
     hmetree.Branch('onshellW_eta', onshellW_eta, 'onshellW_eta/D')  
     hmetree.Branch('onshellW_phi', onshellW_phi, 'onshellW_phi/D')  
     hmetree.Branch('onshellW_pt', onshellW_pt, 'onshellW_pt/D')  
-    hmetree.Branch('onshellW_energy', onshellW_energy, 'onshellW_energy/D')  
+    #hmetree.Branch('onshellW_energy', onshellW_energy, 'onshellW_energy/D')  
     hmetree.Branch('onshellW_mass', onshellW_mass, 'onshellW_mass/D')  
     hmetree.Branch('offshellW_eta', offshellW_eta, 'offshellW_eta/D')  
     hmetree.Branch('offshellW_phi', offshellW_phi, 'offshellW_phi/D')  
     hmetree.Branch('offshellW_pt', offshellW_pt, 'offshellW_pt/D')  
-    hmetree.Branch('offshellW_energy', offshellW_energy, 'offshellW_energy/D')  
+    #hmetree.Branch('offshellW_energy', offshellW_energy, 'offshellW_energy/D')  
     hmetree.Branch('offshellW_mass', offshellW_mass, 'offshellW_mass/D')  
     hmetree.Branch('met_pt', met_pt, 'met_pt/D')
     hmetree.Branch('met_phi', met_phi, 'met_phi/D')
@@ -77,39 +78,40 @@ class HeavyMassEstimator(object):
     hmetree.Branch('met_py', met_py, 'met_py/D')
     hmetree.Branch('metpx_corr', metpx_corr, 'metpx_corr/D')
     hmetree.Branch('metpy_corr', metpy_corr, 'metpy_corr/D')
-    hmetree.Branch('b1jet_eta', b1jet_eta, 'b1jet_eta/D')
-    hmetree.Branch('b1jet_phi', b1jet_phi, 'b1jet_phi/D')
-    hmetree.Branch('b1jet_pt', b1jet_pt, 'b1jet_pt/D')
-    hmetree.Branch('b1jet_energy', b1jet_energy, 'b1jet_energy/D')
-    hmetree.Branch('b2jet_eta', b2jet_eta, 'b2jet_eta/D')
-    hmetree.Branch('b2jet_phi', b2jet_phi, 'b2jet_phi/D')
-    hmetree.Branch('b2jet_pt', b2jet_pt, 'b2jet_pt/D')
-    hmetree.Branch('b2jet_energy', b2jet_energy, 'b2jet_energy/D')
-    hmetree.Branch('htoBB_eta', htoBB_eta, 'htoBB_eta/D')
-    hmetree.Branch('htoBB_phi', htoBB_phi, 'htoBB_phi/D')
-    hmetree.Branch('htoBB_pt', htoBB_pt, 'htoBB_pt/D')
-    hmetree.Branch('htoBB_energy', htoBB_energy, 'htoBB_energy/D')
+    #hmetree.Branch('b1jet_eta', b1jet_eta, 'b1jet_eta/D')
+    #hmetree.Branch('b1jet_phi', b1jet_phi, 'b1jet_phi/D')
+    #hmetree.Branch('b1jet_pt', b1jet_pt, 'b1jet_pt/D')
+    #hmetree.Branch('b1jet_energy', b1jet_energy, 'b1jet_energy/D')
+    #hmetree.Branch('b2jet_eta', b2jet_eta, 'b2jet_eta/D')
+    #hmetree.Branch('b2jet_phi', b2jet_phi, 'b2jet_phi/D')
+    #hmetree.Branch('b2jet_pt', b2jet_pt, 'b2jet_pt/D')
+    #hmetree.Branch('b2jet_energy', b2jet_energy, 'b2jet_energy/D')
+    #hmetree.Branch('htoBB_eta', htoBB_eta, 'htoBB_eta/D')
+    #hmetree.Branch('htoBB_phi', htoBB_phi, 'htoBB_phi/D')
+    #hmetree.Branch('htoBB_pt', htoBB_pt, 'htoBB_pt/D')
+    #hmetree.Branch('htoBB_energy', htoBB_energy, 'htoBB_energy/D')
     hmetree.Branch('htoBB_mass', htoBB_mass, 'htoBB_mass/D')
-    hmetree.Branch('htoWW_eta', htoWW_eta, 'htoWW_eta/D')
-    hmetree.Branch('htoWW_phi', htoWW_phi, 'htoWW_phi/D')
-    hmetree.Branch('htoWW_pt', htoWW_pt, 'htoWW_pt/D')
-    hmetree.Branch('htoWW_energy', htoWW_energy, 'htoWW_energy/D')
+    #hmetree.Branch('htoWW_eta', htoWW_eta, 'htoWW_eta/D')
+    #hmetree.Branch('htoWW_phi', htoWW_phi, 'htoWW_phi/D')
+    #hmetree.Branch('htoWW_pt', htoWW_pt, 'htoWW_pt/D')
+    #hmetree.Branch('htoWW_energy', htoWW_energy, 'htoWW_energy/D')
     hmetree.Branch('htoWW_mass', htoWW_mass, 'htoWW_mass/D')
     hmetree.Branch('h2tohh_eta', h2tohh_eta, 'h2tohh_eta/D')
     hmetree.Branch('h2tohh_phi', h2tohh_phi, 'h2tohh_phi/D')
     hmetree.Branch('h2tohh_pt', h2tohh_pt, 'h2tohh_pt/D')
     hmetree.Branch('h2tohh_energy', h2tohh_energy, 'h2tohh_energy/D')
     hmetree.Branch('h2tohh_mass', h2tohh_mass, 'h2tohh_mass/D')
-
-
-
-
+    hmetree.Branch('leptonNuPair', leptonNuPair, 'leptonNuPair/B')
+    """
 
     def __init__(self):
-	print "  create a HeavyMassEstimator object "
+	#print "  create a HeavyMassEstimator object "
         self.hme_h2Mass = ROOT.TH1F("hme_h2Mass","h2 mass from HME",1000, 200.0,1200.0)
+        self.hme_h2Mass_correctmunupair = ROOT.TH1F("hme_h2Mass_correctmunupair","h2 mass from HME",1000, 200.0,1200.0)
+        self.hme_h2Mass_incorrectmunupair = ROOT.TH1F("hme_h2Mass_incorrectmunupair","h2 mass from HME",1000, 200.0,1200.0)
 	self.hme_h2MassWeight1 = ROOT.TH1F("hme_h2MassWeight1","h2 mass from HME",1000, 200.0,1200.0)
-	self.hme_h2MassWeight4 = ROOT.TH1F("hme_h2MassWeight4","h2 mass from HME",1000, 200.0,1200.0)
+	#self.hme_h2MassWeight4 = ROOT.TH1F("hme_h2MassWeight4","h2 mass from HME",1000, 200.0,1200.0)
+	self.hme_offshellWmass = ROOT.TH1F("hme_offshellWmass","offshell W mass from HME", 60, 10.0, 70.0)
 
 	self.lepton1_p4  = ROOT.TLorentzVector()
 	self.lepton2_p4  = ROOT.TLorentzVector()
@@ -127,19 +129,80 @@ class HeavyMassEstimator(object):
 	self.htoWW_p4 =  ROOT.TLorentzVector()
 	self.htoBB_p4 =  ROOT.TLorentzVector()
 	self.h2tohh_p4 = ROOT.TLorentzVector()
+
+        self.hmetree = ROOT.TTree("hmetree","HME Tree") 
+        self.hmetree.Branch('nsolutions',            self.nsolutions, 'nsolutions/I')
+        self.hmetree.Branch('l_onshellW_eta',        self.l_onshellW_eta, 'l_onshellW_eta/D')  
+        self.hmetree.Branch('l_onshellW_phi',        self.l_onshellW_phi, 'l_onshellW_phi/D')  
+        self.hmetree.Branch('l_onshellW_pt',         self.l_onshellW_pt, 'l_onshellW_pt/D')  
+        self.hmetree.Branch('l_onshellW_energy',     self.l_onshellW_energy, 'l_onshellW_energy/D')  
+        self.hmetree.Branch('l_offshellW_eta',       self.l_offshellW_eta, 'l_offshellW_eta/D')  
+        self.hmetree.Branch('l_offshellW_phi',       self.l_offshellW_phi, 'l_offshellW_phi/D')  
+        self.hmetree.Branch('l_offshellW_pt',        self.l_offshellW_pt, 'l_offshellW_pt/D')  
+        self.hmetree.Branch('l_offshellW_energy',    self.l_offshellW_energy, 'l_offshellW_energy/D')  
+        self.hmetree.Branch('nu_onshellW_eta',       self.nu_onshellW_eta, 'nu_onshellW_eta/D')  
+        self.hmetree.Branch('nu_onshellW_phi',       self.nu_onshellW_phi, 'nu_onshellW_phi/D')  
+        self.hmetree.Branch('nu_onshellW_pt',        self.nu_onshellW_pt, 'nu_onshellW_pt/D')  
+        self.hmetree.Branch('nu_onshellW_energy',    self.nu_onshellW_energy, 'nu_onshellW_energy/D')  
+        self.hmetree.Branch('nu_offshellW_eta',      self.nu_offshellW_eta, 'nu_offshellW_eta/D')  
+        self.hmetree.Branch('nu_offshellW_phi',      self.nu_offshellW_phi, 'nu_offshellW_phi/D')  
+        self.hmetree.Branch('nu_offshellW_pt',       self.nu_offshellW_pt, 'nu_offshellW_pt/D')  
+        self.hmetree.Branch('nu_offshellW_energy',   self.nu_offshellW_energy, 'nu_offshellW_energy/D')  
+        self.hmetree.Branch('onshellW_eta',          self.onshellW_eta, 'onshellW_eta/D')  
+        self.hmetree.Branch('onshellW_phi',          self.onshellW_phi, 'onshellW_phi/D')  
+        self.hmetree.Branch('onshellW_pt',           self.onshellW_pt, 'onshellW_pt/D')  
+        #self.hmetree.Branch('onshellW_energ         self.y', onshellW_energy, 'onshellW_energy/D')  
+        self.hmetree.Branch('onshellW_mass',         self.onshellW_mass, 'onshellW_mass/D')  
+        self.hmetree.Branch('offshellW_eta',         self.offshellW_eta, 'offshellW_eta/D')  
+        self.hmetree.Branch('offshellW_phi',         self.offshellW_phi, 'offshellW_phi/D')  
+        self.hmetree.Branch('offshellW_pt',          self.offshellW_pt, 'offshellW_pt/D')  
+        #self.hmetree.Branch('offshellW_energ        self.y', offshellW_energy, 'offshellW_energy/D')  
+        self.hmetree.Branch('offshellW_mass',        self.offshellW_mass, 'offshellW_mass/D')  
+        self.hmetree.Branch('met_pt',                self.met_pt, 'met_pt/D')
+        self.hmetree.Branch('met_phi',               self.met_phi, 'met_phi/D')
+        self.hmetree.Branch('met_px',                self.met_px, 'met_px/D')
+        self.hmetree.Branch('met_py',                self.met_py, 'met_py/D')
+        self.hmetree.Branch('metpx_corr',            self.metpx_corr, 'metpx_corr/D')
+        self.hmetree.Branch('metpy_corr',            self.metpy_corr, 'metpy_corr/D')
+        #self.hmetree.Branch('b1jet_eta', b1jet_eta, 'b1jet_eta/D')
+        #self.hmetree.Branch('b1jet_phi', b1jet_phi, 'b1jet_phi/D')
+        #self.hmetree.Branch('b1jet_pt', b1jet_pt, 'b1jet_pt/D')
+        #self.hmetree.Branch('b1jet_energy', b1jet_energy, 'b1jet_energy/D')
+        #self.hmetree.Branch('b2jet_eta', b2jet_eta, 'b2jet_eta/D')
+        #self.hmetree.Branch('b2jet_phi', b2jet_phi, 'b2jet_phi/D')
+        #self.hmetree.Branch('b2jet_pt', b2jet_pt, 'b2jet_pt/D')
+        #self.hmetree.Branch('b2jet_energy', b2jet_energy, 'b2jet_energy/D')
+        #self.hmetree.Branch('htoBB_eta', htoBB_eta, 'htoBB_eta/D')
+        #self.hmetree.Branch('htoBB_phi', htoBB_phi, 'htoBB_phi/D')
+        #self.hmetree.Branch('htoBB_pt', htoBB_pt, 'htoBB_pt/D')
+        #self.hmetree.Branch('htoBB_energy', htoBB_energy, 'htoBB_energy/D')
+        #self.hmetree.Branch('htoWW_eta', htoWW_eta, 'htoWW_eta/D')
+        #self.hmetree.Branch('htoWW_phi', htoWW_phi, 'htoWW_phi/D')
+        #self.hmetree.Branch('htoWW_pt', htoWW_pt, 'htoWW_pt/D')
+        #self.hmetree.Branch('htoWW_energy', htoWW_energy, 'htoWW_energy/D')
+        self.hmetree.Branch('htoBB_mass',            self.htoBB_mass, 'htoBB_mass/D')
+        self.hmetree.Branch('htoWW_mass',            self.htoWW_mass, 'htoWW_mass/D')
+        self.hmetree.Branch('h2tohh_eta',            self.h2tohh_eta, 'h2tohh_eta/D')
+        self.hmetree.Branch('h2tohh_phi',            self.h2tohh_phi, 'h2tohh_phi/D')
+        self.hmetree.Branch('h2tohh_pt',             self.h2tohh_pt, 'h2tohh_pt/D')
+        self.hmetree.Branch('h2tohh_energy',         self.h2tohh_energy, 'h2tohh_energy/D')
+        self.hmetree.Branch('h2tohh_mass',           self.h2tohh_mass, 'h2tohh_mass/D')
+        self.hmetree.Branch('leptonNuPair',          self.leptonNuPair, 'leptonNuPair/B')
+
 	#print "self.hme_h2Mass entries ",self.hme_h2Mass.GetEntries()," hmetree entries ",self.hmetree.GetEntries()
 	#print "hme_h2MassWeight1 entries ",self.hme_h2MassWeight1.GetEntries()
 	
 
     def setIterations(self, n):
-	self.iterations = n
+	self.iterations = int(n)
 
-    def setKinematic(self, lepton1_p4, lepton2_p4, jet1_p4, jet2_p4, met):
+    def setKinematic(self, lepton1_p4, lepton2_p4, jet1_p4, jet2_p4, met, onshellW_mu):
 	self.lepton1_p4 = lepton1_p4
 	self.lepton2_p4 = lepton2_p4
 	self.b1jet_p4 = jet1_p4
 	self.b2jet_p4 = jet2_p4
 	self.met = met
+	self.onshellW_mu = onshellW_mu
 	#self.RefPDFFileName = RefPDFFileName
 	#self.RefPDFFile = ROOT.TFile(RefPDFFileName,"READ")
 
@@ -264,9 +327,18 @@ class HeavyMassEstimator(object):
 	if case == 0:
 	    self.lepton_onshellW_p4 = self.lepton1_p4
 	    self.lepton_offshellW_p4 = self.lepton2_p4
+	    if self.onshellW_mu == 1:
+	    	self.correctmunupair = True
+	    else:
+	    	self.correctmunupair = False
+
 	elif case == 1:
 	    self.lepton_offshellW_p4 = self.lepton1_p4
 	    self.lepton_onshellW_p4 = self.lepton2_p4
+	    if self.onshellW_mu == 2:
+	    	self.correctmunupair = True
+	    else:
+	    	self.correctmunupair = False
 	
     def nuPtFromOnshellW(self, nu_eta, nu_phi, lepton_p4, wMass):
 	deta = nu_eta-lepton_p4.Eta()
@@ -413,6 +485,7 @@ class HeavyMassEstimator(object):
 		self.offshellW_phi[0] = self.offshellW_p4.Phi()
 		self.offshellW_pt[0] = self.offshellW_p4.Pt()
 		self.offshellW_energy[0] = self.offshellW_p4.Energy()
+    		self.offshellW_mass[0] = self.offshellW_p4.M()
 
     		self.htoWW_eta[0] = self.htoWW_p4.Eta()
     		self.htoWW_phi[0] = self.htoWW_p4.Phi()
@@ -437,6 +510,13 @@ class HeavyMassEstimator(object):
 	        if self.onshellnuptpdf_flag:
 		    self.weight1[0] = self.weight[0] * self.getWeightFromHist(self.onshellnuptpdf, self.nu_onshellW_pt[0]) 
     		self.hme_h2MassWeight1.Fill(self.h2tohh_mass[0], self.weight1[0])
+                self.hme_offshellWmass.Fill(self.offshellW_mass[0])
+		self.leptonNuPair[0]  = self.correctmunupair
+    		if self.correctmunupair:
+		    self.hme_h2Mass_correctmunupair.Fill(self.h2tohh_mass[0])
+    		else:
+		    self.hme_h2Mass_incorrectmunupair.Fill(self.h2tohh_mass[0])
+    		self.hmetree.Fill()
 	 	isolution += 1 
 	##### end of iteration
 
