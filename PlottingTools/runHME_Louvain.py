@@ -6,6 +6,7 @@ from HeavyMassEstimator import *
 import argparse
 import numpy as np
 #sys.argv.append( '-b' ) 
+from array import array
 
 import Samplelist 
 execfile("start.py")
@@ -29,6 +30,7 @@ doTest = False
 doHME = True
 refPDF = ROOT.TFile("REFPDFPU40.root","READ")
 onshellWmasspdf = refPDF.Get("onshellWmasspdf")
+offshellWmasspdf = refPDF.Get("offshellWmass")
 onshellnuptpdf = refPDF.Get("onshellnuptpdf")
 recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
@@ -50,6 +52,86 @@ print " output ",args.output
 whichSample = args.jobtype
 makeHadd = "HaddNo"
 
+maxn = 10 
+sample_weight               = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jj_M                        = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep1_pt                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep2_pt                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet1_pt                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet2_pt                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+met_pt                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ht                          = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+llmetjj_M                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+cosThetaStar                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ll_M                        = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ll_DR_l_l                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jj_DR_j_j                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+llmetjj_DPhi_ll_jj          = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+llmetjj_MTformula           = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ll_pt                       = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jj_pt                       = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+llmetjj_minDR_l_j           = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep1_eta                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep1_phi                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep1_Iso                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep2_eta                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep2_phi                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+lep2_Iso                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ll_DPhi_l_l                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+ll_DEta_l_l                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet1_eta                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet1_phi                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet2_eta                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet2_phi                    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+event_weight                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+event_pu_weight             = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+isElEl                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+isMuMu                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+isElMu                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+isMuEl                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+event_number                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+event_run                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+isSF                        = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+total_weight                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet1_cMVAv2                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jet2_cMVAv2                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+nJetsL                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+llidiso                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+mumuidiso                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+elelidiso                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jjbtag_heavy                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+jjbtag_light                = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+trigeff                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+pu                          = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+DY_BDT_flat                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+dy_nobtag_to_btagM_weight   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
+passCC                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+passpre                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_h2mass_gen              = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_h2mass_reco             = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mean_reco               = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_stddev_reco             = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_entries_reco            = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_entry_peak_reco         = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_h2mass_weight2_gen      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_h2mass_weight2_reco     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mean_weight2_reco       = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_stddev_weight2_reco     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_entries_weight2_reco    = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_entry_peak_weight2_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+#hme_offshellWmass_reco      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mostprob_offshellWmass_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mean_offshellWmass_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_stddev_offshellWmass_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mostprob_offshellWmass_weight2_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_mean_offshellWmass_weight2_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_stddev_offshellWmass_weight2_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hmecputime                  = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+cross_section               = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+event_weight_sum            = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+hme_bins = []
+for i in range(100):
+    hme_bins.append(array( 'f', maxn*[ 0. ] ))
 #print "Executing: python", sys.argv[0] , "-b", sys.argv[2], sys.argv[3], "(Arg1=makeHadd: HaddYes or HaddNo /|\ Arg2=whichSample: TT, DY, VV, sT, Wjet, ttV, Data)"
 #makeHadd = sys.argv[2]
 #whichSample = sys.argv[3]
@@ -96,7 +178,12 @@ else:
 TCha = ROOT.TChain(tree_name)
 with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
   for line in f:
-    if not line.isspace():
+    if not line.isspace():     
+      tfiletmp = ROOT.TFile(str(line[:-1]),"READ")
+      cross_section[0] = tfiletmp.Get("cross_section").GetVal()
+      event_weight_sum[0] = tfiletmp.Get("event_weight_sum").GetVal()
+      tfiletmp.Close()
+      print "cross_section[0] ",cross_section[0]," event_weight_sum[0]  ",event_weight_sum[0]
       TCha.Add(str(line[:-1]))
 #TCha.Add("/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/out_ana_10k_graviton.root")
 #TCha.Add(this_NtotPath)
@@ -111,120 +198,87 @@ print whichSample, "TChain has", TCha.GetEntries(), "entries."," job star from "
 f = ROOT.TFile(args.output + whichSample + '_ijob%d.root'%args.ijob, 'recreate'); f.cd()
 #f = ROOT.TFile('test.root','recreate'); f.cd()
 #TCha2 = TCha.Clone()
-sample_weight       = np.zeros(1, dtype=float) 
-jj_M                = np.zeros(1, dtype=float) 
-lep1_pt             = np.zeros(1, dtype=float) 
-lep2_pt             = np.zeros(1, dtype=float) 
-jet1_pt             = np.zeros(1, dtype=float) 
-jet2_pt             = np.zeros(1, dtype=float) 
-met_pt              = np.zeros(1, dtype=float) 
-ht                  = np.zeros(1, dtype=float) 
-llmetjj_M           = np.zeros(1, dtype=float) 
-cosThetaStar        = np.zeros(1, dtype=float) 
-ll_M                = np.zeros(1, dtype=float) 
-ll_DR_l_l           = np.zeros(1, dtype=float) 
-jj_DR_j_j           = np.zeros(1, dtype=float) 
-llmetjj_DPhi_ll_jj  = np.zeros(1, dtype=float) 
-llmetjj_MTformula   = np.zeros(1, dtype=float) 
-ll_pt               = np.zeros(1, dtype=float) 
-jj_pt               = np.zeros(1, dtype=float) 
-llmetjj_minDR_l_j   = np.zeros(1, dtype=float) 
-lep1_eta            = np.zeros(1, dtype=float) 
-lep1_phi            = np.zeros(1, dtype=float) 
-lep1_Iso            = np.zeros(1, dtype=float) 
-lep2_eta            = np.zeros(1, dtype=float) 
-lep2_phi            = np.zeros(1, dtype=float) 
-lep2_Iso            = np.zeros(1, dtype=float) 
-ll_DPhi_l_l         = np.zeros(1, dtype=float) 
-ll_DEta_l_l         = np.zeros(1, dtype=float) 
-jet1_eta            = np.zeros(1, dtype=float) 
-jet1_phi            = np.zeros(1, dtype=float) 
-jet2_eta            = np.zeros(1, dtype=float) 
-jet2_phi            = np.zeros(1, dtype=float) 
-event_weight        = np.zeros(1, dtype=float) 
-event_pu_weight     = np.zeros(1, dtype=float) 
-isElEl              = np.zeros(1, dtype=float) 
-isMuMu              = np.zeros(1, dtype=float) 
-isElMu              = np.zeros(1, dtype=float) 
-isMuEl              = np.zeros(1, dtype=float) 
-event_number        = np.zeros(1, dtype=float) 
-event_run           = np.zeros(1, dtype=float)
-isSF                = np.zeros(1, dtype=float) 
-total_weight        = np.zeros(1, dtype=float) 
-jet1_cMVAv2         = np.zeros(1, dtype=float) 
-jet2_cMVAv2         = np.zeros(1, dtype=float) 
-nJetsL              = np.zeros(1, dtype=float) 
-llidiso             = np.zeros(1, dtype=float)
-mumuidiso           = np.zeros(1, dtype=float) 
-elelidiso           = np.zeros(1, dtype=float) 
-jjbtag_heavy        = np.zeros(1, dtype=float) 
-jjbtag_light        = np.zeros(1, dtype=float) 
-trigeff             = np.zeros(1, dtype=float)
-pu                  = np.zeros(1, dtype=float) 
-passCC              = np.zeros(1, dtype=float)
-passpre             = np.zeros(1, dtype=float)
-h_h2mass_gen        = np.zeros(1, dtype=float)
-h_h2mass_reco       = np.zeros(1, dtype=float)
-hmecputime          = np.zeros(1, dtype=float)
-
 
 
 TCha2 = ROOT.TTree("evtreeHME","tree with HME")
-TCha2.Branch("sample_weight",         sample_weight,       "sample_weight/D")
-TCha2.Branch("jj_M",                  jj_M,                "jj_M/D")
-TCha2.Branch("lep1_pt",               lep1_pt,             "lep1_pt/D")
-TCha2.Branch("lep2_pt",               lep2_pt,             "lep2_pt/D")
-TCha2.Branch("jet1_pt",               jet1_pt,             "jet1_pt/D")
-TCha2.Branch("jet2_pt",               jet2_pt,             "jet2_pt/D")
-TCha2.Branch("met_pt",                met_pt,              "met_pt/D")
-TCha2.Branch("ht",                    ht,                  "ht/D")
-TCha2.Branch("llmetjj_M",             llmetjj_M,           "llmetjj_M/D")
-TCha2.Branch("cosThetaStar",          cosThetaStar,        "cosThetaStar/D")
-TCha2.Branch("ll_M",                  ll_M,                "ll_M/D")
-TCha2.Branch("ll_DR_l_l",             ll_DR_l_l,           "ll_DR_l_l/D")
-TCha2.Branch("jj_DR_j_j",             jj_DR_j_j,           "jj_DR_j_j/D")
-TCha2.Branch("llmetjj_DPhi_ll_jj",    llmetjj_DPhi_ll_jj,  "llmetjj_DPhi_ll_jj/D")
-TCha2.Branch("llmetjj_MTformula",     llmetjj_MTformula,   "llmetjj_MTformula/D")
-TCha2.Branch("ll_pt",                 ll_pt,                "ll_pt/D")
-TCha2.Branch("jj_pt",                 jj_pt,                "ll_pt/D")
-TCha2.Branch("llmetjj_minDR_l_j",     llmetjj_minDR_l_j,    "llmetjj_minDR_l_j/D")
-TCha2.Branch("lep1_eta",              lep1_eta,             "lep1_eta/D")
-TCha2.Branch("lep1_phi",              lep1_phi,             "lep1_phi/D")
-TCha2.Branch("lep1_Iso",              lep1_Iso,             "lep1_Iso/D")
-TCha2.Branch("lep2_eta",              lep2_eta,             "lep2_eta/D")
-TCha2.Branch("lep2_phi",              lep2_phi,             "lep2_phi/D")
-TCha2.Branch("lep2_Iso",              lep2_Iso,             "lep2_Iso/D")
-TCha2.Branch("ll_DPhi_l_l",           ll_DPhi_l_l,          "ll_DPhi_l_l/D")
-TCha2.Branch("ll_DEta_l_l",           ll_DEta_l_l,          "ll_DEta_l_l/D")
-TCha2.Branch("jet1_eta",              jet1_eta,             "jet1_eta/D")
-TCha2.Branch("jet1_phi",              jet1_phi,             "jet1_phi/D")
-TCha2.Branch("jet2_eta",              jet2_eta,             "jet2_eta/D")
-TCha2.Branch("jet2_phi",              jet2_phi,             "jet2_phi/D")
-TCha2.Branch("event_weight",          event_weight,         "event_weight/D")
-TCha2.Branch("event_pu_weight",       event_pu_weight,      "event_pu_weight/D")
-TCha2.Branch("isElEl",                isElEl,               "isElEl/D")
-TCha2.Branch("isMuMu",                isMuMu,               "isMuMu/D")
-TCha2.Branch("isElMu",                isElMu,               "isElMu/D")
-TCha2.Branch("isMuEl",                isMuEl,               "isMuEl/D")
-TCha2.Branch("event_number",          event_number,         "event_number/D")
-TCha2.Branch("event_run",             event_run,            "event_run/D")
-TCha2.Branch("isSF",                  isSF,                 "isSF/D")
-TCha2.Branch("total_weight",          total_weight,         "total_weight/D")
-TCha2.Branch("jet1_cMVAv2",           jet1_cMVAv2,          "jet1_cMVAv2/D")
-TCha2.Branch("jet2_cMVAv2",           jet2_cMVAv2,          "jet2_cMVAv2/D")
-TCha2.Branch("nJetsL",                nJetsL,               "nJetsL/D")
-TCha2.Branch("llidiso",               llidiso,              "llidiso/D")
-TCha2.Branch("mumuidiso",             mumuidiso,            "mumuidiso/D")
-TCha2.Branch("elelidiso",             elelidiso,            "elelidiso/D")
-TCha2.Branch("jjbtag_heavy",          jjbtag_heavy,         "jjbtag_heavy/D")
-TCha2.Branch("jjbtag_light",          jjbtag_light,         "jjbtag_light/D")
-TCha2.Branch("trigeff",               trigeff,              "trigeff/D")
-TCha2.Branch("pu",                    pu,                   "pu/D")
-TCha2.Branch("passCC",                passCC,               "passCC/D")
-TCha2.Branch("passpre",               passpre,              "passpre/D")
-TCha2.Branch("h_h2mass_gen",          h_h2mass_gen,         "h_h2mass_gen/D")
-TCha2.Branch("h_h2mass_reco",         h_h2mass_reco,        "h_h2mass_reco/D")
-TCha2.Branch("hmecputime",            hmecputime,           "hmecputime/D")
+TCha2.Branch("sample_weight",                 sample_weight,                "sample_weight/F")
+TCha2.Branch("jj_M",                          jj_M,                         "jj_M/F")
+TCha2.Branch("lep1_pt",                       lep1_pt,                      "lep1_pt/F")
+TCha2.Branch("lep2_pt",                       lep2_pt,                      "lep2_pt/F")
+TCha2.Branch("jet1_pt",                       jet1_pt,                      "jet1_pt/F")
+TCha2.Branch("jet2_pt",                       jet2_pt,                      "jet2_pt/F")
+TCha2.Branch("met_pt",                        met_pt,                       "met_pt/F")
+TCha2.Branch("ht",                            ht,                           "ht/F")
+TCha2.Branch("llmetjj_M",                     llmetjj_M,                    "llmetjj_M/F")
+TCha2.Branch("cosThetaStar",                  cosThetaStar,                 "cosThetaStar/F")
+TCha2.Branch("ll_M",                          ll_M,                         "ll_M/F")
+TCha2.Branch("ll_DR_l_l",                     ll_DR_l_l,                    "ll_DR_l_l/F")
+TCha2.Branch("jj_DR_j_j",                     jj_DR_j_j,                    "jj_DR_j_j/F")
+TCha2.Branch("llmetjj_DPhi_ll_jj",            llmetjj_DPhi_ll_jj,           "llmetjj_DPhi_ll_jj/F")
+TCha2.Branch("llmetjj_MTformula",             llmetjj_MTformula,            "llmetjj_MTformula/F")
+TCha2.Branch("ll_pt",                         ll_pt,                        "ll_pt/F")
+TCha2.Branch("jj_pt",                         jj_pt,                        "ll_pt/F")
+TCha2.Branch("llmetjj_minDR_l_j",             llmetjj_minDR_l_j,            "llmetjj_minDR_l_j/F")
+TCha2.Branch("lep1_eta",                      lep1_eta,                     "lep1_eta/F")
+TCha2.Branch("lep1_phi",                      lep1_phi,                     "lep1_phi/F")
+TCha2.Branch("lep1_Iso",                      lep1_Iso,                     "lep1_Iso/F")
+TCha2.Branch("lep2_eta",                      lep2_eta,                     "lep2_eta/F")
+TCha2.Branch("lep2_phi",                      lep2_phi,                     "lep2_phi/F")
+TCha2.Branch("lep2_Iso",                      lep2_Iso,                     "lep2_Iso/F")
+TCha2.Branch("ll_DPhi_l_l",                   ll_DPhi_l_l,                  "ll_DPhi_l_l/F")
+TCha2.Branch("ll_DEta_l_l",                   ll_DEta_l_l,                  "ll_DEta_l_l/F")
+TCha2.Branch("jet1_eta",                      jet1_eta,                     "jet1_eta/F")
+TCha2.Branch("jet1_phi",                      jet1_phi,                     "jet1_phi/F")
+TCha2.Branch("jet2_eta",                      jet2_eta,                     "jet2_eta/F")
+TCha2.Branch("jet2_phi",                      jet2_phi,                     "jet2_phi/F")
+TCha2.Branch("event_weight",                  event_weight,                 "event_weight/F")
+TCha2.Branch("event_pu_weight",               event_pu_weight,              "event_pu_weight/F")
+TCha2.Branch("isElEl",                        isElEl,                       "isElEl/F")
+TCha2.Branch("isMuMu",                        isMuMu,                       "isMuMu/F")
+TCha2.Branch("isElMu",                        isElMu,                       "isElMu/F")
+TCha2.Branch("isMuEl",                        isMuEl,                       "isMuEl/F")
+TCha2.Branch("event_number",                  event_number,                 "event_number/F")
+TCha2.Branch("event_run",                     event_run,                    "event_run/F")
+TCha2.Branch("isSF",                          isSF,                         "isSF/F")
+TCha2.Branch("total_weight",                  total_weight,                 "total_weight/F")
+TCha2.Branch("jet1_cMVAv2",                   jet1_cMVAv2,                  "jet1_cMVAv2/F")
+TCha2.Branch("jet2_cMVAv2",                   jet2_cMVAv2,                  "jet2_cMVAv2/F")
+TCha2.Branch("nJetsL",                        nJetsL,                       "nJetsL/F")
+TCha2.Branch("llidiso",                       llidiso,                      "llidiso/F")
+TCha2.Branch("mumuidiso",                     mumuidiso,                    "mumuidiso/F")
+TCha2.Branch("elelidiso",                     elelidiso,                    "elelidiso/F")
+TCha2.Branch("jjbtag_heavy",                  jjbtag_heavy,                 "jjbtag_heavy/F")
+TCha2.Branch("jjbtag_light",                  jjbtag_light,                 "jjbtag_light/F")
+TCha2.Branch("trigeff",                       trigeff,                      "trigeff/F")
+TCha2.Branch("pu",                            pu,                           "pu/F")
+TCha2.Branch("DY_BDT_flat",                   DY_BDT_flat,                  "DY_BDT_flat/F")
+TCha2.Branch("dy_nobtag_to_btagM_weight",     dy_nobtag_to_btagM_weight,    "dy_nobtag_to_btagM_weight/F")
+TCha2.Branch("passCC",                        passCC,                       "passCC/F")
+TCha2.Branch("passpre",                       passpre,                      "passpre/F")
+TCha2.Branch("hme_h2mass_gen",                hme_h2mass_gen,               "hme_h2mass_gen/F")
+TCha2.Branch("hme_h2mass_reco",               hme_h2mass_reco,              "hme_h2mass_reco/F")
+TCha2.Branch("hme_mean_reco",                 hme_mean_reco,                "hme_mean_reco/F")
+TCha2.Branch("hme_stddev_reco",               hme_stddev_reco,              "hme_stddev_reco/F")
+TCha2.Branch("hme_entries_reco",              hme_entries_reco,             "hme_entries_reco/F")
+TCha2.Branch("hme_entry_peak_reco",           hme_entry_peak_reco,          "hme_entry_peak_reco/F")
+TCha2.Branch("hme_h2mass_weight2_gen",        hme_h2mass_weight2_gen,       "hme_h2mass_weight2_gen/F")
+TCha2.Branch("hme_h2mass_weight2_reco",       hme_h2mass_weight2_reco,      "hme_h2mass_weight2_reco/F")
+TCha2.Branch("hme_mean_weight2_reco",         hme_mean_weight2_reco,        "hme_mean_weight2_reco/F")
+TCha2.Branch("hme_stddev_weight2_reco",       hme_stddev_weight2_reco,      "hme_stddev_weight2_reco/F")
+TCha2.Branch("hme_entries_weight2_reco",      hme_entries_weight2_reco,     "hme_entries_weight2_reco/F")
+TCha2.Branch("hme_entry_peak_weight2_reco",   hme_entry_peak_weight2_reco,  "hme_entry_peak_weight2_reco/F")
+TCha2.Branch("hme_mostprob_offshellWmass_reco",   hme_mostprob_offshellWmass_reco,  "hme_mostprob_offshellWmass_reco/F")
+TCha2.Branch("hme_mean_offshellWmass_reco",   hme_mean_offshellWmass_reco,  "hme_mean_offshellWmass_reco/F")
+TCha2.Branch("hme_stddev_offshellWmass_reco", hme_stddev_offshellWmass_reco,"hme_stddev_offshellWmass_reco/F")
+TCha2.Branch("hme_mean_offshellWmass_weight2_reco",   hme_mean_offshellWmass_weight2_reco,  "hme_mean_offshellWmass_weight2_reco/F")
+TCha2.Branch("hme_mostprob_offshellWmass_weight2_reco",   hme_mostprob_offshellWmass_weight2_reco,  "hme_mostprob_offshellWmass_weight2_reco/F")
+TCha2.Branch("hme_stddev_offshellWmass_weight2_reco", hme_stddev_offshellWmass_weight2_reco,"hme_stddev_offshellWmass_weight2_reco/F")
+TCha2.Branch("hmecputime",                    hmecputime,                   "hmecputime/F")
+TCha2.Branch("cross_section",                 cross_section,                "cross_section/F")
+TCha2.Branch("event_weight_sum",              event_weight_sum,             "event_weight_sum/F")
+
+for i in range(100):
+    TCha2.Branch("hme_bin%d"%i, hme_bins[i], "hme_bin%d/F"%(i))
 
 
 
@@ -307,17 +361,23 @@ h_cc_dphi_llmet          = ROOT.TH1F("h_cc_dphi_llmet","",50,-4.,4.);  h_cc_dphi
 h_h2mass_weight_gen      = ROOT.TH1F("h_h2mass_weight_gen","",100,200.,1200.);  h_h2mass_weight_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight_gen_sum  = ROOT.TH1F("h_h2mass_weight_gen_sum","",1000,200.,1200.);  h_h2mass_weight_gen_sum.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight1_gen     = ROOT.TH1F("h_h2mass_weight1_gen","",100,200.,1200.);  h_h2mass_weight1_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
+h_h2mass_weight2_gen     = ROOT.TH1F("h_h2mass_weight2_gen","",100,200.,1200.);  h_h2mass_weight2_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight_reco     = ROOT.TH1F("h_h2mass_weight_reco","",100,200.,1200.);  h_h2mass_weight_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight_reco_sum = ROOT.TH1F("h_h2mass_weight_reco_sum","",1000,200.,1200.);  h_h2mass_weight_reco_sum.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight1_reco    = ROOT.TH1F("h_h2mass_weight1_reco","",100,200.,1200.);  h_h2mass_weight1_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
+h_h2mass_weight2_reco     = ROOT.TH1F("h_h2mass_weight2_reco","",100,200.,1200.);  h_h2mass_weight2_reco.GetXaxis().SetTitle("HME reco mass [GeV]");
 offshellWmass_gen	 = ROOT.TH1F("hme_offshellWmass_gen","offshell W mass from HME", 60, 10.0, 70.0); offshellWmass_gen.GetXaxis().SetTitle("HME offshell W mass [GeV]");
 offshellWmass_reco	 = ROOT.TH1F("hme_offshellWmass_reco","offshell W mass from HME", 60, 10.0, 70.0); offshellWmass_reco.GetXaxis().SetTitle("HME offshell W mass [GeV]");
 # adding more branches to TTree
 def initbr():
     passCC[0] = 0
     passpre[0] = 0
-    h_h2mass_gen[0] = -1
-    h_h2mass_reco[0] = -1
+    hme_h2mass_gen[0] = -1
+    hme_h2mass_reco[0] = -1
+    #print "hme_bins ",hme_bins
+    hme_entries_reco[0] = 0.0
+    for i in range(len(hme_bins)):
+	hme_bins[i][0] = 0.0
 
 stop_watch = ROOT.TStopwatch()
 stop_watch2 = ROOT.TStopwatch()
@@ -389,6 +449,9 @@ for ev in TCha:
   jjbtag_light[0]       =  ev.jjbtag_light       
   trigeff[0]            =  ev.trigeff              
   pu[0]                 =  ev.pu                 
+  if whichSample.startswith("DY"):
+      DY_BDT_flat[0]    =  ev.DY_BDT_flat
+      dy_nobtag_to_btagM_weight[0] = ev.dy_nobtag_to_btagM_weight
   MET_cut               = (ev.met_pt>20)
   MuMu_cut              = (ev.lep1_pt>20 and fabs(ev.lep1_eta)<2.4 and ev.lep2_pt>10 and fabs(ev.lep2_eta)<2.4 and ev.ll_M>12)
   #B1B2_cut              = (ev.jet1_pt>20 and fabs(ev.jet1_eta)<2.4 and ev.jet2_pt>20 and fabs(ev.jet2_eta)<2.4)
@@ -424,11 +487,12 @@ for ev in TCha:
       	  onshellW_mu  = 2
       hme_gen.setKinematic(mu1_p4, mu2_p4, jet1_p4, jet2_p4, met_vec2, onshellW_mu)
       hme_gen.setonshellWmasspdf(onshellWmasspdf)
+      hme_gen.setoffshellWmasspdf(offshellWmasspdf)
       hme_gen.setonshellnuptpdf(onshellnuptpdf)
       #hme.showKinematic()
       hme_gen.setIterations(args.iterations)
       hme_gen.runHME()
-      if hme_gen.hme_h2Mass.GetEntries()>0:
+      if hme_gen.hme_h2Mass.GetEntries()>0 and hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())>200:
 	  print "Gen Level most probable reco mass ",hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())," entries ",hme_gen.hme_h2Mass.GetEntries()
 	  hme_gen.hme_h2Mass.SetName("hme_h2Mass_ev%d_genlevel"%nEv)
           hme_gen.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_genlevel"%nEv)
@@ -449,7 +513,7 @@ for ev in TCha:
               hme_gen.hmetree.Write()
           h_h2mass_weight_gen.Fill(hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin()))
           h_h2mass_weight1_gen.Fill(hme_gen.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme_gen.hme_h2MassWeight1.GetMaximumBin()))
-          h_h2mass_gen[0] = hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())
+          hme_h2mass_gen[0] = hme_gen.hme_h2Mass.GetXaxis().GetBinCenter(hme_gen.hme_h2Mass.GetMaximumBin())
   
   #if (cleaning_cuts and doHME):
   stop_watch.Start()
@@ -467,13 +531,14 @@ for ev in TCha:
       hme = HeavyMassEstimator()
       hme.setKinematic(lep1_p4, lep2_p4, jet1_p4, jet2_p4, met_vec2, 0)
       hme.setonshellWmasspdf(onshellWmasspdf)
+      hme.setoffshellWmasspdf(offshellWmasspdf)
       hme.setonshellnuptpdf(onshellnuptpdf)
       hme.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
       #hme.showKinematic()
       hme.setIterations(args.iterations)
       hme.runHME()
-      hme.hme_offshellWmass.SetName("hme_offshellWmass_ev%d_genlevle"%nEv)
-      if hme.hme_h2Mass.GetEntries()>0:
+      #hme.hme_offshellWmass.SetName("hme_offshellWmass_ev%d_genlevle"%nEv)
+      if hme.hme_h2Mass.GetEntries()>0 and hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())>=250.0:
 	  #print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()
 	  hme.hme_h2Mass.SetName("hme_h2Mass_ev%d_recolevel"%nEv)
           hme.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_recolevel"%nEv)
@@ -485,9 +550,40 @@ for ev in TCha:
     	  #    hme.hme_offshellWmass.Write()
           h_h2mass_weight_reco.Fill(hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin()))
           h_h2mass_weight1_reco.Fill(hme.hme_h2MassWeight1.GetXaxis().GetBinCenter(hme.hme_h2MassWeight1.GetMaximumBin()))
-    	  h_h2mass_reco[0] = hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())
+          h_h2mass_weight2_reco.Fill(hme.hme_h2MassWeight2.GetXaxis().GetBinCenter(hme.hme_h2MassWeight2.GetMaximumBin()))
+
+    	  hme_h2mass_reco[0] = hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())
+          hme_mean_reco[0] = hme.hme_h2Mass.GetMean()
+          hme_stddev_reco[0] = hme.hme_h2Mass.GetStdDev(1)
+          hme_entries_reco[0] = float(hme.hme_h2Mass.GetEntries())/args.iterations
+	  hme_entry_peak_reco[0] = hme.hme_h2Mass.Integral(hme.hme_h2Mass.GetMaximumBin()-5, hme.hme_h2Mass.GetMaximumBin()+5)
+    	  hme_h2mass_weight2_reco[0] = hme.hme_h2MassWeight2.GetXaxis().GetBinCenter(hme.hme_h2MassWeight2.GetMaximumBin())
+          hme_mean_weight2_reco[0] = hme.hme_h2MassWeight2.GetMean()
+          hme_stddev_weight2_reco[0] = hme.hme_h2MassWeight2.GetStdDev(1)
+          hme_entries_weight2_reco[0] = float(hme.hme_h2MassWeight2.GetEntries())/args.iterations
+	  hme_entry_peak_weight2_reco[0] = hme.hme_h2MassWeight2.Integral(hme.hme_h2MassWeight2.GetMaximumBin()-5, hme.hme_h2MassWeight2.GetMaximumBin()+5)
+	  print "hme_h2mass_reco[0] ",hme_h2mass_reco[0]," hme_h2mass_weight2_reco[0] ",hme_h2mass_weight2_reco[0]
+	  #offshell Wmass
+	  h_offshellWmass_recoh2mass = hme.hme_h2MassAndoffshellWmass.ProjectionY("h_offshellWmass_recoh2mass",hme.hme_h2Mass.GetMaximumBin()-5, hme.hme_h2Mass.GetMaximumBin()+5)
+	  h_offshellWmass_recoh2mass_weight2 = hme.hme_h2MassAndoffshellWmass_weight2.ProjectionY("h_offshellWmass_recoh2mass_weight2",hme.hme_h2MassWeight2.GetMaximumBin()-5, hme.hme_h2MassWeight2.GetMaximumBin()+5)
+	  hme_mostprob_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetXaxis().GetBinCenter(h_offshellWmass_recoh2mass.GetMaximumBin())
+	  hme_mean_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetMean()
+	  hme_stddev_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetStdDev(1)
+	  hme_mostprob_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetXaxis().GetBinCenter(h_offshellWmass_recoh2mass_weight2.GetMaximumBin())
+	  hme_mean_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetMean()
+	  hme_stddev_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetStdDev(1)
+
+          hme.hme_h2Mass.Rebin(10)
+          hme.hme_h2MassWeight2.Rebin(10)
+          nbins = hme.hme_h2Mass.GetXaxis().GetNbins()
+          #print "nbins ",nbins
+	  if nbins != len(hme_bins):
+	      print "error!!! nbins of hme_h2mass is not the same as the one written to TTree "
+	  for i in range(1, len(hme_bins)+1):
+	      hme_bins[i-1][0] =  hme.hme_h2Mass.GetBinContent(i)
+        
   # WEIGHTS
-  #passCCbr.Fill();   passprebr.Fill();   h_h2mass_genbr.Fill();  h_h2mass_recobr.Fill();
+  #passCCbr.Fill();   passprebr.Fill();   hme_h2mass_genbr.Fill();  hme_h2mass_recobr.Fill();
   hmecputime[0] =  stop_watch.CpuTime()
   #print "Cputime ",stop_watch.CpuTime()," realtime ",stop_watch.RealTime()
   stop_watch.Stop()
