@@ -1330,7 +1330,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     if (debug_){
 	printf("Jet with pt %6.1f, eta %+4.2f, pileup mva disc %+.2f, btag CSV %.3f, CISV %.3f\n",
 	  j.pt(),j.eta(), j.userFloat("pileupJetId:fullDiscriminant"), std::max(0.f,j.bDiscriminator("combinedSecondaryVertexBJetTags")), std::max(0.f,j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags")));
-	printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
+	//printf("Jet with virtex: vtxMass %+4.2f, vtxNtracks %.1f, vtxPt %+4.2f, vtx3DSig %+4.2f, vtx3DVal %+4.2f, vtxPosX %+4.2f, vtxPosY %+4.2f, vtxPosZ %+4.2f", j.userFloat("vtxMass"), j.userFloat("vtxNtracks"), sqrt(j.userFloat("vtxPx")*j.userFloat("vtxPx") + j.userFloat("vtxPy")*j.userFloat("vtxPy")), j.userFloat("vtx3DSig"), j.userFloat("vtx3DVal"), j.userFloat("vtxPosX"), j.userFloat("vtxPosY"), j.userFloat("vtxPosZ"));
     }
     const reco::GenParticle * genp = j.genParticle();
     if (genp and debug_)
@@ -1407,11 +1407,11 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     //b1jet_neEmEF = allbjets[jet1].neutralEmEnergy()/(allbjets[jet1].p4()*allbjets[jet1].rawFactor()).energy();//neutralEmEnergyFraction
     b1jet_neHEF = allbjets[jet1].neutralHadronEnergyFraction();
     b1jet_neEmEF = allbjets[jet1].neutralEmEnergyFraction();
-    b1jet_vtxMass = allbjets[jet1].userFloat("vtxMass"); b1jet_vtxNtracks = allbjets[jet1].userFloat("vtxNtracks"); 
-    b1jet_vtxPx = allbjets[jet1].userFloat("vtxPx"); b1jet_vtxPy = allbjets[jet1].userFloat("vtxPy");
+    //b1jet_vtxMass = allbjets[jet1].userFloat("vtxMass"); b1jet_vtxNtracks = allbjets[jet1].userFloat("vtxNtracks"); 
+    //b1jet_vtxPx = allbjets[jet1].userFloat("vtxPx"); b1jet_vtxPy = allbjets[jet1].userFloat("vtxPy");
     b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
-    b1jet_vtx3DSig = allbjets[jet1].userFloat("vtx3DSig"); b1jet_vtx3DVal = allbjets[jet1].userFloat("vtx3DVal");
-    b1jet_vtxPosX = allbjets[jet1].userFloat("vtxPosX"); b1jet_vtxPosY = allbjets[jet1].userFloat("vtxPosY"); b1jet_vtxPosZ = allbjets[jet1].userFloat("vtxPosZ");
+    //b1jet_vtx3DSig = allbjets[jet1].userFloat("vtx3DSig"); b1jet_vtx3DVal = allbjets[jet1].userFloat("vtx3DVal");
+    //b1jet_vtxPosX = allbjets[jet1].userFloat("vtxPosX"); b1jet_vtxPosY = allbjets[jet1].userFloat("vtxPosY"); b1jet_vtxPosZ = allbjets[jet1].userFloat("vtxPosZ");
 
     b2jet_px = allbjets[jet2].px(); b2jet_py = allbjets[jet2].py(); b2jet_pz = allbjets[jet2].pz(); b2jet_energy = allbjets[jet2].energy();
     b2jet_pt = allbjets[jet2].pt(); b2jet_eta = allbjets[jet2].eta(); b2jet_phi = allbjets[jet2].phi();
@@ -1449,11 +1449,11 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b2jet_neEmEF = allbjets[jet2].neutralEmEnergyFraction();
     //b2jet_neHEF = allbjets[jet2].neutralHadronEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralHardonEfraction
     //b2jet_neEmEF = allbjets[jet2].neutralEmEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralEmEnergyFraction
-    b2jet_vtxMass = allbjets[jet2].userFloat("vtxMass"); b2jet_vtxNtracks = allbjets[jet2].userFloat("vtxNtracks"); 
-    b2jet_vtxPx = allbjets[jet2].userFloat("vtxPx"); b2jet_vtxPy = allbjets[jet2].userFloat("vtxPy");
+    //b2jet_vtxMass = allbjets[jet2].userFloat("vtxMass"); b2jet_vtxNtracks = allbjets[jet2].userFloat("vtxNtracks"); 
+    //b2jet_vtxPx = allbjets[jet2].userFloat("vtxPx"); b2jet_vtxPy = allbjets[jet2].userFloat("vtxPy");
     b2jet_vtxPt = sqrt(b2jet_vtxPx*b2jet_vtxPx + b2jet_vtxPy*b2jet_vtxPy);
-    b2jet_vtx3DSig = allbjets[jet2].userFloat("vtx3DSig"); b2jet_vtx3DVal = allbjets[jet2].userFloat("vtx3DVal");
-    b2jet_vtxPosX = allbjets[jet2].userFloat("vtxPosX"); b2jet_vtxPosY = allbjets[jet2].userFloat("vtxPosY"); b2jet_vtxPosZ = allbjets[jet2].userFloat("vtxPosZ");
+    //b2jet_vtx3DSig = allbjets[jet2].userFloat("vtx3DSig"); b2jet_vtx3DVal = allbjets[jet2].userFloat("vtx3DVal");
+    //b2jet_vtxPosX = allbjets[jet2].userFloat("vtxPosX"); b2jet_vtxPosY = allbjets[jet2].userFloat("vtxPosY"); b2jet_vtxPosZ = allbjets[jet2].userFloat("vtxPosZ");
 
     if (sampleType_>Data){
 	float dR_gen_reco11 = deltaR(b1_eta, b1_phi, b1jet_eta, b1jet_phi);

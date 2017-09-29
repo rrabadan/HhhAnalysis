@@ -19,7 +19,8 @@ process.source = cms.Source("PoolSource",
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/GravitonM400-02DF7FEF-74D9-E611-956A-02163E013746.root'
-	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
+	'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v3/000/300/742/00000/00CE998C-717E-E711-AD9B-02163E019CB5.root'
     )
 )
 
@@ -48,10 +49,11 @@ process.hltfilter = hlt.triggerResultsFilter.clone(
 	l1tResults = '',#not use L1t results
 	throw = cms.bool(False) 
 """
-triggerPaths = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
-			     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
-			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
-			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+triggerPaths = cms.vstring( #'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
+			    # 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+			    # 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			    # 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+			     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_*',##added 20170928
 	)
 process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
         triggerConditions = triggerPaths,
@@ -69,7 +71,7 @@ muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   verbose = cms.untracked.int32(0),
   #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
-  SampleType = cms.untracked.int32(3),
+  SampleType = cms.untracked.int32(0),
   #############gen level
   #genParticles = cms.InputTag("genParticles"),
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
@@ -80,7 +82,9 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   #trigger matching
   doTriggerMatching = cms.bool(True),
   TriggerResults = cms.InputTag("TriggerResults","","HLT"),
-  TriggerObjects = cms.InputTag("selectedPatTrigger"),
+  #TriggerObjects = cms.InputTag("selectedPatTrigger"),
+  TriggerObjects = cms.InputTag("slimmedPatTrigger"),
+ 
   hltPaths = triggerPaths,
   deltaPtRel_trigger = cms.untracked.double(.5),
   deltaR_trigger  = cms.untracked.double(.1),
