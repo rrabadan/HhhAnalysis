@@ -7,6 +7,7 @@ import argparse
 import numpy as np
 #sys.argv.append( '-b' ) 
 from array import array
+import mt2_bisect
 
 import Samplelist 
 execfile("start.py")
@@ -107,6 +108,7 @@ DY_BDT_flat                 = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float
 dy_nobtag_to_btagM_weight   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float) 
 passCC                      = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 passpre                     = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+mt2                         = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 hme_h2mass_gen              = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 hme_h2mass_reco             = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 hme_mean_reco               = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
@@ -255,6 +257,7 @@ TCha2.Branch("DY_BDT_flat",                   DY_BDT_flat,                  "DY_
 TCha2.Branch("dy_nobtag_to_btagM_weight",     dy_nobtag_to_btagM_weight,    "dy_nobtag_to_btagM_weight/F")
 TCha2.Branch("passCC",                        passCC,                       "passCC/F")
 TCha2.Branch("passpre",                       passpre,                      "passpre/F")
+TCha2.Branch("mt2",                           mt2,                          "mt2/F")
 TCha2.Branch("hme_h2mass_gen",                hme_h2mass_gen,               "hme_h2mass_gen/F")
 TCha2.Branch("hme_h2mass_reco",               hme_h2mass_reco,              "hme_h2mass_reco/F")
 TCha2.Branch("hme_mean_reco",                 hme_mean_reco,                "hme_mean_reco/F")
@@ -528,6 +531,22 @@ for ev in TCha:
       jet1_p4 	  = ROOT.TLorentzVector(); jet1_p4.SetPtEtaPhiM(ev.jet1_pt, ev.jet1_eta, ev.jet1_phi, 4.18)
       jet2_p4 	  = ROOT.TLorentzVector(); jet2_p4.SetPtEtaPhiM(ev.jet2_pt, ev.jet2_eta, ev.jet2_phi, 4.18)
       met_vec2    = ROOT.TVector2();       met_vec2.SetMagPhi(ev.met_pt, ev.met_phi)
+      
+      mt2_event1 =  mt2_bisect.mt2()
+      sumesBl11_p4 = lep1_p4+jet1_p4
+      sumesBl22_p4 = lep2_p4+jet2_p4
+      mt2_event1.set_momenta(sumesBl11_p4.M(), sumesBl11_p4.Px(), sumesBl11_p4.Py(), sumesBl22_p4.M(), sumesBl22_p4.Px(), sumesBl22_p4.Py(), 0.0, met_vec2.Px(), met_vec2.Py())
+      mt2_event1.set_mn(0.0)
+      MT2_1 = mt2_event1.get_mt2()
+
+      mt2_event2 =  mt2_bisect.mt2()
+      sumesBl12_p4 = lep2_p4+jet1_p4
+      sumesBl21_p4 = lep1_p4+jet2_p4
+      mt2_event2.set_momenta(sumesBl12_p4.M(), sumesBl12_p4.Px(), sumesBl12_p4.Py(), sumesBl21_p4.M(), sumesBl21_p4.Px(), sumesBl21_p4.Py(), 0.0, met_vec2.Px(), met_vec2.Py())
+      mt2_event2.set_mn(0.0)
+      MT2_2 = mt2_event2.get_mt2()
+      
+      mt2 = min(MT2_1, MT2_2)
       hme = HeavyMassEstimator()
       hme.setKinematic(lep1_p4, lep2_p4, jet1_p4, jet2_p4, met_vec2, 0)
       hme.setonshellWmasspdf(onshellWmasspdf)
