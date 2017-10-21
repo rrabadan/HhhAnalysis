@@ -4,14 +4,16 @@ def hist1D(tree, todraw, x_bins, cut, B, Lumi, nTOT, isMC):
   xBins   = int(x_bins[1:-1].split(',')[0])
   xminBin = float(x_bins[1:-1].split(',')[1])
   xmaxBin = float(x_bins[1:-1].split(',')[2])
-  b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
+  #b1      = ROOT.TH1F("%s_%s"%(B,todraw), "%s"%B, xBins, xminBin, xmaxBin)
+  b1      = ROOT.TH1F("%s"%(B), "%s"%B, xBins, xminBin, xmaxBin)
   if isMC:
-    cut_and_weight = str(Lumi) + "*(XsecBr/" + str(nTOT) + ")*(" + str(cut) + ")"
+    SFs = "(muon1_pogSF*muon2_pogSF*0.884016*((1.+(0.0331508*b1jet_pt))/(1.+(0.0285096*b1jet_pt)))*0.884016*((1.+(0.0331508*b2jet_pt))/(1.+(0.0285096*b2jet_pt))))"
+    cut_and_weight = str(Lumi) + "*(XsecBr/" + str(nTOT) + ")*"+ str(SFs)+"*(" + str(cut) + ")"
   else:
     if nTOT!=1: print 'WARNING!!! DATA have "nTOT" that is different from 1. nTOT is the totoal number of MC event geenrated, that should be set to 1 for DATA.'
     #cut_and_weight = str(Lumi) + "*((1.05*XsecBr)/" + str(nTOT) + ")*(" + str(cut) + ")" #Use this if you want to make a test and use a MC sample as if it was DATA
     cut_and_weight = str(cut)
-  tree.Draw("%s>>%s_%s"%(todraw,B,todraw), cut_and_weight)
+  tree.Draw("%s>>%s"%(todraw,B), cut_and_weight)
   ROOT.SetOwnership(b1, False)
   return b1
 
@@ -24,7 +26,7 @@ def draw1D_v2(filelist,x_bins,x_title,cut,benchmarks, pic_name):
   b1.GetYaxis().SetTitle("Events")
   b1.GetXaxis().SetTitle("%s"%x_title)
   b1.SetStats(0)
-  color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan]
+  color = [ROOT.kRed-4, ROOT.kBlue-4, ROOT.kMagenta-2, ROOT.kOrange-3, ROOT.kSpring, ROOT.kCyan]
   marker = [20,21,22,23,34]
   legend = ROOT.TLegend(0.75,0.6,0.86,0.94)
   legend.SetFillColor(ROOT.kWhite)
@@ -146,9 +148,11 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
   c1.SetGridx(); c1.SetGridy(); c1.SetTickx(); c1.SetTicky()
   if(LOG=="yes"): c1.SetLogy(1)
   if(LOG=="no"):  c1.SetLogy(0)
-  color = [ROOT.kRed, ROOT.kBlue, ROOT.kMagenta+2, ROOT.kGreen+2, ROOT.kCyan, ROOT.kOrange+2, ROOT.kViolet-1, ROOT.kPink+2]
+  color = [ROOT.kRed-4, ROOT.kBlue-4, ROOT.kMagenta-2, ROOT.kOrange-3, ROOT.kSpring, ROOT.kCyan, ROOT.kViolet-1, ROOT.kPink+2]
   marker = [20,21,22,23,34,33,29,28]
-  legend = ROOT.TLegend(0.65,0.65,0.8,0.94); legend.SetFillColor(ROOT.kWhite); legend.SetTextSize(0.05); legend.SetTextFont(62)
+  legend = ROOT.TLegend(0.65,0.65,0.8,0.94); 
+  #legend.SetFillColor(ROOT.kWhite); 
+  legend.SetTextSize(0.05); legend.SetTextFont(62)
   hs = ROOT.THStack("hs"," ")
   hdata = ROOT.TH1F()
   hists = []
@@ -176,7 +180,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
         if(DataOrMC=="DataMC"): hist.SetFillColor(color[nfile])
         if(Norm=="unity"): hist.Scale(1./hist.Integral())
         hs.Add(hist)
-        legend.AddEntry(hist, "%s"%B, "l")
+        legend.AddEntry(hist, "%s"%B, "f")
         hists.append(hist)
       else: # Data is expected to be the last item of filelist
         print "IS DATA"
@@ -185,7 +189,7 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
         legend.AddEntry(hist, "%s"%B, "l")
     i = i+1
   print 'Done with LOOP'
-  hs.SetMaximum(maxY)
+  hs.SetMaximum(maxY*1.4)
   if DataOrMC!="DataMC": hs.Draw("nostack") # One on top of the others
   else:                  hs.Draw("hist"); hdata.Draw("same")
   hs.GetHistogram().GetXaxis().SetTitle("%s"%x_title)
@@ -195,9 +199,12 @@ def draw1D(filelist, todraw, x_bins, x_title,cut, benchmarks, pic_name, Lumi, nT
   logTXT = ""
   if(LOG=="yes"): logTXT = "log_"
   for this_format in Format:
-    Folder = "Plots/"
-    if this_format == ".C": Folder = "Plots/C/"
+    Folder = "Run2017BCPlots_bjetSF/"
+    if not os.path.exists(Folder):
+	os.makedirs(Folder)
+    #if this_format == ".C": Folder = "Plots/C/"
     c1.SaveAs( Folder + logTXT + Norm + "_" + DataOrMC + "_" + pic_name + this_format )
+    c1.SaveAs( Folder + logTXT + Norm + "_" + DataOrMC + "_" + pic_name + ".C" )
 
 def normalize1D(hist):
   nbins = hist.GetXaxis().GetNbins()
