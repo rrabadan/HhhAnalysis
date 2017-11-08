@@ -30,11 +30,11 @@ def AddFiles(chain, inputDir):
 	    exit()
 doTest = False
 doHME = True
-refPDF = ROOT.TFile("REFPDFPU40_ZZBB.root","READ")
-onshellZmasspdf = refPDF.Get("onshellZmasspdf")
-offshellZmasspdf = refPDF.Get("offshellZmasspdf")
-#onshellZmasspdf.Print(); offshellZmasspdf.Print()
-recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
+#refPDF = ROOT.TFile("REFPDFPU40_ZZBB.root","READ")
+#onshellZmasspdf = refPDF.Get("onshellZmasspdf")
+#offshellZmasspdf = refPDF.Get("offshellZmasspdf")
+##onshellZmasspdf.Print(); offshellZmasspdf.Print()
+#recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
 tree_name="DiHiggsWWBBAna/evtree"
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
@@ -293,9 +293,9 @@ for ev in TCha:
       met_vec2        = ROOT.TVector2(ev.nu1_px + ev.nu2_px, ev.nu1_py + ev.nu2_py)
       hme_gen = HeavyMassEstimator()
       hme_gen.setKinematic(mu1_p4, mu2_p4, b1jet_p4, b2jet_p4, met_vec2)
-      hme_gen.setonshellZmasspdf(onshellZmasspdf)
-      hme_gen.setoffshellZmasspdf(offshellZmasspdf)
-      hme_gen.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
+      #hme_gen.setonshellZmasspdf(onshellZmasspdf)
+      #hme_gen.setoffshellZmasspdf(offshellZmasspdf)
+      #hme_gen.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
       #hme_gen.showKinematic()
       hme_gen.setIterations(args.iterations)
       hme_gen.runHME()
@@ -317,9 +317,9 @@ for ev in TCha:
       met_vec2    = ROOT.TVector2(met_px, met_py)
       hme = HeavyMassEstimator()
       hme.setKinematic(muon1_p4, muon2_p4, b1jet_p4, b2jet_p4, met_vec2)
-      hme.setonshellZmasspdf(onshellZmasspdf)
-      hme.setoffshellZmasspdf(offshellZmasspdf)
-      hme.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
+      #hme.setonshellZmasspdf(onshellZmasspdf)
+      #hme.setoffshellZmasspdf(offshellZmasspdf)
+      #hme.setrecobjetrescalec1pdf(recobjetrescalec1pdfPU40)
       #hme.showKinematic()
       hme.setIterations(args.iterations)
       hme.runHME()
