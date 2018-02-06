@@ -148,9 +148,9 @@ with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
 #TCha.Add(this_NtotPath)
 #TCha.Add("/fdata/hepx/store/user/tahuang/HHNTuples/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow_Summer16MiniAODv2_v5.0.1+80X_HHAnalysis_2017-03-01.v0_histos.root")
 TotalEv = TCha.GetEntries()
-nStart = TotalEv/args.njobs*args.ijob
-nEnd = TotalEv/args.njobs*(args.ijob+1)
-if args.ijob == args.njobs-1:
+nStart = (TotalEv/args.njobs + 1)*args.ijob
+nEnd = (TotalEv/args.njobs + 1)*(args.ijob+1)
+if args.ijob == args.njobs-1 or nEnd>TCha.GetEntries():
     nEnd = TCha.GetEntries()
 print whichSample, "TChain has", TCha.GetEntries(), "entries."," job star from ",nStart," end at ",nEnd
 #f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Test/'%user + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
@@ -372,10 +372,10 @@ for nEv in range(nStart, nEnd):
           print "NO solution found!!!!! "
       elif hme.hme_h2Mass.GetEntries() >0 and  hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin()) < 249.0 :
           print "Num solutions ",hme.hme_h2Mass.GetEntries()," BUT the maximum is ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())
-	  hme.hme_h2Mass.Print("ALL")
+	  #hme.hme_h2Mass.Print("ALL")
 
       if hme.hme_h2Mass.GetEntries()>0 and hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())>=250.0 :
-	  print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()," stddev ",hme.hme_h2Mass.GetStdDev(1)
+	  #print "Reco Level most probable reco mass ",hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())," entries ",hme.hme_h2Mass.GetEntries()," stddev ",hme.hme_h2Mass.GetStdDev(1)
 	  hme.hme_h2Mass.SetName("hme_h2Mass_ev%d_recolevel"%nEv)
           hme.hme_h2MassWeight1.SetName("hme_h2MassWeight1_ev%d_recolevel"%nEv)
           hme.hme_offshellWmass.SetName("hme_offshellWmass_ev%d_recolevel"%nEv)
@@ -390,12 +390,12 @@ for nEv in range(nStart, nEnd):
 
     	  hme_h2mass_reco[0] = hme.hme_h2Mass.GetXaxis().GetBinCenter(hme.hme_h2Mass.GetMaximumBin())
           hme_mean_reco[0] = hme.hme_h2Mass.GetMean()
-          hme_stddev_reco[0] = hme.hme_h2Mass.GetStdDev(1)
+          #hme_stddev_reco[0] = hme.hme_h2Mass.GetStdDev(1)
           hme_entries_reco[0] = float(hme.hme_h2Mass.GetEntries())/args.iterations
 	  hme_entry_peak_reco[0] = hme.hme_h2Mass.Integral(hme.hme_h2Mass.GetMaximumBin()-5, hme.hme_h2Mass.GetMaximumBin()+5)
     	  hme_h2mass_weight2_reco[0] = hme.hme_h2MassWeight2.GetXaxis().GetBinCenter(hme.hme_h2MassWeight2.GetMaximumBin())
           hme_mean_weight2_reco[0] = hme.hme_h2MassWeight2.GetMean()
-          hme_stddev_weight2_reco[0] = hme.hme_h2MassWeight2.GetStdDev(1)
+          #hme_stddev_weight2_reco[0] = hme.hme_h2MassWeight2.GetStdDev(1)
           hme_entries_weight2_reco[0] = float(hme.hme_h2MassWeight2.GetEntries())/args.iterations
 	  hme_entry_peak_weight2_reco[0] = hme.hme_h2MassWeight2.Integral(hme.hme_h2MassWeight2.GetMaximumBin()-5, hme.hme_h2MassWeight2.GetMaximumBin()+5)
 	  #print "hme_h2mass_reco[0] ",hme_h2mass_reco[0]," hme_h2mass_weight2_reco[0] ",hme_h2mass_weight2_reco[0]
@@ -404,10 +404,10 @@ for nEv in range(nStart, nEnd):
 	  h_offshellWmass_recoh2mass_weight2 = hme.hme_h2MassAndoffshellWmass_weight2.ProjectionY("h_offshellWmass_recoh2mass_weight2",hme.hme_h2MassWeight2.GetMaximumBin()-5, hme.hme_h2MassWeight2.GetMaximumBin()+5)
 	  hme_mostprob_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetXaxis().GetBinCenter(h_offshellWmass_recoh2mass.GetMaximumBin())
 	  hme_mean_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetMean()
-	  hme_stddev_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetStdDev(1)
+	  #hme_stddev_offshellWmass_reco[0] = h_offshellWmass_recoh2mass.GetStdDev(1)
 	  hme_mostprob_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetXaxis().GetBinCenter(h_offshellWmass_recoh2mass_weight2.GetMaximumBin())
 	  hme_mean_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetMean()
-	  hme_stddev_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetStdDev(1)
+	  #hme_stddev_offshellWmass_weight2_reco[0] = h_offshellWmass_recoh2mass_weight2.GetStdDev(1)
 
           hme.hme_h2Mass.Rebin(10)
           hme.hme_h2MassWeight2.Rebin(10)
