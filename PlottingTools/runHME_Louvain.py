@@ -151,7 +151,7 @@ TotalEv = TCha.GetEntries()
 nStart = TotalEv/args.njobs*args.ijob
 nEnd = TotalEv/args.njobs*(args.ijob+1)
 if args.ijob == args.njobs-1:
-    nEnd = -1
+    nEnd = TCha.GetEntries()
 print whichSample, "TChain has", TCha.GetEntries(), "entries."," job star from ",nStart," end at ",nEnd
 #f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Test/'%user + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
 f = ROOT.TFile(args.output + whichSample + '_ijob%d.root'%args.ijob, 'recreate'); f.cd()
