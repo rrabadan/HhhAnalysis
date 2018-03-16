@@ -148,9 +148,9 @@ with open(this_cat.split(">")[1].split(" ")[1],"r") as f:
 #TCha.Add(this_NtotPath)
 #TCha.Add("/fdata/hepx/store/user/tahuang/HHNTuples/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow_Summer16MiniAODv2_v5.0.1+80X_HHAnalysis_2017-03-01.v0_histos.root")
 TotalEv = TCha.GetEntries()
-nStart = (TotalEv/args.njobs + 1)*args.ijob
-nEnd = (TotalEv/args.njobs + 1)*(args.ijob+1)
-if args.ijob == args.njobs-1 or nEnd>TCha.GetEntries():
+nStart = (TotalEv/args.njobs )*args.ijob
+nEnd = (TotalEv/args.njobs )*(args.ijob+1)
+if args.ijob == args.njobs or nEnd>TCha.GetEntries():
     nEnd = TCha.GetEntries()
 print whichSample, "TChain has", TCha.GetEntries(), "entries."," job star from ",nStart," end at ",nEnd, " events to run ",nEnd-nStart
 #f = ROOT.TFile('/fdata/hepx/store/user/%s/Hhh_For_Test/'%user + whichSample + '_ijob%d.root'%args.ijob,'recreate'); f.cd()
