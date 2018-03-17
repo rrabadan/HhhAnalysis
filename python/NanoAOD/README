@@ -1,0 +1,9 @@
+Setup:
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+
+and then 
+postproc_local.py 
+to run producer 
+
+I did not test the crab job yet and add the instruction for crab later
+

@@ -7,9 +7,18 @@ from PhysicsTools.NanoAODTools.postprocessing.tools import * #deltaR, matching e
 
 class HHbbWWProducer(Module):
     ## data or MC, which L1 trigger, HLT?
-    def __init__(self, isMC, L1trigger):
+    def __init__(self, isMC, L1trigger, verbose = 4):
         self.isMC = isMC ## two mode: data or MC
 	self.triggertype  = L1trigger##"DoubleMuon, DoubleEG, MuonEG"
+	self.deltaR_trigger_reco = 0.1; self.deltaPtRel_trigger_reco = 0.5
+	self.ievent = 0
+	self.verbose = verbose
+	self.leadingMuonPt = {"DoubleMuon": 20; "MuonEG":25}
+	self.subleadingMuonPt = {"DoubleMuon": 10; "MuonEG":10}
+	self.leadingEGPt = {"DoubleEG": 25; "MuonEG":25}
+	self.subleadingEGPt = {"DoubleEG": 15; "MuonEG":15}
+	self.h_cutflow = ROOT.TH1F("h_cutflow","h_cutflow", 20, 0, 20.0)
+
         pass
     def beginJob(self):
         pass
@@ -17,7 +26,6 @@ class HHbbWWProducer(Module):
         pass
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("sample_weight",  "F");
         self.out.branch("jet1_pt",  "F");
         self.out.branch("jet1_E",  "F");
         self.out.branch("jet1_eta",  "F");
@@ -69,8 +77,12 @@ class HHbbWWProducer(Module):
 	self.out.branch("llmetjj_MTformula",  "F")
 	self.out.branch("ll_DPhi_l_l",  "F")
 	self.out.branch("ll_DEta_l_l",  "F")
-	self.out.branch("event_weight",  "F")
 	self.out.branch("event_pu_weight",  "F")
+	self.out.branch("event_lep_weight",  "F")
+	self.out.branch("event_btag_weight",  "F")
+        self.out.branch("sample_weight",  "F");
+	self.out.branch("event_reco_weight",  "F")
+	self.out.branch("event_weight",  "F")
 	self.out.branch("pu",  "F")
 	self.out.branch("DY_BDT_flat",  "F")
 	self.out.branch("dy_nobtag_to_btagM_weight",  "F")
@@ -83,6 +95,61 @@ class HHbbWWProducer(Module):
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
+
+    def electronImpactParameterCut(self, electron):
+	""" check electron impact parameter, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
+	dxy_endcap = 0.1 #cm
+	dxy_barrel = 0.05
+	dz_endcap  = 0.2
+	dz_barrel = 0.1
+	if abs(electron.eta) < 1.479: ##barrel
+	    return (abs(electron.dz) < dz_barrel and abs(electron.dxy) < dxy_barrel)
+        else abs(electron.eta) >= 1.479 and abs(electron.eta) < 2.5:
+	    return (abs(electron.dz) < dz_endcap and abs(electron.dxy) < dxy_endcap)
+	else:
+	    return False
+
+    def electronID(self, electron):
+	""" check electron ID, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
+	### we use medium Electron
+	return electron.cutBased >= 3
+	
+    def electronIso(self, electron):
+	""" check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
+	### electron iso cut
+	return True
+    
+    def electronHLTSafeID(self, electron):
+	""" check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
+	"""https://twiki.cern.ch/twiki/bin/view/CMS/ChangesEGMHLTAlgo2014"""
+	### extrac HLT safe ID cut is applied for electron selection for 2016 data only
+	return True
+	#if abs(electron.eta) < 1.479: #barrel
+	#return (abs(electron.sieie) < 0.11 and 
+	
+    def muonID(self, muon):
+        """https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Muon_Isolation """
+	#goodGlob = (muon.isGlobalMuon() and muon.globalTrack()->normalizedChi2() < 3 and muon.combinedQuality().chi2LocalPosition < 12 and muon.combinedQuality().trkKink < 20)
+        ###check Muon ID
+	return muon.mediumId
+
+    def muonIso(self. muon):
+        ###check Muon iso 
+        return muon.pfRelIso03_all < 0.15
+    
+    def checkTwoleptons(self, leptons_mu_keys, leptons_el_keys):
+        passdilepton = False
+	if self.triggertype == "DoubleMuon":
+	    if len(leptons_mu_keys) >= 2:
+	        passdilepton = True
+	elif self.triggertype == "DoubleEG":
+	    if len(leptons_el_keys) >= 2:
+	        passdilepton = True
+	elif self.triggertype == "MuonEG":
+	    if len(leptons_mu_keys) >= 1 and len(leptons_el_keys) >= 1:
+	        passdilepton = True
+        return passdilepton
+	
 
     def pt(self, jet, isMC):
         ## the MC has JER smearing applied which has output branch Jet_pt_smeared which should be compared 
@@ -101,6 +168,7 @@ class HHbbWWProducer(Module):
             return (met.pt,met.phi)
 	   
     def HLTPath(self, hlt, isMC):
+	""" check which HLT is fired """
 	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"], 
 	    	   "MuonEG": ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", 
 		   		"HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"],
@@ -121,46 +189,214 @@ class HHbbWWProducer(Module):
 		    return True, path
 	return False,"" 
 
+    def trigger_reco_matching(self, muons, mu_effSF, trigobjs, leptons):
+	""" match reco object to triggger obj """
+	    for imu, mu in enumerate(muons):
+		triggermatch = False
+		for tobj in trigobjs:
+		    if abs(mu.pdgId) != tobj.id:
+		        continue
+		    dR = deltaR(tobj.eta, tobj.phi, mu.eta, mu.phi)
+		    dPtRel = abs(tobj.pt-mu.pt)/mu.pt ###which trigger object pt should be used here, FIXME
+		    ##check id, dR, dpt
+		    if dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco:
+		        if self.verbose > 3:
+			    print "trigger obj l1 pt ", tobj.l1pt," l2pt ", tobj.l2pt," pt ",tobj.pt, " eta ",tobj.eta, " bits ", tobj.filterBits, " offlep pt ",mu.pt," eta ",mu.eta
+			triggermatch = True
+			break;
+		if triggermatch:
+		    leptons[mu] = mu_effSF[imu]
+
+    def fillMCinfo(self, event):
+	""" fill all gen information here """
+	if not self.isMC:
+		return 
+
+	genmet = Object(event)
+
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
 	#hlts = Collection(event, "HLT")
-	fired, path =  self.HLTPath(event, self.isMC)
-	if not fired:
-	    return False
+
 	
+	event_reco_weight = 1.0 ## for pu_weight*btag_SF*lepSF
+	sample_weight = 1.0
+	###cutstep1: initial events, no selection, 
+	fired, path =  self.HLTPath(event, self.isMC)
+	##cutstep2: HLT is fired or not
+	cutflow_bin = 1.0
+	if not fired:
+	    self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	    return False
+	else:
+	    cutflow_bin += 1.0
+	
+	self.ievent += 1
         Lepstype = -1##MuMu:1, MuEl:2, ElMu:3, ElEl:4
 	if self.triggertype == "DoubleMuon":
         	Lepstype = 1	
 	elif self.triggertype == "DoubleEG":
 		Lepstype = 4
-	elif self.triggertype == "MuonEG" and "Mu23" in path:
+	elif self.triggertype == "MuonEG":
 		Lepstype = 2
-	elif self.triggertype == "MuonEG" and "Ele23" in path:
-		Lepstype = 3
+	#elif self.triggertype == "MuonEG" and "Ele23" in path:
+		#Lepstype = 3
 	else:
-		return False
+		raise ValueError('Triggertype is not acceptable , check self.triggertype ')
+	        
+	if self.verbose > 2:
+		print "iEvent ",self.ievent," HLT path ",path," leptype ",Lepstype
 
-	
-        electrons = Collection(event, "Electron")
-        muons = Collection(event, "Muon")
-        jets = list(Collection(event, "Jet"))
+        ### PV	
+	PV = Object(event, "PV")
+	pu_weight = event.puWeight
+        #self.out.fillBranch("pu", PV.npvs)
+        self.out.fillBranch("event_pu_weight", pu_weight)
+
+	### MET
         met = Object(event, "MET")
-
         #metPt,metPhi = self.met(met,self.isMC)
 	metPt = met.pt; metPhi = met.phi
-	print "Lepstype ",Lepstype," metpt ",metPt, " metphi ",metPhi
-        self.out.fillBranch("met_pt",metPt)
-        self.out.fillBranch("met_phi",metPhi) 
+        #self.out.fillBranch("met_pt",metPt)
+        #self.out.fillBranch("met_phi",metPhi) 
+
+        electrons = Collection(event, "Electron")
+        muons = Collection(event, "Muon")
+	mu_effSF = event.Muon_effSF
+	el_effSF = event.Electron_effSF
+        jets = Collection(event, "Jet")
+	jet_btagSF = event.Jet_btagSF
+	njets = len(jets)
+	trigobjs = Collection(event, "TrigObj")
+	
+
+	###match trigger obj to HLT?
+	trigobjs_lep = []
+  	for tobj in trigobjs:
+	    if (tobj.id == 11 and tobj.l1pt >= 12) or (tobj.id == 13 and tobj.l1pt >= 8):
+		trigobjs_lep.append(tobj)
+		if self.verbose > 3:
+	            print "triggerobj id  ",tobj.id," l1pt ",tobj.l1pt," l2pt ",tobj.l2pt," pt ",tobj.pt," eta ",tobj.eta," phi ",tobj.phi," bits ",tobj.filterBits	
+	leptons_mu = {}
+	leptons_el = {}
+	
+	if self.triggertype == "DoubleMuon" or self.triggertype == "MuonEG":
+            self.trigger_reco_matching(muons, mu_effSF, trigobjs_lep, leptons_mu)
+	if self.triggertype == "DoubleEG" or self.triggertype == "MuonEG":
+            self.trigger_reco_matching(electrons, el_effSF, trigobjs_lep, leptons_el)
+	
+
+	###cutstep3: L1_HLT_RECO matching
+	if (self.triggertype == "DoubleMuon" and len(leptons_mu) >= 2) or (self.triggertype == "DoubleEG" and len(leptons_el) >= 2) or (self.triggertype == "MuonEG" and len(leptons_mu)>=1 and len(leptons_el) >= 1):
+	    cutflow_bin += 1.0
+	else:
+	    self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	    return False
+		
+	
+
+
+	leptons_el_keys = leptons_el.keys()
+        leptons_el_keys.sort(key=lambda x:x.pt,reverse=True)	
+	for el in leptons_el_keys:
+	    if not(self.electronImpactParameterCut(el)):
+		leptons_el_keys.remove(el)
+        leptons_mu_keys = leptons_mu.keys()
+        leptons_mu_keys.sort(key=lambda x:x.pt,reverse=True)	
+	passdileptonPtEta = False
+	###cutstep4: dilepton pt, and eta, 
+	if self.triggertype == "DoubleMuon":
+	    for mu in leptons_mu_keys:
+	        if mu.pt < self.subleadingMuonPt["DoubleMuon"] :
+		    leptons_mu_keys.remove( mu )
+            if len(leptons_mu_keys) >= 2 and leptons_mu_keys[0].pt >= self.leadingMuonPt["DoubleMuon"]:
+	        cutflow_bin += 1.0
+	    else:
+	        self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	        return False
+	elif self.triggertype == "DoubleEG":
+	    for el in leptons_el_keys:
+	        if el.pt < self.subleadingEGPt["DoubleEG"] :
+		    leptons_el_keys.remove( el )
+            if len(leptons_el_keys) >= 2 and leptons_el_keys[0].pt >= self.leadingEGPt["DoubleEG"]:
+	        cutflow_bin += 1.0
+	    else:
+	        self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	        return False
+	elif self.triggertype == "MuonEG":
+            if len(leptons_mu_keys) >= 1 and len(leptons_el_keys) >= 1:
+	        if (leptons_mu_keys[0].pt >= self.leadingMuonPt["MuonEG"] and leptons_el_keys[0].pt >= self.subleadingEGPt["MuonEG"]):
+		     cutflow_bin += 1.0
+		elif (leptons_mu_keys[0].pt >= self.subleadingMuonPt["MuonEG"] and leptons_el_keys[0].pt >= self.leadingEGPt["MuonEG"]):
+		     cutflow_bin += 1.0
+		else:
+	            self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	            return False
+	    else:
+	        self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	        return False
+	    
+		
+	###cutstep5: dilepton, ISO
+	passdileptonIso = False
+	for el in leptons_el_keys:
+	    if not(self.electronIso(el)):
+		leptons_el_keys.remove(el)
+	for mu in leptons_mu_keys:
+	    if not(self.muonIso(mu)):
+		leptons_mu_keys.remove(mu)
+	
+	passdileptonIso =  self.checkTwoleptons(leptons_mu_keys, leptons_el_keys)
+
+	if passdileptonIso:
+	     cutflow_bin += 1.0
+	else:
+	     self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	     return False
+	
+	###cutstep6: dilepton, ID
+	for el in leptons_el_keys:
+	    if not(self.electronID(el)):
+		leptons_el_keys.remove(el)
+	for mu in leptons_mu_keys:
+	    if not(self.muonID(mu)):
+		leptons_mu_keys.remove(mu)
+	
+	passdileptonID =  self.checkTwoleptons(leptons_mu_keys, leptons_el_keys)
+	if passdileptonID:
+	     cutflow_bin += 1.0
+	else:
+	     self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	     return False
+
+
+	###cutstep6: dilepton, ID
+	for el in leptons_el_keys:
+	    if not(self.electronHLTSafeID(el)):
+		leptons_el_keys.remove(el)
+
+	passdileptonHLTSafeID =  self.checkTwoleptons(leptons_mu_keys, leptons_el_keys)
+
+	if passdileptonHLTSafeID:
+	     cutflow_bin += 1.0
+	else:
+	     self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
+	     return False
+
+        ## selection final two leptons	
+
+	##Lepton Selection
+        #wMuons = [x for x in muons if x.pt > 25 and x.tightId >= 1 and x.pfRelIso04_all < 0.15 and x.dxy < 0.05 and x.dz < 0.2]
+        #wElectrons = [x for x in electrons if x.mvaSpring16GP_WP80 and x.pt > 25 and x.pfRelIso03_all < 0.12]      
+
+        #wMuons.sort(key=lambda x:x.pt,reverse=True)
+        #wElectrons.sort(key=lambda x:x.pt,reverse=True)
       
 	self.out.fillBranch("lepstype", Lepstype)
         ## add branches for some basic kinematics
         #ll = ROOT.TLorentzVector()
 
-        #wElectrons = [x for x in electrons if x.mvaSpring16GP_WP80 and x.pt > 25 and x.pfRelIso03_all < 0.12]      
-        #wMuons = [x for x in muons if x.pt > 25 and x.tightId >= 1 and x.pfRelIso04_all < 0.15 and x.dxy < 0.05 and x.dz < 0.2]
 
-        #wMuons.sort(key=lambda x:x.pt,reverse=True)
-        #wElectrons.sort(key=lambda x:x.pt,reverse=True)
 
         #vLeptons = [] # decay products of H->WW
 
