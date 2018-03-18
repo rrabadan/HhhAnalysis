@@ -6,9 +6,11 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
 #from HhhAnalysis.NanoAOD.HHbbWWProducer import *
+from HHbbWWProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
 from  PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
@@ -44,7 +46,8 @@ mhtVHbb = lambda : mhtProducer( lambda j : j.pt > 30,
 #this takes care of converting the input files from CRAB
 from PhysicsTools.NanoAODTools.postprocessing.framework.crabhelper import inputFiles,runsAndLumis
 
-p=PostProcessor(".",inputFiles(),selection.replace('\n',' '),"keep_and_drop.txt",modules=[puWeight(),jetmetUncertaintiesAll(),mhtVHbb(),btagSFProducer("cmva"),hhbbWW()],provenance=True,fwkJobReport=True,jsonInput=runsAndLumis())
+p=PostProcessor(".",inputFiles(),"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
+#p=PostProcessor(".",inputFiles(),selection.replace('\n',' '),"keep_and_drop.txt",modules=[puWeight(),jetmetUncertaintiesAll(),mhtVHbb(),btagSFProducer("cmva"),hhbbWW()],provenance=True,fwkJobReport=True,jsonInput=runsAndLumis())
 p.run()
 
 print "DONE"
