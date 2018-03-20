@@ -40,6 +40,27 @@ def muonIso(muon):
     ###check Muon iso 
     return muon.pfRelIso03_all < 0.15
 
+def leptonImpactParameter(lepton):
+    return ((abs(lepton.pdgId) == 11 and electronImpactParameterCut(lepton)) or abs(lepton.pdgId) == 13 )
+def leptonpairImpactParameter(leptonpair):
+    return (leptonImpactParameter(leptonpair[0]) and leptonImpactParameter(leptonpair[1]))
+
+def leptonIso(lepton):
+    #print "lepton id ",lepton.pdgId
+    return ((abs(lepton.pdgId) == 11 and electronIso(lepton)) or (abs(lepton.pdgId) == 13 and muonIso(lepton)))
+def leptonpairIso(leptonpair):
+    return (leptonIso(leptonpair[0]) and leptonIso(leptonpair[1]))
+
+def leptonID(lepton):
+    return ((abs(lepton.pdgId) == 11 and electronID(lepton)) or (abs(lepton.pdgId) == 13 and muonID(lepton)))
+def leptonpairID(leptonpair):
+    return (leptonID(leptonpair[0]) and leptonID(leptonpair[1]))
+
+def leptonHLTSafeID(lepton):
+    return ((abs(lepton.pdgId) == 11 and electronHLTSafeID(lepton)) or (abs(lepton.pdgId) == 13))
+def leptonpairHLTSafeID(leptonpair):
+    return (leptonHLTSafeID(leptonpair[0]) and leptonHLTSafeID(leptonpair[1]))
+
 def jetMediumBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X """ 
     ### use medium btagging 
