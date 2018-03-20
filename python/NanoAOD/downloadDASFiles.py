@@ -1,11 +1,12 @@
-import os
+import os,sys
 
 dataset = "/GluGluToRadionToHHTo2B2VTo2L2Nu_M-*_narrow_13TeV-madgraph-v2/RunIISummer16NanoAOD-PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/NANOAODSIM"
 query = "file dataset="+dataset
 filelist = "filelist.txt"
-os.system("dasgoclient -limit=0 -query='{query}' > {filelist}".format(query = query, filelist = filelist))
+flist = os.popen("dasgoclient -limit=0 -query='{query}'".format(query = query))
+#os.system("dasgoclient -limit=0 -query='{query}' > {filelist}".format(query = query, filelist = filelist))
 output_folder = "/fdata/hepx/store/user/taohuang/HH_NanoAOD/"
-flist = open(filelist, "read")
+#flist = open(filelist, "read")
 masslist = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 750, 800, 900]
 for line in flist:
     print "line ",line[:-1]
