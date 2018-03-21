@@ -15,6 +15,8 @@ class HHbbWWProducer(Module):
     ###kwargs: triggertype, verbose, run_lumi
     def __init__(self,isMC, **kwargs):
         self.isMC = isMC ## two mode: data or MC
+	for key in kwargs.keys():
+	    print "key in kwargs ",key
 	self.triggertype  = ''##"DoubleMuon, DoubleEG, MuonEG"
 	self.deltaR_trigger_reco = 0.1; self.deltaPtRel_trigger_reco = 0.5
 	self.verbose = 3
@@ -69,13 +71,13 @@ class HHbbWWProducer(Module):
         self.out.branch("lep1_E",  "F");
         self.out.branch("lep1_eta",  "F");
         self.out.branch("lep1_phi",  "F");
-        self.out.branch("lep1_id",  "F");
+        self.out.branch("lep1_pdgid",  "I");
         self.out.branch("lep1_iso",  "F");
         self.out.branch("lep2_pt",  "F");
         self.out.branch("lep2_E",  "F");
         self.out.branch("lep2_eta",  "F");
         self.out.branch("lep2_phi",  "F");
-        self.out.branch("lep2_id",  "F");
+        self.out.branch("lep2_pdgid",  "I");
         self.out.branch("lep2_iso",  "F");
 	self.out.branch("met_pt",  "F")
 	self.out.branch("met_phi",  "F")
@@ -114,7 +116,31 @@ class HHbbWWProducer(Module):
 	self.out.branch("mt2_ll",  "F")
 	self.out.branch("event_number",  "I")
 	self.out.branch("event_run",  "I")
+	self.out.branch("event_lumiblock",  "I")
 	##how to add gen information???
+	if self.isMC:
+	    self.out.branch("genjet1_pt",  "F");
+	    self.out.branch("genjet1_E",  "F");
+	    self.out.branch("genjet1_eta",  "F");
+	    self.out.branch("genjet1_phi",  "F");
+	    self.out.branch("genjet1_partonid",  "I");
+	    self.out.branch("genjet2_pt",  "F");
+	    self.out.branch("genjet2_E",  "F");
+	    self.out.branch("genjet2_eta",  "F");
+	    self.out.branch("genjet2_phi",  "F");
+	    self.out.branch("genjet2_partonid",  "I");
+	    self.out.branch("genl1_pt",  "F");
+	    self.out.branch("genl1_E",  "F");
+	    self.out.branch("genl1_eta",  "F");
+	    self.out.branch("genl1_phi",  "F");
+	    self.out.branch("genl1_id",  "I");
+	    self.out.branch("genl2_pt",  "F");
+	    self.out.branch("genl2_E",  "F");
+	    self.out.branch("genl2_eta",  "F");
+	    self.out.branch("genl2_phi",  "F");
+	    self.out.branch("genl2_id",  "I");
+	    self.out.branch("genmet_pt",  "F");
+	    self.out.branch("genmet_phi",  "F");
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_cutflow.Write()
@@ -307,7 +333,7 @@ class HHbbWWProducer(Module):
         ### PV	
 	PV = Object(event, "PV")
 	event_pu_weight = 1.0
-	pu = PV.npvs
+	pu = PV.npvsGood
         run = getattr(event,"run", False)	
 	luminosityBlock = getattr(event, "luminosityBlock", False)
 	ievent =  getattr(event,"event", False)
@@ -498,11 +524,22 @@ class HHbbWWProducer(Module):
 
         ## select final two leptons	
 	leptons = leptonpairs[0]##leading lepton first
+	lep1_iso = 0.0; lep2_iso = 0.0
 	if self.triggertype == "MuonEG":
 	    if abs(leptons[0].pdgId) == 13:
     		Lepstype = 2
+		lep1_iso = leptons[0].pfRelIso04_all
+		lep2_iso = leptons[1].pfRelIso03_all
     	    else:
     		Lepstype = 3
+		lep1_iso = leptons[0].pfRelIso03_all
+		lep2_iso = leptons[1].pfRelIso04_all
+	elif self.triggertype == "DoubleMuon":
+	    lep1_iso = leptons[0].pfRelIso04_all
+	    lep2_iso = leptons[1].pfRelIso04_all
+	elif  self.triggertype == "DoubleEG":
+	    lep1_iso = leptons[0].pfRelIso03_all
+	    lep2_iso = leptons[1].pfRelIso03_all
 
         # SetPtEtaPhiE(pt,eta,phi,e); and SetPtEtaPhiM(pt,eta,phi,m);
         lep1_p4 = ROOT.TLorentzVector()
@@ -647,14 +684,14 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("lep1_E",  lep1_p4.E());
         self.out.fillBranch("lep1_eta",  lep1_p4.Eta());
         self.out.fillBranch("lep1_phi",  lep1_p4.Phi());
-        #self.out.fillBranch("lep1_id", "F" );
-        #self.out.fillBranch("lep1_iso",  "F");
+        self.out.fillBranch("lep1_pdgid", leptons[0].pdgId );
+        self.out.fillBranch("lep1_iso",  lep1_iso);
         self.out.fillBranch("lep2_pt",  lep2_p4.Pt());
         self.out.fillBranch("lep2_E",   lep2_p4.E());
         self.out.fillBranch("lep2_eta",  lep2_p4.Eta());
         self.out.fillBranch("lep2_phi",  lep2_p4.Phi());
-        #self.out.fillBranch("lep2_id",  "F");
-        #self.out.fillBranch("lep2_iso",  "F");
+        self.out.fillBranch("lep2_pdgid",  leptons[1].pdgId);
+        self.out.fillBranch("lep2_iso",  lep2_iso);
 	self.out.fillBranch("met_pt",  met_p4.Pt())
 	self.out.fillBranch("met_phi", met_p4.Phi())
 	self.out.fillBranch("ht",  ht)
@@ -689,12 +726,56 @@ class HHbbWWProducer(Module):
 	#self.out.fillBranch("mt2",  "F")
 	#self.out.fillBranch("mt2_bb",  "F")
 	#self.out.fillBranch("mt2_ll",  "F")
-	#self.out.fillBranch("event_number",  "I")
-	#self.out.fillBranch("event_run",  "I")
-        #self.out.fillBranch("H_pt",hbb.Pt())
-        #self.out.fillBranch("H_phi",hbb.Phi())
-        #self.out.fillBranch("H_eta",hbb.Eta())
-        #self.out.fillBranch("H_mass",hbb.M())
+	self.out.fillBranch("event_number",  ievent)
+	self.out.fillBranch("event_run",  run)
+	self.out.fillBranch("event_lumiblock",  luminosityBlock)
+	if self.isMC:
+	    genmet = Object(event, "GenMET")
+	    genParticles = Collection(event, "GenPart")
+	    genjets = Collection(event, "GenJet")
+	    nGenPart = getattr(event, "nGenPart", False)
+	    nGenJet = getattr(event, "nGenJet", False)
+	    
+	    lep1_genindex = leptons[0].genPartIdx
+	    lep2_genindex = leptons[1].genPartIdx
+	    if lep1_genindex >= 0 and lep1_genindex < nGenPart:
+		genl1 = genParticles[lep1_genindex]
+		genl1_p4 = ROOT.TLorentzVector(); genl1_p4.SetPtEtaPhiM(genl1.pt, genl1.eta, genl1.phi, genl1.mass)
+		self.out.fillBranch("genl1_pt",  genl1_p4.Pt());
+		self.out.fillBranch("genl1_E",  genl1_p4.E());
+		self.out.fillBranch("genl1_eta",  genl1_p4.Eta());
+		self.out.fillBranch("genl1_phi",  genl1_p4.Phi());
+		self.out.fillBranch("genl1_id",  abs(genl1.pdgId));
+	    if lep2_genindex >= 0 and lep2_genindex < nGenPart:
+		genl2 = genParticles[lep2_genindex]
+		genl2_p4 = ROOT.TLorentzVector(); genl2_p4.SetPtEtaPhiM(genl2.pt, genl2.eta, genl2.phi, genl2.mass)
+		self.out.fillBranch("genl2_pt",  genl2_p4.Pt());
+		self.out.fillBranch("genl2_E",  genl2_p4.E());
+		self.out.fillBranch("genl2_eta",  genl2_p4.Eta());
+		self.out.fillBranch("genl2_phi",  genl2_p4.Phi());
+		self.out.fillBranch("genl2_id",  abs(genl2.pdgId));
+    	    if jet1.genJetIdx >= 0 and jet1.genJetIdx < nGenJet:
+		genjet1 = genjets[jet1.genJetIdx]
+		genjet1_p4 = ROOT.TLorentzVector(); 
+		genjet1_p4.SetPtEtaPhiM(genjet1.pt, genjet1.eta, genjet1.phi, genjet1.mass)
+		self.out.fillBranch("genjet1_pt", genjet1_p4.Pt());
+		self.out.fillBranch("genjet1_E",  genjet1_p4.E());
+		self.out.fillBranch("genjet1_eta",  genjet1_p4.Eta());
+		self.out.fillBranch("genjet1_phi",  genjet1_p4.Phi());
+		self.out.fillBranch("genjet1_partonid",  genjet1.partonFlavour);
+    	    if jet2.genJetIdx >= 0 and jet2.genJetIdx < nGenJet:
+		genjet2 = genjets[jet2.genJetIdx]
+		genjet2_p4 = ROOT.TLorentzVector(); 
+		genjet2_p4.SetPtEtaPhiM(genjet2.pt, genjet2.eta, genjet2.phi, genjet2.mass)
+		self.out.fillBranch("genjet2_pt", genjet2_p4.Pt());
+		self.out.fillBranch("genjet2_E",  genjet2_p4.E());
+		self.out.fillBranch("genjet2_eta",  genjet2_p4.Eta());
+		self.out.fillBranch("genjet2_phi",  genjet2_p4.Phi());
+		self.out.fillBranch("genjet2_partonid",  genjet2.partonFlavour);
+
+	    self.out.fillBranch("genmet_pt",  genmet.pt);
+	    self.out.fillBranch("genmet_phi", genmet.phi);
+
 
 	### Compute soft activity vetoing Higgs jets
 	##find signal footprint
