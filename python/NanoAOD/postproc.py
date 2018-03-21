@@ -47,7 +47,7 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20,
 #this takes care of converting the input files from CRAB
 from PhysicsTools.NanoAODTools.postprocessing.framework.crabhelper import inputFiles,runsAndLumis
 
-p=PostProcessor(".",fileMuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW()],provenance=True, jsonInput=runsAndLumis())
+p=PostProcessor(".",fileMuMu,"1","keep_and_drop.txt",[mht_hh(),  HHbbWWProducer(True)],provenance=True, jsonInput=runsAndLumis())
 #p=PostProcessor(".",inputFiles(),selection.replace('\n',' '),"keep_and_drop.txt",modules=[puWeight(),jetmetUncertaintiesAll(),mhtVHbb(),btagSFProducer("cmva"),hhbbWW()],provenance=True,fwkJobReport=True,jsonInput=runsAndLumis())
 p.run()
 
