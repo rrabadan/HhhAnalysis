@@ -19,6 +19,7 @@ files = ["root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/GluGluToB
 filesTTbar= [
 'root://cms-xrd-global.cern.ch//store/group/cmst3/group/nanoAOD/NanoTestProd006/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer17MiniAOD-92X-NanoCrabProd006/171006_155430/0000/nanolzma_1.root',
 ]
+fileMuMu = ["root://cms-xrd-global.cern.ch//store/data/Run2016B/MuonEG/NANOAOD/05Feb2018_ver2-v1/00000/48512742-610C-E811-B1A6-0CC47A1DF800.root"]
 filesTTbar = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIIFall17_NanoAOD.root"]
 filesSignal = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/GravitonToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV_NanoAOD.root"]
 
@@ -36,7 +37,7 @@ selectionALL='''Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
 Sum$(Jet_pt *(abs(Jet_eta)<2.5 && Jet_pt > 20 && Jet_jetId)) > 160  || 
 MET_pt > 100  || Sum$(Muon_pt > 20 && Muon_tightId) >= 1
 '''
-mhtVHbb = lambda : mhtProducer( lambda j : j.pt > 30,
+mht_hh = lambda : mhtProducer( lambda j : j.pt > 20,
                             lambda mu : mu.pt > 5 and mu.pfRelIso04_all < 0.4,
                             lambda el : el.pt > 5 and el.pfRelIso03_all < 0.4 )
 
@@ -46,7 +47,7 @@ mhtVHbb = lambda : mhtProducer( lambda j : j.pt > 30,
 #this takes care of converting the input files from CRAB
 from PhysicsTools.NanoAODTools.postprocessing.framework.crabhelper import inputFiles,runsAndLumis
 
-p=PostProcessor(".",inputFiles(),"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
+p=PostProcessor(".",fileMuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW()],provenance=True, jsonInput=runsAndLumis())
 #p=PostProcessor(".",inputFiles(),selection.replace('\n',' '),"keep_and_drop.txt",modules=[puWeight(),jetmetUncertaintiesAll(),mhtVHbb(),btagSFProducer("cmva"),hhbbWW()],provenance=True,fwkJobReport=True,jsonInput=runsAndLumis())
 p.run()
 

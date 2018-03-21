@@ -89,6 +89,7 @@ class LeptonSFManager():
 	self.MuonTrgSF_tfile = ROOT.TFile(self.MuonTrgSF_filename,"READ")
 
 	self.EGSF_th2 = self.EGSF_tfile.Get(self.EGSF_histname)
+        #print "self.EGSF_th2 ",self.EGSF_th2.Print("ALL")
 	self.MuonIDSF_th2 = self.MuonIDSF_tfile.Get(self.MuonIDSF_histname)
 	self.MuonIsoSF_th2 = self.MuonIsoSF_tfile.Get(self.MuonIsoSF_histname)
 	self.MuonTrgSF_th2 = self.MuonTrgSF_tfile.Get(self.MuonTrgSF_histname)
@@ -96,23 +97,27 @@ class LeptonSFManager():
 
     #### FIXME, add uncertainty in next version
     def getSF(self,  th2, eta, pt):
-	 bin1 = th2.GetXaxis().FindBin(abs(eta));
-	 bin2 = th2.GetXaxis().FindBin(pt);
+	 bin1 = th2.GetXaxis().FindBin(eta);
+	 bin2 = th2.GetYaxis().FindBin(pt);
+	 #if th2.GetName() == "EGamma_SF2D":
+	 #    print "EGamma_SF2D bin1 ".bin1," bin2 ",bin2
 	 if (bin1==0 or bin1== th2.GetNbinsX()+1 or bin2==0 or bin2== th2.GetNbinsY()+1):
 	     return 1.0,0.0,0.0
 	 return th2.GetBinContent(bin1, bin2),th2.GetBinErrorUp(bin1, bin2),th2.GetBinErrorLow(bin1, bin2)
 
     def getEGSF(self, eta, pt):##final one ?
-	return self.getSF(self.EGSF_th2, eta, pt)
+	SF = self.getSF(self.EGSF_th2, eta, pt)
+        #print "Electron SFs ",SF
+	return SF
 
     def getMuonIDSF(self, eta, pt):
-	return self.getSF(self.MuonIDSF_th2, eta, pt)
+	return self.getSF(self.MuonIDSF_th2, abs(eta), pt)
 
     def getMuonIsoSF(self, eta, pt):
-	return self.getSF(self.MuonIsoSF_th2, eta, pt)
+	return self.getSF(self.MuonIsoSF_th2, abs(eta), pt)
 
     def getMuonTrgSF(self, eta, pt):
-	return self.getSF(self.MuonTrgSF_th2, eta, pt)
+	return self.getSF(self.MuonTrgSF_th2, abs(eta), pt)
 
     def getleptonTrgSF(self, lep):
 	if abs(lep.pdgId) == 11:

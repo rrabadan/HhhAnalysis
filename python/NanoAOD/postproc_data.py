@@ -44,12 +44,14 @@ filesdata_MuEl = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_MuonEG_E4
 mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
+import Cert_271036_284044_13TeV_PromptReco_Collisions16_JSON as goldenjason
+
 
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016, hhbbWW()],provenance=True)
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(), hhbbWW()],provenance=True)
 #p=PostProcessor(".",filesSignal,"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
-p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
+p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=3, run_lumi=goldenjason.run_lumi_2016Run)],provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
 
