@@ -327,8 +327,8 @@ class HHbbWWProducer(Module):
 	##first time to fill cutflow histogram 
 	if self.isMC:
 	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, event_reco_weight * sample_weight *.25)
-	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .5)
-	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .25)
+	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .25)
+	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .5)
 	else:
 	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, event_reco_weight * sample_weight )
 	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, event_reco_weight * sample_weight )
