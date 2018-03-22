@@ -15,8 +15,7 @@ class HHbbWWProducer(Module):
     ###kwargs: triggertype, verbose, run_lumi
     def __init__(self,isMC, **kwargs):
         self.isMC = isMC ## two mode: data or MC
-	for key in kwargs.keys():
-	    print "key in kwargs ",key
+	print "kwargs ",kwargs
 	self.triggertype  = ''##"DoubleMuon, DoubleEG, MuonEG"
 	self.deltaR_trigger_reco = 0.1; self.deltaPtRel_trigger_reco = 0.5
 	self.verbose = 3
@@ -149,15 +148,15 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["MuonEG"].Write()
         pass
 
-    def goldenJason(self, run, lumi):
-	run_str = '%d'%run
-	if run_str in self.run_lumi.keys():
-	    alllumis = self.run_lumi[run_str]
-	    for lumirange in alllumis:
-	        if lumi >= lumirange[0] and lumi <= lumirange[1]:
-	            return True
-	else:
-	    return False
+    #def goldenJason(self, run, lumi):
+    #    run_str = '%d'%run
+    #    if run_str in self.run_lumi.keys():
+    #        alllumis = self.run_lumi[run_str]
+    #        for lumirange in alllumis:
+    #            if lumi >= lumirange[0] and lumi <= lumirange[1]:
+    #                return True
+    #    else:
+    #        return False
 
 
     def findingLeptonPairs(self, leptons_mu, leptons_el):
@@ -339,10 +338,6 @@ class HHbbWWProducer(Module):
 	ievent =  getattr(event,"event", False)
 	event_reco_weight = 1.0 ## for pu_weight*btag_SF*lepSF
 	sample_weight = 1.0
-	if not(self.isMC) and self.run_lumi != None:
-            if not(self.goldenJason(run, luminosityBlock)):
-		### skip events failed the goldenjason check for real data 
-		return False
 	if self.isMC:
 	    #sample_weight = 1.0
 	    event_pu_weight = event.puWeight
