@@ -38,6 +38,8 @@ elif os.path.isfile(inputdir):
 else:
     print "ERROR: This is NOT a valid directory: ",inputdir
     exit()
+if not os.path.isdir(outputdir):
+    os.system("mkdir "+outputdir)
 
 modules = []
 #selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
@@ -51,6 +53,7 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
+print "=============================================================="
 if "DoubleMuon" in jobtype:
     print "Dataset DoubleMuon "
     modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
@@ -67,6 +70,11 @@ elif jobtype != "":
 else:
     print "jobtype to run is not found, exit "
     exit()
+print "=============================================================="
+print "inputfiles ", inputfiles
+print "=============================================================="
+print "outputdir ", outputdir
+print "=============================================================="
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)

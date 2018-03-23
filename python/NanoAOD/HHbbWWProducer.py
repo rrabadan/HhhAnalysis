@@ -27,6 +27,7 @@ class HHbbWWProducer(Module):
 	self.jetPt = 20; self.jetEta = 2.4
 	self.deltaR_j_l = 0.3 #jet,lepton seperation
 	self.h_cutflow = ROOT.TH1F("h_cutflow","h_cutflow", 20, 0, 20.0)
+	self.h_cutflow_weight = ROOT.TH1F("h_cutflow_weight","h_cutflow_weight", 200, 0, 200.0)
 	self.h_cutflowlist = {"DoubleMuon":ROOT.TH1F("h_cutflow_DoubleMuon","h_cutflow_DoubleMuon", 20, 0, 20.0), 
 			      "DoubleEG":ROOT.TH1F("h_cutflow_DoubleEG","h_cutflow_DoubleEG", 20, 0, 20.0), 
 			      "MuonEG":ROOT.TH1F("h_cutflow_MuonEG","h_cutflow_MuonEG", 20, 0, 20.0)}
@@ -84,10 +85,17 @@ class HHbbWWProducer(Module):
 	self.out.branch("jjbtag_heavy",  "F")
 	self.out.branch("jjbtag_light",  "F")
 	self.out.branch("jj_M",  "F")
-	self.out.branch("llidiso",  "F")
-	self.out.branch("trigeff",  "F")
-	self.out.branch("ll_M",  "F")
+	#self.out.branch("llidiso",  "F")
+	#self.out.branch("trigeff",  "F")
+	self.out.branch("llid_weight",  "F")
+	self.out.branch("lliso_weight",  "F")
+	self.out.branch("lltrigger_weight",  "F")
+	self.out.branch("ht_jets",  "F")
 	self.out.branch("ht",  "F")
+	self.out.branch("mht_pt",  "F")
+	self.out.branch("mht_phi",  "F")
+	self.out.branch("ll_M",  "F")
+	self.out.branch("llmet_M",  "F")
 	self.out.branch("llmetjj_MT2",  "F")
 	self.out.branch("llmetjj_M",  "F")
 	self.out.branch("lljj_M",  "F")
@@ -95,6 +103,7 @@ class HHbbWWProducer(Module):
 	self.out.branch("ll_DR_l_l",  "F")
 	self.out.branch("jj_DR_j_j",  "F")
 	self.out.branch("llmetjj_DPhi_ll_jj",  "F")
+	self.out.branch("llmetjj_DPhi_llmet_jj",  "F")
 	self.out.branch("ll_pt",  "F")
 	self.out.branch("jj_pt",  "F")
 	self.out.branch("llmetjj_minDR_l_j",  "F")
@@ -146,6 +155,16 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleMuon"].Write()
 	self.h_cutflowlist["DoubleEG"].Write()
 	self.h_cutflowlist["MuonEG"].Write()
+	self.h_cutflow_weight.Write()
+	#c1 = ROOT.TCanvas("h_cutflow","h_cutflow")
+	#self.h_cutflowlist["MuonEG"].Draw("hist")
+	#self.h_cutflowlist["DoubleEG"].Draw("histsame")
+	#self.h_cutflowlist["DoubleMuon"].Draw("histsame")
+	#c1.Write()
+	#c2 = ROOT.TCanvas("h_cutflow_weight","h_cutflow_weight")
+	#c2.cd()
+	#self.h_cutflow_weight.Draw("hist")
+	#c2.Write()
         pass
 
     #def goldenJason(self, run, lumi):
@@ -229,8 +248,8 @@ class HHbbWWProducer(Module):
 
     def HLTPath(self, hlt, trigobjs, isMC):
 	""" check which HLT is fired """
-	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"],
-				  #"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"], ##FIXME
+	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
+				  "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"], ##FIXME
 	    	   "MuonEG": ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", 
 		   		"HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"],
 		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"]
@@ -241,7 +260,9 @@ class HHbbWWProducer(Module):
 	    for l1 in L1t_hlt:
 	    	matchedobjs = []
 	    	for path in L1t_hlt[l1]:
-		    firepath = getattr(hlt,  path, False)
+		    firepath = False
+		    if hasattr(hlt, path): 
+			firepath = getattr(hlt,  path, False)
     		    if firepath:
 		        if self.verbose > 4:
 			    if l1 == "DoubleEG":
@@ -278,7 +299,9 @@ class HHbbWWProducer(Module):
 	    matchedobjs = []
 	    l1 = self.triggertype
 	    for path in L1t_hlt[self.triggertype]:
-		firepath = getattr(hlt,  path, False)
+		firepath = False
+		if hasattr(hlt, path): 
+		    firepath = getattr(hlt,  path, False)
 		if firepath:
 		    selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
 		    if len(selectedObjs) >= 2:
@@ -320,9 +343,23 @@ class HHbbWWProducer(Module):
     def fillCutFlow(self, cutflow_bin, weight):
 	#cutflow_bin += 1.0
 	if self.verbose > 4:
-	    print "filling cutflow ",cutflow_bin," triggertype ",self.triggertype," weight ",weight
-	self.h_cutflow.Fill( cutflow_bin, weight)
-	self.h_cutflowlist[self.triggertype].Fill( cutflow_bin, weight)
+	    print "final filling cutflow ",cutflow_bin," triggertype ",self.triggertype," weight ",weight
+	self.h_cutflow_weight.Fill(weight)##used to mornitor the weight
+	if cutflow_bin < 1 and cutflow_bin >= 0: ## special case, do not which event category it is for MC
+	    if self.isMC:
+		self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, weight *.25)
+		self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, weight * .25)
+		self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, weight * .5)
+	    else:
+		self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, weight )
+		self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, weight )
+		self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, weight )
+	    self.h_cutflow.Fill( cutflow_bin, weight)
+        else:
+	    while cutflow_bin >= 0:
+		self.h_cutflow.Fill( cutflow_bin, weight)
+		self.h_cutflowlist[self.triggertype].Fill( cutflow_bin, weight)
+		cutflow_bin = cutflow_bin - 1
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
@@ -344,17 +381,8 @@ class HHbbWWProducer(Module):
 	    sample_weight = getattr(event, "genWeight", 1) * event.puWeight
 	if self.verbose > 1:
 	    print "run ",run," luminosityBlock ",luminosityBlock," ievent ",ievent," sample_weight ",sample_weight
-	cutflow_bin = 0.0
+	cutflow_bin = 0
 	##first time to fill cutflow histogram 
-	if self.isMC:
-	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, event_reco_weight * sample_weight *.25)
-	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .25)
-	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, event_reco_weight * sample_weight * .5)
-	else:
-	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, event_reco_weight * sample_weight )
-	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, event_reco_weight * sample_weight )
-	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, event_reco_weight * sample_weight )
-	self.h_cutflow.Fill( cutflow_bin, event_reco_weight * sample_weight)
 
 	###cutstep1: initial events, no selection, 
 	trigobjs = Collection(event, "TrigObj")
@@ -364,13 +392,13 @@ class HHbbWWProducer(Module):
 	if not fired:
 	    if self.verbose > 3:
 	        print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
 	if self.isMC:
 	    self.triggertype = triggertype
 	    if self.verbose > 2:
 		print "Final fired trigger type ",triggertype
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
 	
         Lepstype = -1##MuMu:1, MuEl:2, ElMu:3, ElEl:4
 	if self.triggertype == "DoubleMuon":
@@ -393,6 +421,7 @@ class HHbbWWProducer(Module):
         electrons = Collection(event, "Electron")
         muons = Collection(event, "Muon")
         jets = list(Collection(event, "Jet"))
+	mht = Object(event, "MHT")
 	jet_btagSF = 0
 	#mu_effSF = 0
 	#el_effSF = 0
@@ -419,6 +448,7 @@ class HHbbWWProducer(Module):
         leptons_el.sort(key=lambda x:x.pt,reverse=True)	
 	###cutstep3: L1_HLT_RECO matching
         passdileptonTrig = False
+	lltrgsf = 1.0; lltrgsf_up= 0.0;  lltrgsf_low = 0.0
 	if (self.triggertype == "DoubleMuon" and len(leptons_mu) >= 2):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptons_mu[:2])
@@ -437,14 +467,13 @@ class HHbbWWProducer(Module):
 	else:
 	    if self.verbose > 3:
 	        print " cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," Triggermatching "
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
 	
 
 
-	###cutstep4: dilepton pt, and eta, dz, dxy??
+	###cutstep4: dilepton pt, and eta
 	for mu in leptons_mu:
 	    if  self.verbose > 3:
 	        print "Muon id ",mu.pdgId, " pt ",mu.pt," eta ",mu.eta
@@ -459,17 +488,35 @@ class HHbbWWProducer(Module):
 
         leptonpairs = self.findingLeptonPairs(leptons_mu, leptons_el)
 
-        for pair in leptonpairs:
-	    if not(POGRecipesRun2.leptonpairImpactParameter(pair)):
-		leptonpairs.remove(pair)
-
         passdileptonPtEta = (len(leptonpairs) >= 1)
 	if not passdileptonPtEta:
 	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptoPtEta"
+	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonPtEta"
+	    if self.isMC:
+		event_reco_weight = event_reco_weight * lltrgsf ## already pass the trigger cut, apply ll trigger SF
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
+	if self.isMC: ##may need to update the SFs for trigging since leading lepton pair  may change
+	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+
+       
+	###cutstep4: dilepton dz, dxy
+        for pair in leptonpairs:
+	    if not(POGRecipesRun2.leptonpairImpactParameter(pair)):
+		leptonpairs.remove(pair)
+	passdileptonIP = (len(leptonpairs) >= 1)
+	if not passdileptonIP:
+	    if self.verbose > 3:
+	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonIP "
+	    if self.isMC:
+		event_reco_weight = event_reco_weight * lltrgsf ## already pass the trigger cut, apply ll trigger SF
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	    return False
+	cutflow_bin += 1
+	if self.isMC: ##may need to update the SFs for trigging since leading lepton pair  may change
+	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+
 		
 	###cutstep6: dilepton, ID
         for pair in leptonpairs:
@@ -480,12 +527,15 @@ class HHbbWWProducer(Module):
 	if not passdileptonID:
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonID"
+	    if self.isMC:
+		event_reco_weight = event_reco_weight * lltrgsf ## already pass the trigger cut, apply ll trigger SF
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
-	if self.isMC:
+	cutflow_bin += 1
+	llIDsf = 1.0; llIDsf_up = 0.0; llIDsf_low = 0.0;
+	if self.isMC: ##may need to update the SFs for trigging since leading lepton pair  may change
 	    llIDsf, llIDsf_up, llIDsf_low = lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-	    event_reco_weight = event_reco_weight*llIDsf
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
 
 
 	###cutstep5: dilepton, ISO
@@ -497,12 +547,16 @@ class HHbbWWProducer(Module):
 	if not passdileptonIso:
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonIso"
+	    if self.isMC:
+		event_reco_weight = event_reco_weight * llIDsf * lltrgsf ## already pass the trigger+ID cut, apply ll trigger+ID SF
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
+	cutflow_bin += 1
+	llIsosf, llIsosf_up, llIsosf_low = 1.0, 0.0, 0.0
 	if self.isMC:
 	    llIsosf, llIsosf_up, llIsosf_low = lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    event_reco_weight = event_reco_weight*llIsosf
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	    llIDsf, llIDsf_up, llIDsf_low = lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
 
 	###cutstep6: dilepton, HLTSafeID
         for pair in leptonpairs:
@@ -513,12 +567,22 @@ class HHbbWWProducer(Module):
 	if not passdileptonHLTSafeID:
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonHLTSafeID "
+	    if self.isMC:
+		event_reco_weight = event_reco_weight * llIsosf * llIDsf * lltrgsf ## already pass the trigger+ID+Iso cut, apply ll trigger+ID+Iso SF
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
 
         ## select final two leptons	
 	leptons = leptonpairs[0]##leading lepton first
+	event_lep_weight = 1.0
+	if self.isMC:
+	    llIsosf, llIsosf_up, llIsosf_low = lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
+	    llIDsf, llIDsf_up, llIDsf_low = lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+    	    event_lep_weight = llIsosf * llIDsf * lltrgsf
+    	    event_reco_weight = event_reco_weight * llIsosf * llIDsf * lltrgsf
+
 	lep1_iso = 0.0; lep2_iso = 0.0
 	if self.triggertype == "MuonEG":
 	    if abs(leptons[0].pdgId) == 13:
@@ -552,32 +616,30 @@ class HHbbWWProducer(Module):
 	if not(ll_p4.M() > 12):
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," llM ",ll_p4.M()
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-
+	cutflow_bin += 1
 
         #####################################
         ## di-jets selection
         #####################################
-	if len(jets) >= 2:
-	    cutflow_bin += 1.0
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	else:
+	if not (len(jets) >= 2):
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," njets ",len(jets)
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
+	cutflow_bin += 1
 
 	###cut: JetPt, JetEta
-	ht = sum([x.pt for x in jets])
+	ht_jets = sum([x.pt for x in jets])
         bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
 	if not(len(bjets) >= 2) :
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," jetPtEta "
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-            		
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
+
 	###cut: the seperation between jet and lepton
         bjets.sort(key=lambda x:x.pt,reverse=True)	
         for jet in bjets:
@@ -589,9 +651,9 @@ class HHbbWWProducer(Module):
         if not(len(bjets) >= 2): 
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," bl seperation"
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-	cutflow_bin += 1.0
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	cutflow_bin += 1
             		
 	###cut: jet btagging 
         for jet in bjets:
@@ -600,8 +662,10 @@ class HHbbWWProducer(Module):
         if not(len(bjets) >= 2): 
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight, " btagging "
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
-		
+	cutflow_bin += 1
+
         #### select final two bjets: jets with maximum btagging  and then fill cutflow hist
         hJets = sorted(bjets, key = lambda jet : jet.btagCMVA, reverse=True)[0:2]
         hJidx = [jets.index(x) for x in hJets]
@@ -611,7 +675,6 @@ class HHbbWWProducer(Module):
 	if self.isMC:
 	    hJets_BtagSF = [jet_btagSF[x] for x in hJidx]
 	    event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
-	cutflow_bin += 1.0
 	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	if self.verbose > 3:
 	    print "cutflow_bin ",cutflow_bin," Fine , weight ",event_reco_weight * sample_weight
@@ -641,6 +704,13 @@ class HHbbWWProducer(Module):
 	llmetjj_MTformula = sqrt(2*ll_p4.Pt()*met_p4.Pt()*(1-cos(llmetjj_DPhi_ll_met)))
         lljj_p4 = hbb_p4 + ll_p4
 	lljj_M = lljj_p4.M()
+        llmet_p4 = met_p4 + ll_p4
+	llmetjj_p4 = met_p4 + ll_p4 + hbb_p4
+	llmetjj_M = llmetjj_p4.M()
+        llmet_M = llmet_p4.M()
+        llmetjj_DPhi_llmet_jj =  deltaPhi(llmet_p4.Phi(), hbb_p4.Phi())
+        cosThetaStar = cos(llmet_p4.Theta() - hbb_p4.Theta())
+    	ht = hj1_p4.Pt() + hj2_p4.Pt() + lep1_p4.Pt() + lep2_p4.Pt() + met_p4.Pt()
         ###
 
         #jetsForHiggs = [x for x in jets if x.lepFilter and x.puId>0 and x.jetId>0 and x.Pt>20 and abs(x.eta)<2.5]
@@ -689,21 +759,27 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("lep2_iso",  lep2_iso);
 	self.out.fillBranch("met_pt",  met_p4.Pt())
 	self.out.fillBranch("met_phi", met_p4.Phi())
+	self.out.fillBranch("mht_pt",  mht.pt)
+	self.out.fillBranch("mht_phi",  mht.phi)
 	self.out.fillBranch("ht",  ht)
+	self.out.fillBranch("ht_jets",  ht_jets)
 	self.out.fillBranch("nJetsL",  nJetsL)
 	#self.out.fillBranch("jjbtag_heavy",  "F")
 	#self.out.fillBranch("jjbtag_light",  "F")
 	self.out.fillBranch("jj_M",  jj_M)
-	#self.out.fillBranch("llidiso",  "F")
-	#self.out.fillBranch("trigeff",  "F")
+	self.out.fillBranch("llid_weight",  llIDsf)
+	self.out.fillBranch("lliso_weight",  llIsosf)
+	self.out.fillBranch("lltrigger_weight",  lltrgsf)
 	self.out.fillBranch("ll_M",  ll_M)
+	self.out.fillBranch("llmet_M",  llmet_M)
 	#self.out.fillBranch("llmetjj_MT2",  "F")
-	#self.out.fillBranch("llmetjj_M",  "F")
+	self.out.fillBranch("llmetjj_M", llmetjj_M)
 	self.out.fillBranch("lljj_M",  lljj_M)
-	#self.out.fillBranch("cosThetaStar",  "F")
+	self.out.fillBranch("cosThetaStar",  cosThetaStar)
 	self.out.fillBranch("ll_DR_l_l",  ll_DR_l_l)
 	self.out.fillBranch("jj_DR_j_j",  jj_DR_j_j)
 	self.out.fillBranch("llmetjj_DPhi_ll_jj",  llmetjj_DPhi_ll_jj)
+	self.out.fillBranch("llmetjj_DPhi_llmet_jj",  llmetjj_DPhi_llmet_jj)
 	self.out.fillBranch("ll_pt",  ll_pt)
 	self.out.fillBranch("jj_pt",  jj_pt)
 	self.out.fillBranch("llmetjj_minDR_l_j",  llmetjj_minDR_l_j)
@@ -711,7 +787,7 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("ll_DPhi_l_l",  ll_DPhi_l_l)
 	self.out.fillBranch("pu",  pu)
 	self.out.fillBranch("event_pu_weight",  event_pu_weight)
-	#self.out.fillBranch("event_lep_weight",  "F")
+	self.out.fillBranch("event_lep_weight",  event_lep_weight)
 	self.out.fillBranch("event_btag_weight",  hJets_BtagSF[0] * hJets_BtagSF[1])
         self.out.fillBranch("sample_weight",  sample_weight)
 	self.out.fillBranch("event_reco_weight",  event_reco_weight)
