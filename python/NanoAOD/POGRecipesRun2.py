@@ -75,28 +75,53 @@ class LeptonSFManager():
     ### Electron Triggering, IP, Isolation, tracking?
     ### Muon tracking ?
     def __init__(self):
+	self.totalLumi = 36.8#fb-1
 	self.EGSF_filename  = "leptonSF/EGM2D_eleGSF.root" ## for electron ID
 	self.MuonIDSF_filename = "leptonSF/Mu_ID.root"
 	self.MuonIsoSF_filename = "leptonSF/Mu_Iso.root"
 	self.MuonTrgSF_filename = "leptonSF/Mu_Trg.root"
+	self.MuonTrackingSF_filename = "leptonSF/Mu_Tracking.root"##only 9.2fb
+	self.MuonTrackingSF_lumi = 9.2
+
 	
 	### x-axis: eta,  y-axis: pt
 	self.EGSF_histname = "EGamma_SF2D"
 	self.MuonIDSF_histname = "MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
 	self.MuonIsoSF_histname = "TightISO_MediumID_pt_eta/abseta_pt_ratio"
 	self.MuonTrgSF_histname = "IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"
+	self.MuonTrackingSF_tgraphname = "ratio_eta"
 
 	self.EGSF_tfile = ROOT.TFile(self.EGSF_filename,"READ")
 	self.MuonIDSF_tfile = ROOT.TFile(self.MuonIDSF_filename,"READ")
 	self.MuonIsoSF_tfile = ROOT.TFile(self.MuonIsoSF_filename,"READ")
 	self.MuonTrgSF_tfile = ROOT.TFile(self.MuonTrgSF_filename,"READ")
+	self.MuonTrackingSF_tfile = ROOT.TFile(self.MuonTrackingSF_filename,"READ")
 
 	self.EGSF_th2 = self.EGSF_tfile.Get(self.EGSF_histname)
         #print "self.EGSF_th2 ",self.EGSF_th2.Print("ALL")
 	self.MuonIDSF_th2 = self.MuonIDSF_tfile.Get(self.MuonIDSF_histname)
 	self.MuonIsoSF_th2 = self.MuonIsoSF_tfile.Get(self.MuonIsoSF_histname)
 	self.MuonTrgSF_th2 = self.MuonTrgSF_tfile.Get(self.MuonTrgSF_histname)
+	self.MuonTrackingSF_tgraph= self.MuonTrackingSF_tfile.Get(self.MuonTrackingSF_tgraphname)
 
+    	self.MuonTrackingSF_nbins = self.MuonTrackingSF_tgraph.GetN()
+    	eta = ROOT.Double(0.0); trackingSF =  ROOT.Double(0.0);
+	self.MuonTrackingSF_allbins = []
+	## how to weight SF based on Lumi ?
+	self.MuonTrackingSF_lumiratio = self.MuonTrackingSF_lumi/self.totalLumi
+	for i in range(0, self.MuonTrackingSF_nbins):
+	    self.MuonTrackingSF_tgraph.GetPoint(i, eta, trackingSF)
+	    thisbin = {}
+	    xlow = self.MuonTrackingSF_tgraph.GetErrorXlow(i)
+	    xhigh = self.MuonTrackingSF_tgraph.GetErrorXhigh(i)
+	    ylow = self.MuonTrackingSF_tgraph.GetErrorYlow(i)
+	    yhigh = self.MuonTrackingSF_tgraph.GetErrorYhigh(i)
+    	    thisbin["etalow"]  = eta - xlow
+    	    thisbin["etahigh"]  = eta + xhigh
+	    thisbin["SF"] = trackingSF*self.MuonTrackingSF_lumiratio + 1.0*(1.0-self.MuonTrackingSF_lumiratio)
+    	    thisbin["SFerrlow"]  = (-1.0)*ylow*self.MuonTrackingSF_lumiratio + thisbin["SF"]
+    	    thisbin["SFerrhigh"]  = yhigh*self.MuonTrackingSF_lumiratio + thisbin["SF"]
+	    self.MuonTrackingSF_allbins.append(thisbin)
 
     #### FIXME, add uncertainty in next version
     def getSF(self,  th2, eta, pt):
@@ -105,8 +130,11 @@ class LeptonSFManager():
 	 #if th2.GetName() == "EGamma_SF2D":
 	 #    print "EGamma_SF2D bin1 ".bin1," bin2 ",bin2
 	 if (bin1==0 or bin1== th2.GetNbinsX()+1 or bin2==0 or bin2== th2.GetNbinsY()+1):
-	     return 1.0,0.0,0.0
-	 return th2.GetBinContent(bin1, bin2),th2.GetBinErrorUp(bin1, bin2),th2.GetBinErrorLow(bin1, bin2)
+	     return 1.0,1.0,1.0
+	 errup = th2.GetBinErrorUp(bin1, bin2)
+	 errlow = th2.GetBinErrorLow(bin1, bin2)
+	 SF = th2.GetBinContent(bin1, bin2)
+	 return SF, SF+errup, SF-errlow
 
     def getEGSF(self, eta, pt):##final one ?
 	SF = self.getSF(self.EGSF_th2, eta, pt)
@@ -124,7 +152,7 @@ class LeptonSFManager():
 
     def getleptonTrgSF(self, lep):
 	if abs(lep.pdgId) == 11:
-	    return 1.0,0.0,0.0
+	    return 1.0,1.0,1.0
 	elif abs(lep.pdgId) == 13:
 	    return self.getMuonTrgSF(lep.eta, lep.pt)
 	else:
@@ -150,7 +178,7 @@ class LeptonSFManager():
 
     def getleptonIDSF(self, lep):
 	if abs(lep.pdgId) == 11:
-	    return 1.0,0.0,0.0
+	    return 1.0,1.0,1.0
 	elif abs(lep.pdgId) == 13:
 	    return self.getMuonIDSF(lep.eta, lep.pt)
 	else:
@@ -161,7 +189,22 @@ class LeptonSFManager():
        	SF2 = self.getleptonIDSF(leptonpair[1])
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
+    def getMuonTrackingSF(self, eta):
+	 for thisbin in self.MuonTrackingSF_allbins:
+	     if eta > thisbin["etalow"] and eta <= thisbin["etahigh"]:
+		 return thisbin["SF"],thisbin["SFerrhigh"], thisbin["SFerrlow"]
+	 return  1.0, 1.0, 1.0
 
+
+    def getleptonTrackingSF(self, lep):
+	if abs(lep.pdgId) == 13:
+	    return self.getMuonTrackingSF(lep.eta)
+	else:
+	    return 1.0, 1.0, 1.0
+    def getleptonpairTrackingSF(self, leptonpair):
+	SF1 = self.getleptonTrackingSF(leptonpair[0])
+       	SF2 = self.getleptonTrackingSF(leptonpair[1])
+        return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
 
 	  

@@ -325,7 +325,7 @@ class HHbbWWProducer(Module):
 		if abs(mu.pdgId) != tobj.id:
 		    continue
 		dR = deltaR(tobj.eta, tobj.phi, mu.eta, mu.phi)
-		dPtRel = abs(tobj.pt-mu.pt)/mu.pt ###which trigger object pt should be used here, FIXME
+		dPtRel = abs(tobj.pt-mu.pt)/mu.pt 
 		##check id, dR, dpt
 		if dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco:
 		    if self.verbose > 3:
@@ -335,13 +335,6 @@ class HHbbWWProducer(Module):
 	    if triggermatch:
 		leptons_mu.append(mu)
 
-
-    def fillMCinfo(self, event):
-	""" fill all gen information here """
-	if not self.isMC:
-		return 
-
-	genmet = Object(event)
 
     def fillCutFlow(self, cutflow_bin, weight):
 	#cutflow_bin += 1.0
@@ -574,10 +567,12 @@ class HHbbWWProducer(Module):
         ## select final two leptons	
 	leptons = leptonpairs[0]##leading lepton first
 	event_lep_weight = 1.0
+	lltrackingsf, lltrackingsf_up, lltrackingsf_low  = 1.0, 1.0, 1.0
 	if self.isMC:
 	    llIsosf, llIsosf_up, llIsosf_low = lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
 	    llIDsf, llIDsf_up, llIDsf_low = lepSFmanager.getleptonpairIDSF(leptonpairs[0])
 	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+	    lltrackingsf, lltrackingsf_up, lltrackingsf_low = lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
     	    event_lep_weight = llIsosf * llIDsf * lltrgsf
     	    event_reco_weight = event_reco_weight * llIsosf * llIDsf * lltrgsf
 
