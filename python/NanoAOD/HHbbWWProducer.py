@@ -113,6 +113,7 @@ class HHbbWWProducer(Module):
 	self.out.branch("event_pu_weight",  "F")
 	self.out.branch("event_lep_weight",  "F")
 	self.out.branch("event_btag_weight",  "F")
+        self.out.branch("genweight",  "F");
         self.out.branch("sample_weight",  "F");
 	self.out.branch("event_reco_weight",  "F")
 	self.out.branch("event_weight",  "F")
@@ -122,33 +123,33 @@ class HHbbWWProducer(Module):
 	self.out.branch("mt2",  "F")
 	self.out.branch("mt2_bb",  "F")
 	self.out.branch("mt2_ll",  "F")
-	self.out.branch("event_number",  "I")
+	#self.out.branch("event_number",  "I")
 	self.out.branch("event_run",  "I")
 	self.out.branch("event_lumiblock",  "I")
 	##how to add gen information???
-	if self.isMC:
-	    self.out.branch("genjet1_pt",  "F");
-	    self.out.branch("genjet1_E",  "F");
-	    self.out.branch("genjet1_eta",  "F");
-	    self.out.branch("genjet1_phi",  "F");
-	    self.out.branch("genjet1_partonid",  "I");
-	    self.out.branch("genjet2_pt",  "F");
-	    self.out.branch("genjet2_E",  "F");
-	    self.out.branch("genjet2_eta",  "F");
-	    self.out.branch("genjet2_phi",  "F");
-	    self.out.branch("genjet2_partonid",  "I");
-	    self.out.branch("genl1_pt",  "F");
-	    self.out.branch("genl1_E",  "F");
-	    self.out.branch("genl1_eta",  "F");
-	    self.out.branch("genl1_phi",  "F");
-	    self.out.branch("genl1_id",  "I");
-	    self.out.branch("genl2_pt",  "F");
-	    self.out.branch("genl2_E",  "F");
-	    self.out.branch("genl2_eta",  "F");
-	    self.out.branch("genl2_phi",  "F");
-	    self.out.branch("genl2_id",  "I");
-	    self.out.branch("genmet_pt",  "F");
-	    self.out.branch("genmet_phi",  "F");
+	#if self.isMC:
+	self.out.branch("genjet1_pt",  "F");
+	self.out.branch("genjet1_E",  "F");
+	self.out.branch("genjet1_eta",  "F");
+	self.out.branch("genjet1_phi",  "F");
+	self.out.branch("genjet1_partonid",  "I");
+	self.out.branch("genjet2_pt",  "F");
+	self.out.branch("genjet2_E",  "F");
+	self.out.branch("genjet2_eta",  "F");
+	self.out.branch("genjet2_phi",  "F");
+	self.out.branch("genjet2_partonid",  "I");
+	self.out.branch("genl1_pt",  "F");
+	self.out.branch("genl1_E",  "F");
+	self.out.branch("genl1_eta",  "F");
+	self.out.branch("genl1_phi",  "F");
+	self.out.branch("genl1_id",  "I");
+	self.out.branch("genl2_pt",  "F");
+	self.out.branch("genl2_E",  "F");
+	self.out.branch("genl2_eta",  "F");
+	self.out.branch("genl2_phi",  "F");
+	self.out.branch("genl2_id",  "I");
+	self.out.branch("genmet_pt",  "F");
+	self.out.branch("genmet_phi",  "F");
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_cutflow.Write()
@@ -233,8 +234,10 @@ class HHbbWWProducer(Module):
 	allhltlist = path.split('_')[1:-1]
 	selectedObjs = []
 	for x in allhltlist:
-	    if "Mu" in x:##TkMu is not inclued in HLT path, FIXME??
-		pt = int(x[2:])
+	    if "Mu" in x:
+	    	pt = 8.0
+	    	if "TkMu" not in x:
+		    pt = int(x[2:])
 		for obj in trigobjs:
 		    if obj.id == 13 and obj.pt >= pt and (obj.l1pt >= 4.0 or obj.l1pt_2 >= 4.0):
 		    	selectedObjs.append(obj)
@@ -249,10 +252,10 @@ class HHbbWWProducer(Module):
     def HLTPath(self, hlt, trigobjs, isMC):
 	""" check which HLT is fired """
 	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
-				  "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"], ##FIXME
+				  "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"],
 	    	   "MuonEG": ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", 
 		   		"HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"],
-		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"]
+		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"]
 			}
         paths_objs = {}
 	l1t_objs = {}
@@ -287,7 +290,7 @@ class HHbbWWProducer(Module):
 		    l1t_objs[l1] = matchedobjs
 
 	    l1ts = l1t_objs.keys()
-	    if len(l1ts) > 1:
+	    if len(l1ts) > 1: ## more than one channle is fired, randomly select one
 	    	randint = random.randint(0, len(l1ts)-1)
     		if self.verbose > 1:
 		    print "all fired paths_objs ",paths_objs.keys()," selected trigger type ",l1ts[randint]
@@ -345,21 +348,10 @@ class HHbbWWProducer(Module):
 	if self.verbose > 4:
 	    print "final filling cutflow ",cutflow_bin," triggertype ",self.triggertype," weight ",weight
 	self.h_cutflow_weight.Fill(weight)##used to mornitor the weight
-	if cutflow_bin < 1 and cutflow_bin >= 0: ## special case, do not which event category it is for MC
-	    if self.isMC:
-		self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, weight *.25)
-		self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, weight * .25)
-		self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, weight * .5)
-	    else:
-		self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, weight )
-		self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, weight )
-		self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, weight )
+	while cutflow_bin > 0:
 	    self.h_cutflow.Fill( cutflow_bin, weight)
-        else:
-	    while cutflow_bin >= 0:
-		self.h_cutflow.Fill( cutflow_bin, weight)
-		self.h_cutflowlist[self.triggertype].Fill( cutflow_bin, weight)
-		cutflow_bin = cutflow_bin - 1
+	    self.h_cutflowlist[self.triggertype].Fill( cutflow_bin, weight)
+	    cutflow_bin = cutflow_bin - 1
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
@@ -375,13 +367,25 @@ class HHbbWWProducer(Module):
 	ievent =  getattr(event,"event", False)
 	event_reco_weight = 1.0 ## for pu_weight*btag_SF*lepSF
 	sample_weight = 1.0
+	genweight = 1.0
 	if self.isMC:
 	    #sample_weight = 1.0
 	    event_pu_weight = event.puWeight
-	    sample_weight = getattr(event, "genWeight", 1) * event.puWeight
+	    genweight = getattr(event, "genWeight", 1)
+	    sample_weight = genweight * event.puWeight
+	    #sample_weight = event.puWeight
 	if self.verbose > 1:
 	    print "run ",run," luminosityBlock ",luminosityBlock," ievent ",ievent," sample_weight ",sample_weight
 	cutflow_bin = 0
+	if self.isMC:
+	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, sample_weight *.25)
+	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, sample_weight * .25)
+	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, sample_weight * .5)
+	else:
+	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, sample_weight )
+	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, sample_weight )
+	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, sample_weight )
+	self.h_cutflow.Fill( cutflow_bin, sample_weight)
 	##first time to fill cutflow histogram 
 
 	###cutstep1: initial events, no selection, 
@@ -452,21 +456,20 @@ class HHbbWWProducer(Module):
 	if (self.triggertype == "DoubleMuon" and len(leptons_mu) >= 2):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptons_mu[:2])
-	        event_reco_weight = lltrgsf * event_reco_weight
 	    passdileptonTrig = True
 	elif (self.triggertype == "DoubleEG" and len(leptons_el) >= 2):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptons_el[:2])
-	        event_reco_weight = lltrgsf * event_reco_weight
 	    passdileptonTrig = True
 	elif (self.triggertype == "MuonEG" and len(leptons_mu)>=1 and len(leptons_el) >= 1):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF([leptons_mu[0], leptons_el[0]])
-	        event_reco_weight = lltrgsf * event_reco_weight
 	    passdileptonTrig = True
 	else:
 	    if self.verbose > 3:
 	        print " cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," Triggermatching "
+	    if self.isMC:
+	        event_reco_weight = lltrgsf * event_reco_weight
 	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    return False
 	cutflow_bin += 1
@@ -477,14 +480,12 @@ class HHbbWWProducer(Module):
 	for mu in leptons_mu:
 	    if  self.verbose > 3:
 	        print "Muon id ",mu.pdgId, " pt ",mu.pt," eta ",mu.eta
-	    if abs(mu.eta) >= self.muonEta:
-	        leptons_mu.remove(mu)
+        leptons_mu = [x for x in leptons_mu if abs(x.eta)<self.muonEta]
 	for el in leptons_el:
 	    if  self.verbose > 3:
 	        print "Electron id ", el.pdgId, " pt ", el.pt," eta ", el.eta
-	    if abs(el.eta) >= self.EGEta or not(el.convVeto): 
-		## check eta and whether it passes the conversion veto(not from photon conversion), convVeto = True: good electron
-	        leptons_el.remove(el)
+	## check eta and whether it passes the conversion veto(not from photon conversion), convVeto = True: good electron
+    	leptons_el = [x for x in leptons_el if abs(x.eta)<self.EGEta and x.convVeto]
 
         leptonpairs = self.findingLeptonPairs(leptons_mu, leptons_el)
 
@@ -502,9 +503,7 @@ class HHbbWWProducer(Module):
 
        
 	###cutstep4: dilepton dz, dxy
-        for pair in leptonpairs:
-	    if not(POGRecipesRun2.leptonpairImpactParameter(pair)):
-		leptonpairs.remove(pair)
+	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairImpactParameter(x)]
 	passdileptonIP = (len(leptonpairs) >= 1)
 	if not passdileptonIP:
 	    if self.verbose > 3:
@@ -519,10 +518,7 @@ class HHbbWWProducer(Module):
 
 		
 	###cutstep6: dilepton, ID
-        for pair in leptonpairs:
-	    if not(POGRecipesRun2.leptonpairID(pair)):
-		leptonpairs.remove(pair)
-
+	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairID(x)]
         passdileptonID = (len(leptonpairs) >= 1)
 	if not passdileptonID:
 	    if self.verbose > 3:
@@ -539,10 +535,7 @@ class HHbbWWProducer(Module):
 
 
 	###cutstep5: dilepton, ISO
-        for pair in leptonpairs:
-	    if not(POGRecipesRun2.leptonpairIso(pair)):
-		leptonpairs.remove(pair)
-
+	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairIso(x)]
         passdileptonIso = (len(leptonpairs) >= 1)
 	if not passdileptonIso:
 	    if self.verbose > 3:
@@ -559,10 +552,7 @@ class HHbbWWProducer(Module):
 	    lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
 
 	###cutstep6: dilepton, HLTSafeID
-        for pair in leptonpairs:
-	    if not(POGRecipesRun2.leptonpairHLTSafeID(pair)):
-		leptonpairs.remove(pair)
-
+	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairHLTSafeID(x)]
         passdileptonHLTSafeID = (len(leptonpairs) >= 1)
 	if not passdileptonHLTSafeID:
 	    if self.verbose > 3:
@@ -573,6 +563,14 @@ class HHbbWWProducer(Module):
 	    return False
 	cutflow_bin += 1
 
+	### add lepton pair veto 
+	if len(leptonpairs) > 1:
+	    if self.verbose > 3:
+	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonpair>1 vetoed "
+	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+	    return False
+	cutflow_bin += 1
+	    
         ## select final two leptons	
 	leptons = leptonpairs[0]##leading lepton first
 	event_lep_weight = 1.0
@@ -632,7 +630,8 @@ class HHbbWWProducer(Module):
 
 	###cut: JetPt, JetEta
 	ht_jets = sum([x.pt for x in jets])
-        bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
+        #bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
+        bjets = [x for x in jets if x.puId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta] ## remove jetid > 0
 	if not(len(bjets) >= 2) :
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," jetPtEta "
@@ -642,11 +641,9 @@ class HHbbWWProducer(Module):
 
 	###cut: the seperation between jet and lepton
         bjets.sort(key=lambda x:x.pt,reverse=True)	
-        for jet in bjets:
-	    dR1 = deltaR(jet.eta, jet.phi, leptons[0].eta, leptons[0].phi)
-	    dR2 = deltaR(jet.eta, jet.phi, leptons[1].eta, leptons[1].phi)
-            if dR1 < self.deltaR_j_l or dR2 < self.deltaR_j_l:
-	        bjets.remove(jet)
+    	deltaRl1j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[0].eta, leptons[0].phi) > self.deltaR_j_l
+    	deltaRl2j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[1].eta, leptons[1].phi) > self.deltaR_j_l
+        bjets = [x for x in bjets if deltaRl1j(x) and deltaRl2j(x)]
 	nJetsL = len(bjets)
         if not(len(bjets) >= 2): 
 	    if self.verbose > 3:
@@ -656,9 +653,7 @@ class HHbbWWProducer(Module):
 	cutflow_bin += 1
             		
 	###cut: jet btagging 
-        for jet in bjets:
-	    if not (POGRecipesRun2.jetMediumBtagging(jet)):
-		bjets.remove(jet)
+	bjets = [x for x in bjets if POGRecipesRun2.jetMediumBtagging(x)]
         if not(len(bjets) >= 2): 
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight, " btagging "
@@ -674,6 +669,8 @@ class HHbbWWProducer(Module):
 
 	if self.isMC:
 	    hJets_BtagSF = [jet_btagSF[x] for x in hJidx]
+	    ## FIXME, how to apply SFs:  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
+	    ## it depends on the sample!!!
 	    event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
 	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	if self.verbose > 3:
@@ -790,6 +787,7 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("event_lep_weight",  event_lep_weight)
 	self.out.fillBranch("event_btag_weight",  hJets_BtagSF[0] * hJets_BtagSF[1])
         self.out.fillBranch("sample_weight",  sample_weight)
+        self.out.fillBranch("genweight",  genweight)
 	self.out.fillBranch("event_reco_weight",  event_reco_weight)
 	#self.out.fillBranch("event_weight",  "F")
 	#self.out.fillBranch("DY_BDT_flat",  "F")
@@ -797,7 +795,7 @@ class HHbbWWProducer(Module):
 	#self.out.fillBranch("mt2",  "F")
 	#self.out.fillBranch("mt2_bb",  "F")
 	#self.out.fillBranch("mt2_ll",  "F")
-	self.out.fillBranch("event_number",  ievent)
+	#self.out.fillBranch("event_number",  ievent)
 	self.out.fillBranch("event_run",  run)
 	self.out.fillBranch("event_lumiblock",  luminosityBlock)
 	if self.isMC:

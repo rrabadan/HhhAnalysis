@@ -66,7 +66,9 @@ elif "MuonEG" in jobtype:
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
-    modules = [puAutoWeight(), btagSF2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva')
+    btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')
+    modules = [puAutoWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 else:
     print "jobtype to run is not found, exit "
     exit()
@@ -76,7 +78,7 @@ print "=============================================================="
 print "outputdir ", outputdir
 print "=============================================================="
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
-p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, jsonInput = jsonfile, provenance=True)
+p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, friend = True, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
 

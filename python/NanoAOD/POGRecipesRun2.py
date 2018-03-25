@@ -22,7 +22,7 @@ def electronID( electron):
 def electronIso( electron):
     """ check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
     ### electron iso cut
-    return electron.pfRelIso03_all < .04
+    return electron.pfRelIso03_all < 0.04
 
 def electronHLTSafeID( electron):
     """ check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
@@ -66,13 +66,16 @@ def leptonpairHLTSafeID(leptonpair):
 def jetMediumBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X """ 
     ### use medium btagging 
-    return jet.btagCMVA >= 0.185
+    return (jet.btagCMVA > 0.185)
 
 
 
 class LeptonSFManager():
+    ### to take the lumi into consideration?
+    ### Electron Triggering, IP, Isolation, tracking?
+    ### Muon tracking ?
     def __init__(self):
-	self.EGSF_filename  = "leptonSF/EGM2D_eleGSF.root"
+	self.EGSF_filename  = "leptonSF/EGM2D_eleGSF.root" ## for electron ID
 	self.MuonIDSF_filename = "leptonSF/Mu_ID.root"
 	self.MuonIsoSF_filename = "leptonSF/Mu_Iso.root"
 	self.MuonTrgSF_filename = "leptonSF/Mu_Trg.root"
