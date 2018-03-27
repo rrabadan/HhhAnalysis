@@ -370,14 +370,10 @@ class HHbbWWProducer(Module):
 	if self.verbose > 1:
 	    print "run ",run," luminosityBlock ",luminosityBlock," ievent ",ievent," sample_weight ",sample_weight
 	cutflow_bin = 0
-	if self.isMC:
-	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, sample_weight *.25)
-	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, sample_weight * .25)
-	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, sample_weight * .5)
-	else:
-	    self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, sample_weight )
-	    self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, sample_weight )
-	    self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, sample_weight )
+	##to get even weight sum
+	self.h_cutflowlist["DoubleMuon"].Fill( cutflow_bin, sample_weight )
+	self.h_cutflowlist["DoubleEG"].Fill( cutflow_bin, sample_weight )
+	self.h_cutflowlist["MuonEG"].Fill( cutflow_bin, sample_weight )
 	self.h_cutflow.Fill( cutflow_bin, sample_weight)
 	##first time to fill cutflow histogram 
 

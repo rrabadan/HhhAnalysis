@@ -64,9 +64,10 @@ def leptonpairHLTSafeID(leptonpair):
     return (leptonHLTSafeID(leptonpair[0]) and leptonHLTSafeID(leptonpair[1]))
 
 def jetMediumBtagging(jet):
-    """https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X """ 
+    """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
-    return (jet.btagCMVA > 0.185)
+    ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
+    return (jet.btagCMVA > 0.4432)
 
 
 
