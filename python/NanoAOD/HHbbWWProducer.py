@@ -450,9 +450,12 @@ class HHbbWWProducer(Module):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF(leptons_el[:2])
 	    passdileptonTrig = True
-	elif (self.triggertype == "MuonEG" and len(leptons_mu)>=1 and len(leptons_el) >= 1):
+	elif (self.triggertype == "MuonEG" and len(leptons_mu)>=1 and len(leptons_el) >= 1 and leptons_mu[0].pt > leptons_el[0].pt):
 	    if self.isMC:
 	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF([leptons_mu[0], leptons_el[0]])
+	elif (self.triggertype == "MuonEG" and len(leptons_mu)>=1 and len(leptons_el) >= 1 and leptons_mu[0].pt < leptons_el[0].pt):
+	    if self.isMC:
+	        lltrgsf, lltrgsf_up, lltrgsf_low = lepSFmanager.getleptonpairTrgSF([leptons_el[0], leptons_mu[0]])
 	    passdileptonTrig = True
 	else:
 	    if self.verbose > 3:
@@ -663,6 +666,9 @@ class HHbbWWProducer(Module):
 	    ## FIXME, how to apply SFs:  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
 	    ## it depends on the sample!!!
 	    event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
+	## keep events with ll_M>76 but fill h_cutflow
+	if ll_M < 76:
+	    cutflow_bin += 1
 	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	if self.verbose > 3:
 	    print "cutflow_bin ",cutflow_bin," Fine , weight ",event_reco_weight * sample_weight
