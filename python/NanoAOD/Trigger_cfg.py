@@ -368,7 +368,7 @@ Trigger['Full2016'] =  {
                                                 'SingleMu'  : [ 44 , 45 ] ,
                                                 'DoubleEle' : [ 46 ] ,
                                                 'SingleEle' : [ 93  , 112 ] ,
-                                              } ,
+                                              },
 
                                 },
         
