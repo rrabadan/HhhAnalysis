@@ -106,8 +106,6 @@ btag_cut = 0.4432
 
 treename  = "Friends"
 chain = ROOT.TChain(treename)
-#key = 'DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8'
-#key = 'DYToLL_1J_13TeV-amcatnloFXFX-pythia8'
 
 sampleinfo = get_sample(inFileDir, options.name)
 for f in sampleinfo["files"]:

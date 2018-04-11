@@ -11,7 +11,7 @@ def trainMVA(bkgs, sigs, discriList, trainCut, weightExpr, MVAmethods, spectator
     print "Will write MVA info in ", MVA_fileName 
 
     factory = R.TMVA.Factory(label, file_MVA)
-    dataloader = R.TMVA.DataLoader("dataset")
+    dataloader = R.TMVA.DataLoader("DYBDTTraining")
     print "factory ",factory
 
     # This will be overridden if signal or background have specific weights

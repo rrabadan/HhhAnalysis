@@ -99,8 +99,8 @@ discriList = [
         "jet2_eta",
         "jj_pt",
         "ll_pt",
-        #"ll_eta",
-        #"llmetjj_DPhi_ll_met",
+        "ll_eta",
+        "llmetjj_DPhi_ll_met",
         "ht",
         "nJetsL"
         ]
@@ -118,7 +118,7 @@ discriList = [
 #    ]
 
 spectatorList = []
-cut = ""
+cut = "(isMuMu || isElEl)"
 MVAmethods = ["kBDT"]
 #weightExpr = "event_weight * trigeff * llidiso * pu * sample_weight"
 weightExpr = "event_reco_weight * sample_weight"
@@ -127,8 +127,8 @@ sigFiles = copy.deepcopy(bkgFiles)
 
 #sigSelection = "(gen_bb || gen_cc)"
 #bkgSelection = "(!(gen_bb || gen_cc))"
-genbb_selection = "genjet1_partonflavour == 5 && genjet2_partonflavour == 5"
-gencc_selection = "genjet1_partonflavour == 4 && genjet2_partonflavour == 4"
+genbb_selection = "genjet1_partonFlavour == 5 && genjet2_partonFlavour == 5"
+gencc_selection = "genjet1_partonFlavour == 4 && genjet2_partonFlavour == 4"
 sigSelection = "((%s) || (%s))"%(genbb_selection, gencc_selection)
 bkgSelection = "(! %s)"%(sigSelection)
 
