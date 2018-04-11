@@ -19,8 +19,8 @@ from tmvaTools import *
 def get_sample(inFileDir, samplename):
     sampleinfo = {}
     sampleinfo["files"] = [ os.path.join(inFileDir, samplename+"_Friend.root") ]
-    allsamplenames = [x.split('/')[1] for x in Samplelist.datasets]
-    index = allsamplenames.index(samplename)
+    #allsamplenames = [x.split('/')[1] for x in Samplelist.datasets]
+    #index = allsamplenames.index(samplename)
     #sampleinfo["cross_section"] = Samplelist.MCxsections[index]
     tfile = ROOT.TFile(sampleinfo["files"][0] ,"READ")
     h_cutflow = tfile.Get("h_cutflow")
