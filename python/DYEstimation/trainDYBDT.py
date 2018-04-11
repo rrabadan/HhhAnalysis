@@ -9,13 +9,13 @@ from tmvaTools import *
 
 #sys.path.append('/nfs/soft/python/python-2.7.5-sl6_amd64_gcc44/lib/python2.7/site-packages/storm-0.20-py2.7-linux-x86_64.egg')
 #sys.path.append('/nfs/soft/python/python-2.7.5-sl6_amd64_gcc44/lib/python2.7/site-packages/MySQL_python-1.2.3-py2.7-linux-x86_64.egg')
-sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+#sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+#
+#CMSSW_BASE = os.environ['CMSSW_BASE']
+#SCRAM_ARCH = os.environ['SCRAM_ARCH']
+#sys.path.append(os.path.join(CMSSW_BASE,'bin', SCRAM_ARCH))
 
-CMSSW_BASE = os.environ['CMSSW_BASE']
-SCRAM_ARCH = os.environ['SCRAM_ARCH']
-sys.path.append(os.path.join(CMSSW_BASE,'bin', SCRAM_ARCH))
-
-import Samplelist
+#import Samplelist
 def get_sample(inFileDir, samplename):
     sampleinfo = {}
     sampleinfo["files"] = [ os.path.join(inFileDir, samplename+"_Friend.root") ]
@@ -24,8 +24,9 @@ def get_sample(inFileDir, samplename):
     #sampleinfo["cross_section"] = Samplelist.MCxsections[index]
     tfile = ROOT.TFile(sampleinfo["files"][0] ,"READ")
     h_cutflow = tfile.Get("h_cutflow")
-    #sampleinfo["event_weight_sum"] = h_cutflow.GetBinContent(1)
-    sampleinfo["relativeWeight"] = Samplelist.MCxsections[index]/h_cutflow.GetBinContent(1)
+    sampleinfo["cross_section"] = tfile.Get("cross_section").GetVal()
+    sampleinfo["event_weight_sum"] = h_cutflow.GetBinContent(1)
+    sampleinfo["relativeWeight"] = sampleinfo["cross_section"]/h_cutflow.GetBinContent(1)
     return sampleinfo
 
 date = "2017_02_17"
