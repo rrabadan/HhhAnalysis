@@ -122,7 +122,7 @@ bdt_tmva_variables = [
 #bdt_label = "2017_02_17_BDTDY_bb_cc_vs_rest_10var"
 bdt_label = "2018_04_12_BDTDY_bb_cc_vs_rest_10var"
 #FIXME
-bdt_xml_file = "DYBDTTraining/weights/{}_kBDT.weights.xml".format(bdt_label)
+bdt_xml_file = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/DYBDTTraining/weights/{}_kBDT.weights.xml".format(bdt_label)
 print "bdt_xml_file ",bdt_xml_file
 
 dict_tmva_variables = { var: array('f', [0]) for var in bdt_tmva_variables }
