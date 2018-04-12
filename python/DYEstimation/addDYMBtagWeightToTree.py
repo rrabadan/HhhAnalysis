@@ -88,19 +88,22 @@ if not entries:
 
 
 
-#chain.SetBranchStatus("*", 0)
-#
-#chain.SetBranchStatus("is*", 1)
+chain.SetBranchStatus("*", 0)
+
+chain.SetBranchStatus("is*", 1)
 #chain.SetBranchStatus("lep*", 1)
-#chain.SetBranchStatus("jet*", 1)
-#chain.SetBranchStatus("ll*", 1)
-#chain.SetBranchStatus("jj*", 1)
-#chain.SetBranchStatus("ht*", 1)
-#chain.SetBranchStatus("nJetsL*", 1)
-#chain.SetBranchStatus("*DPhi*", 1)
+chain.SetBranchStatus("jet*", 1)
+chain.SetBranchStatus("ll_pt", 1)
+chain.SetBranchStatus("ll_eta", 1)
+chain.SetBranchStatus("jj_pt", 1)
+chain.SetBranchStatus("ht", 1)
+chain.SetBranchStatus("nJetsL", 1)
+chain.SetBranchStatus("llmetjj_DPhi_ll_met", 1)
 #chain.SetBranchStatus("*partonFlavour*", 1)
 #chain.SetBranchStatus("event_reco_weight", 1)
 #chain.SetBranchStatus("sample_weight", 1)
+chain.SetBranchStatus("bdt_value", 1)
+chain.SetBranchStatus("dy_Mbtag_weight", 1)
 
 bdt_tmva_variables = [
         "jet1_pt",
@@ -140,7 +143,7 @@ for i in range(0, entries):
     chain.GetEntry(i)
 
     initBranchVals()
-    if (i % 10 == 0):
+    if (i % 10000 == 0):
         print("Event %d over %d" % (i + 1, entries))
 
 
