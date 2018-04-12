@@ -34,11 +34,13 @@ class HHbbWWProducer(Module):
 	self.__dict__.update((key, kwargs[key]) for key in kwargs.keys())
         print "self.run_lumi  ",self.run_lumi," trigger type ",self.triggertype," verbose ",self.verbose, " DYestimation ",self.DYestimation
 
+	self.addGenToTree = True
+
 	### for debug
 	self.nEv_DoubleEG = 0
 	self.nEv_DoubleMuon = 0
 	self.nEv_MuonEG = 0
-        pass
+
     def beginJob(self, histFile=None,histDirName=None):
 	Module.beginJob(self,histFile,histDirName)
 	self.h_cutflow = ROOT.TH1F("h_cutflow","h_cutflow", 20, 0, 20.0)
@@ -50,9 +52,11 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleMuon"].SetLineColor(ROOT.kRed)
 	self.h_cutflowlist["DoubleEG"].SetLineColor(ROOT.kBlue)
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
-        pass
+
     def endJob(self):
         pass
+
+
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
         self.out.branch("jet1_pt",  "F");
@@ -144,29 +148,29 @@ class HHbbWWProducer(Module):
 	self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
 	self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
 	##how to add gen information???
-	#if self.isMC:
-	self.out.branch("genjet1_pt",  "F");
-	self.out.branch("genjet1_E",  "F");
-	self.out.branch("genjet1_eta",  "F");
-	self.out.branch("genjet1_phi",  "F");
-	self.out.branch("genjet1_partonFlavour",  "I");
-	self.out.branch("genjet2_pt",  "F");
-	self.out.branch("genjet2_E",  "F");
-	self.out.branch("genjet2_eta",  "F");
-	self.out.branch("genjet2_phi",  "F");
-	self.out.branch("genjet2_partonFlavour",  "I");
-	self.out.branch("genl1_pt",  "F");
-	self.out.branch("genl1_E",  "F");
-	self.out.branch("genl1_eta",  "F");
-	self.out.branch("genl1_phi",  "F");
-	self.out.branch("genl1_id",  "I");
-	self.out.branch("genl2_pt",  "F");
-	self.out.branch("genl2_E",  "F");
-	self.out.branch("genl2_eta",  "F");
-	self.out.branch("genl2_phi",  "F");
-	self.out.branch("genl2_id",  "I");
-	self.out.branch("genmet_pt",  "F");
-	self.out.branch("genmet_phi",  "F");
+	if self.isMC and self.addGenToTree:
+	    self.out.branch("genjet1_pt",  "F");
+	    self.out.branch("genjet1_E",  "F");
+	    self.out.branch("genjet1_eta",  "F");
+	    self.out.branch("genjet1_phi",  "F");
+	    self.out.branch("genjet1_partonFlavour",  "I");
+	    self.out.branch("genjet2_pt",  "F");
+	    self.out.branch("genjet2_E",  "F");
+	    self.out.branch("genjet2_eta",  "F");
+	    self.out.branch("genjet2_phi",  "F");
+	    self.out.branch("genjet2_partonFlavour",  "I");
+	    self.out.branch("genl1_pt",  "F");
+	    self.out.branch("genl1_E",  "F");
+	    self.out.branch("genl1_eta",  "F");
+	    self.out.branch("genl1_phi",  "F");
+	    self.out.branch("genl1_id",  "I");
+	    self.out.branch("genl2_pt",  "F");
+	    self.out.branch("genl2_E",  "F");
+	    self.out.branch("genl2_eta",  "F");
+	    self.out.branch("genl2_phi",  "F");
+	    self.out.branch("genl2_id",  "I");
+	    self.out.branch("genmet_pt",  "F");
+	    self.out.branch("genmet_phi",  "F");
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_cutflow.Write()
@@ -272,7 +276,7 @@ class HHbbWWProducer(Module):
 				  "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"],
 	    	   "MuonEG": ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", 
 		   		"HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"],
-		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"]
+		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"],
 			}
         paths_objs = {}
 	l1t_objs = {}
@@ -325,6 +329,8 @@ class HHbbWWProducer(Module):
 		    firepath = getattr(hlt,  path, False)
 		if firepath:
 		    selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
+		    if self.verbose > 1: 
+		        print "data, ",l1, " firedpath ", path, " matched l1objs ", len(selectedObjs)
 		    if len(selectedObjs) >= 2:
 			#paths_objs[path] = selectedObjs
 			matchedobjs.extend(selectedObjs)
@@ -665,6 +671,8 @@ class HHbbWWProducer(Module):
 	cutflow_bin += 1
 
 	#### select final two jets: jets with maximum pT , for DY estimation 
+        ## sort alljets with a cMVAv2 descreasing order 
+        bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
 	hJets = bjets[0:2]
 	hJidx = [jets.index(x) for x in hJets]
 	jet1 = hJets[0]; jet2 = hJets[1]
@@ -676,21 +684,18 @@ class HHbbWWProducer(Module):
 	alljets_eta = [jet.eta for jet in alljets]
 	alljets_cMVAv2 = [jet.btagCMVA for jet in alljets]
 	flavour = lambda x : abs(x)*(abs(x) == 4 or abs(x) == 5)
-	alljets_partonFlavour = [jet.partonFlavour for jet in alljets]
-	alljets_hadronFlavour = [jet.hadronFlavour for jet in alljets]
+	##only select jets up to self.maxnjets
 	def resize_alljets(thislist):
-	    if len(alljets)> self.maxnjets:	 
-    		return thislist[0:20] 
+	    if len(thislist)> self.maxnjets:	 
+    		return thislist[0: self.maxnjets] 
 	    else: 
-	    	return thislist+[0]*(20-len(alljets))
+	    	return thislist+[0]*(self.maxnjets-len(alljets))
         alljets_pt = resize_alljets(alljets_pt)
         alljets_eta = resize_alljets(alljets_eta)
         alljets_cMVAv2 = resize_alljets(alljets_cMVAv2)
-        alljets_partonFlavour = resize_alljets(alljets_partonFlavour)
-        alljets_hadronFlavour = resize_alljets(alljets_hadronFlavour)
 	
             		
-	###cut: jet btagging , normal selection 
+	###cut: jet btagging , normal selection
 	if not self.DYestimation:
 	    bjets = [x for x in bjets if POGRecipesRun2.jetMediumBtagging(x)]
 	    if not(len(bjets) >= 2): 
@@ -775,15 +780,11 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("jet1_eta",  hj1_p4.Eta());
         self.out.fillBranch("jet1_phi",  hj1_p4.Phi());
         self.out.fillBranch("jet1_cMVAv2",  jet1.btagCMVA);
-        self.out.fillBranch("jet1_partonFlavour",  flavour(jet1.partonFlavour));
-        self.out.fillBranch("jet1_hadronFlavour",  flavour(jet1.hadronFlavour));
         self.out.fillBranch("jet2_pt", hj2_p4.Pt());
         self.out.fillBranch("jet2_E",  hj2_p4.E());
         self.out.fillBranch("jet2_eta", hj2_p4.Eta());
         self.out.fillBranch("jet2_phi",  hj2_p4.Phi());
         self.out.fillBranch("jet2_cMVAv2",  jet2.btagCMVA);
-        self.out.fillBranch("jet2_partonFlavour",  flavour(jet2.partonFlavour));
-        self.out.fillBranch("jet2_hadronFlavour",  flavour(jet2.hadronFlavour));
 	self.out.fillBranch("isElEl", isElEl) # 0 or 1
 	self.out.fillBranch("isElMu",  isElMu) # 0 or 1, mu_pt<el_pt
 	self.out.fillBranch("isMuEl",  isMuEl) # 0 or 1
@@ -852,8 +853,6 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("alljets_pt", alljets_pt)
 	self.out.fillBranch("alljets_eta", alljets_eta)
 	self.out.fillBranch("alljets_cMVAv2", alljets_cMVAv2)
-	self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
-	self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
 	if self.isMC:
 	    genmet = Object(event, "GenMET")
 	    genParticles = Collection(event, "GenPart")
@@ -863,7 +862,7 @@ class HHbbWWProducer(Module):
 	    
 	    lep1_genindex = leptons[0].genPartIdx
 	    lep2_genindex = leptons[1].genPartIdx
-	    if lep1_genindex >= 0 and lep1_genindex < nGenPart:
+	    if lep1_genindex >= 0 and lep1_genindex < nGenPart and self.addGenToTree:
 		genl1 = genParticles[lep1_genindex]
 		genl1_p4 = ROOT.TLorentzVector(); genl1_p4.SetPtEtaPhiM(genl1.pt, genl1.eta, genl1.phi, genl1.mass)
 		self.out.fillBranch("genl1_pt",  genl1_p4.Pt());
@@ -871,7 +870,7 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("genl1_eta",  genl1_p4.Eta());
 		self.out.fillBranch("genl1_phi",  genl1_p4.Phi());
 		self.out.fillBranch("genl1_id",  abs(genl1.pdgId));
-	    if lep2_genindex >= 0 and lep2_genindex < nGenPart:
+	    if lep2_genindex >= 0 and lep2_genindex < nGenPart and self.addGenToTree:
 		genl2 = genParticles[lep2_genindex]
 		genl2_p4 = ROOT.TLorentzVector(); genl2_p4.SetPtEtaPhiM(genl2.pt, genl2.eta, genl2.phi, genl2.mass)
 		self.out.fillBranch("genl2_pt",  genl2_p4.Pt());
@@ -879,7 +878,7 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("genl2_eta",  genl2_p4.Eta());
 		self.out.fillBranch("genl2_phi",  genl2_p4.Phi());
 		self.out.fillBranch("genl2_id",  abs(genl2.pdgId));
-    	    if jet1.genJetIdx >= 0 and jet1.genJetIdx < nGenJet:
+    	    if jet1.genJetIdx >= 0 and jet1.genJetIdx < nGenJet and self.addGenToTree:
 		genjet1 = genjets[jet1.genJetIdx]
 		genjet1_p4 = ROOT.TLorentzVector(); 
 		genjet1_p4.SetPtEtaPhiM(genjet1.pt, genjet1.eta, genjet1.phi, genjet1.mass)
@@ -889,7 +888,7 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("genjet1_eta",  genjet1_p4.Eta());
 		self.out.fillBranch("genjet1_phi",  genjet1_p4.Phi());
 		self.out.fillBranch("genjet1_partonFlavour",  genjet1_partonflavour);
-    	    if jet2.genJetIdx >= 0 and jet2.genJetIdx < nGenJet:
+    	    if jet2.genJetIdx >= 0 and jet2.genJetIdx < nGenJet and self.addGenToTree:
 		genjet2 = genjets[jet2.genJetIdx]
 		genjet2_p4 = ROOT.TLorentzVector(); 
 		genjet2_partonflavour = flavour(genjet2.partonFlavour)
@@ -909,7 +908,17 @@ class HHbbWWProducer(Module):
 		    alljets_genpartonFlavour.append(0)
 		    
 	    alljets_genpartonFlavour = resize_alljets(alljets_genpartonFlavour)
+	    alljets_partonFlavour = [jet.partonFlavour for jet in alljets]
+	    alljets_hadronFlavour = [jet.hadronFlavour for jet in alljets]
+	    alljets_partonFlavour = resize_alljets(alljets_partonFlavour)
+	    alljets_hadronFlavour = resize_alljets(alljets_hadronFlavour)
 	    self.out.fillBranch("alljets_genpartonFlavour", alljets_genpartonFlavour)
+	    self.out.fillBranch("jet1_partonFlavour",  flavour(jet1.partonFlavour));
+	    self.out.fillBranch("jet1_hadronFlavour",  flavour(jet1.hadronFlavour));
+	    self.out.fillBranch("jet2_partonFlavour",  flavour(jet2.partonFlavour));
+	    self.out.fillBranch("jet2_hadronFlavour",  flavour(jet2.hadronFlavour));
+	    self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
+	    self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
 	    self.out.fillBranch("genmet_pt",  genmet.pt);
 	    self.out.fillBranch("genmet_phi", genmet.phi);
 
