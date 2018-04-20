@@ -5,7 +5,6 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
-sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
 from HHbbWWProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
@@ -59,13 +58,13 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
 print "=============================================================="
 if "DoubleMuon" in jobtype:
     print "Dataset DoubleMuon "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
+    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", DYestimation = True, verbose=1)]
 elif "DoubleEG" in jobtype:
     print "Dataset DoubleEG "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleEG", verbose=1)]
+    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleEG", DYestimation = True, verbose=1)]
 elif "MuonEG" in jobtype:
     print "Dataset MuonEG "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=1)]
+    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", DYestimation = True, verbose=1)]
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
@@ -84,6 +83,7 @@ print "inputfiles ", inputfiles
 print "=============================================================="
 print "outputdir ", outputdir
 print "=============================================================="
+#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, friend = True, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)

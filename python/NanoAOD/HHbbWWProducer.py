@@ -1,5 +1,6 @@
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+print "ROOT version ",ROOT.gROOT.GetVersion()
 from math import sqrt,cos
 import random
 #random.randint(0,100)
@@ -7,18 +8,24 @@ import random
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import * #deltaR, matching etc..
+import sys
+sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
 import POGRecipesRun2
 lepSFmanager = POGRecipesRun2.LeptonSFManager()
+
+print "HHbbWWProducer, import finished here"
 
 class HHbbWWProducer(Module):
     ## data or MC, which L1 trigger, HLT?
     ###kwargs: triggertype, verbose, run_lumi
     def __init__(self,isMC, **kwargs):
+	print "init HHbbWWProduer"
 	self.writeHistFile=True
         self.isMC = isMC ## two mode: data or MC
 	print "kwargs ",kwargs
 	self.triggertype  = ''##"DoubleMuon, DoubleEG, MuonEG"
 	self.DYestimation = False
+	self.CheckBtaggingEff = False
 	self.deltaR_trigger_reco = 0.1; self.deltaPtRel_trigger_reco = 0.5
 	self.verbose = 3
 	self.muonEta = 2.4; self.EGEta = 2.5
@@ -32,6 +39,7 @@ class HHbbWWProducer(Module):
 
 	self.run_lumi = None
 	self.__dict__.update((key, kwargs[key]) for key in kwargs.keys())
+	self.CheckBtaggingEff = (self.CheckBtaggingEff and self.DYestimation)
         print "self.run_lumi  ",self.run_lumi," trigger type ",self.triggertype," verbose ",self.verbose, " DYestimation ",self.DYestimation
 
 	self.addGenToTree = True
@@ -42,7 +50,21 @@ class HHbbWWProducer(Module):
 	self.nEv_MuonEG = 0
 
     def beginJob(self, histFile=None,histDirName=None):
-	Module.beginJob(self,histFile,histDirName)
+	print "BeginJob "
+	#Module.beginJob(self,histFile,histDirName)
+	#self.addObject(self.h_cutflow)
+	#self.addObject(self.h_cutflow_weight)
+	#self.addObject(self.h_cutflowlist["DoubleMuon"])
+	#self.addObject(self.h_cutflowlist["DoubleEG"])
+	#self.addObject(self.h_cutflowlist["MuonEG"])
+
+    def endJob(self):
+        pass
+
+
+    def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
+	print "BeginFiles "
+	self.h_eventcounter = ROOT.TH1F("h_raweventcounter","h_raweventcounter", 20, 0, 20.0)
 	self.h_cutflow = ROOT.TH1F("h_cutflow","h_cutflow", 20, 0, 20.0)
 	self.h_cutflow_weight = ROOT.TH1F("h_cutflow_weight","h_cutflow_weight", 200, 0, 200.0)
 	self.h_cutflowlist = {"DoubleMuon":ROOT.TH1F("h_cutflow_DoubleMuon","h_cutflow_DoubleMuon", 20, 0, 20.0), 
@@ -52,12 +74,7 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleMuon"].SetLineColor(ROOT.kRed)
 	self.h_cutflowlist["DoubleEG"].SetLineColor(ROOT.kBlue)
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
-
-    def endJob(self):
-        pass
-
-
-    def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
+	
         self.out = wrappedOutputTree
         self.out.branch("jet1_pt",  "F");
         self.out.branch("jet1_E",  "F");
@@ -131,22 +148,23 @@ class HHbbWWProducer(Module):
         self.out.branch("genweight",  "F");
         self.out.branch("sample_weight",  "F");
 	self.out.branch("event_reco_weight",  "F")
-	self.out.branch("event_weight",  "F")
 	self.out.branch("pu",  "F")
-	self.out.branch("DY_BDT_flat",  "F")
-	self.out.branch("dy_nobtag_to_btagM_weight",  "F")
-	self.out.branch("mt2",  "F")
-	self.out.branch("mt2_bb",  "F")
-	self.out.branch("mt2_ll",  "F")
+	#self.out.branch("event_weight",  "F")
+	#self.out.branch("DY_BDT_flat",  "F")
+	#self.out.branch("dy_nobtag_to_btagM_weight",  "F")
+	#self.out.branch("mt2",  "F")
+	#self.out.branch("mt2_bb",  "F")
+	#self.out.branch("mt2_ll",  "F")
 	#self.out.branch("event_number",  "I")
 	self.out.branch("event_run",  "I")
 	self.out.branch("event_lumiblock",  "I")
-	self.out.branch("alljets_pt", "F", n=self.maxnjets)
-	self.out.branch("alljets_eta", "F", n=self.maxnjets)
-	self.out.branch("alljets_cMVAv2", "F", n=self.maxnjets)
-	self.out.branch("alljets_partonFlavour", "I", n=self.maxnjets)
-	self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
-	self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
+	if self.CheckBtaggingEff:
+	    self.out.branch("alljets_pt", "F", n=self.maxnjets)
+	    self.out.branch("alljets_eta", "F", n=self.maxnjets)
+	    self.out.branch("alljets_cMVAv2", "F", n=self.maxnjets)
+	    #self.out.branch("alljets_partonFlavour", "I", n=self.maxnjets)
+	    #self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
+	    self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
 	##how to add gen information???
 	if self.isMC and self.addGenToTree:
 	    self.out.branch("genjet1_pt",  "F");
@@ -173,6 +191,7 @@ class HHbbWWProducer(Module):
 	    self.out.branch("genmet_phi",  "F");
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
+	self.h_eventcounter.Write()
 	self.h_cutflow.Write()
 	self.h_cutflowlist["DoubleMuon"].Write()
 	self.h_cutflowlist["DoubleEG"].Write()
@@ -280,6 +299,7 @@ class HHbbWWProducer(Module):
 			}
         paths_objs = {}
 	l1t_objs = {}
+	l1t_path = {}
         if isMC:
 	    for l1 in L1t_hlt:
 	    	matchedobjs = []
@@ -302,11 +322,12 @@ class HHbbWWProducer(Module):
 		    	selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
     			if len(selectedObjs) >= 2:
 			    #self.triggertype = l1
+			    l1t_path[l1]= path
 			    paths_objs[path] = selectedObjs
 			    matchedobjs.extend(selectedObjs)
     			    break
 
-	   	if len(matchedobjs)>0 :
+	   	if len(matchedobjs) >= 2 :
 		    matchedobjs = set(matchedobjs)
 		    l1t_objs[l1] = matchedobjs
 
@@ -316,31 +337,33 @@ class HHbbWWProducer(Module):
        
     		if self.verbose > 1:
 		    print "all fired paths_objs ",paths_objs.keys()," randint ",randint, " selected trigger type ",l1ts[randint]
-    		return True, l1ts[randint], l1t_objs[l1ts[randint]]
+    		return True, l1ts[randint], l1t_objs[l1ts[randint]], l1t_path[l1ts[randint]]
 	    elif len(l1ts) == 1:
-    		return True, l1ts[0], l1t_objs[l1ts[0]]
+    		return True, l1ts[0], l1t_objs[l1ts[0]],l1t_path[l1ts[0]]
 
 	else:
 	    matchedobjs = []
 	    l1 = self.triggertype
+	    firedpath = None
 	    for path in L1t_hlt[self.triggertype]:
 		firepath = False
 		if hasattr(hlt, path): 
 		    firepath = getattr(hlt,  path, False)
 		if firepath:
 		    selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
+		    firedpath = path
 		    if self.verbose > 1: 
 		        print "data, ",l1, " firedpath ", path, " matched l1objs ", len(selectedObjs)
 		    if len(selectedObjs) >= 2:
 			#paths_objs[path] = selectedObjs
 			matchedobjs.extend(selectedObjs)
-	    if len(matchedobjs)>0 :
+	    if len(matchedobjs)>=2 :
 		matchedobjs = set(matchedobjs)
 		l1t_objs[l1] = matchedobjs
-		return True, l1, matchedobjs
+		return True, l1, matchedobjs, firedpath
 		    #return True, path
 
-	return False," ",[]
+	return False," ",[]," "
     def trigger_reco_matching(self, muons, trigobjs, leptons_mu):
 	""" match reco object to triggger obj """
 	for imu, mu in enumerate(muons):
@@ -374,7 +397,7 @@ class HHbbWWProducer(Module):
         """process event, return True (go to next module) or False (fail, go to next event)"""
 	#hlts = Collection(event, "HLT")
 
-	
+        self.h_eventcounter.Fill(1)	
         ### PV	
 	PV = Object(event, "PV")
 	event_pu_weight = 1.0
@@ -403,7 +426,7 @@ class HHbbWWProducer(Module):
 
 	###cutstep1: initial events, no selection, 
 	trigobjs = Collection(event, "TrigObj")
-	fired,triggertype, matchedobjs =  self.HLTPath(event, trigobjs, self.isMC)
+	fired,triggertype, matchedobjs,path =  self.HLTPath(event, trigobjs, self.isMC)
         
 	##cutstep2: HLT is fired or not
 	if not fired:
@@ -422,10 +445,10 @@ class HHbbWWProducer(Module):
         	Lepstype = 1	
 	elif self.triggertype == "DoubleEG":
 		Lepstype = 4
-	elif self.triggertype == "MuonEG":
+	elif self.triggertype == "MuonEG" and "Mu23" in path:
 		Lepstype = 2
-	#elif self.triggertype == "MuonEG" and "Ele23" in path:
-		#Lepstype = 3
+	elif self.triggertype == "MuonEG" and "Ele23" in path:
+		Lepstype = 3
 	else:
 		raise ValueError('Triggertype is not acceptable , check self.triggertype ')
 	        
@@ -602,11 +625,9 @@ class HHbbWWProducer(Module):
 	lep1_iso = 0.0; lep2_iso = 0.0
 	if self.triggertype == "MuonEG":
 	    if abs(leptons[0].pdgId) == 13:
-    		Lepstype = 2
 		lep1_iso = leptons[0].pfRelIso04_all
 		lep2_iso = leptons[1].pfRelIso03_all
     	    else:
-    		Lepstype = 3
 		lep1_iso = leptons[0].pfRelIso03_all
 		lep2_iso = leptons[1].pfRelIso04_all
 	elif self.triggertype == "DoubleMuon":
@@ -674,6 +695,7 @@ class HHbbWWProducer(Module):
         ## sort alljets with a cMVAv2 descreasing order 
         bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
 	hJets = bjets[0:2]
+	hJets.sort(key=lambda x:x.pt, reverse=True)
 	hJidx = [jets.index(x) for x in hJets]
 	jet1 = hJets[0]; jet2 = hJets[1]
 	hJets_BtagSF = [1.0, 1.0]
@@ -850,9 +872,10 @@ class HHbbWWProducer(Module):
 	#self.out.fillBranch("event_number",  ievent)
 	self.out.fillBranch("event_run",  run)
 	self.out.fillBranch("event_lumiblock",  luminosityBlock)
-	self.out.fillBranch("alljets_pt", alljets_pt)
-	self.out.fillBranch("alljets_eta", alljets_eta)
-	self.out.fillBranch("alljets_cMVAv2", alljets_cMVAv2)
+	if self.CheckBtaggingEff:
+	    self.out.fillBranch("alljets_pt", alljets_pt)
+	    self.out.fillBranch("alljets_eta", alljets_eta)
+	    self.out.fillBranch("alljets_cMVAv2", alljets_cMVAv2)
 	if self.isMC:
 	    genmet = Object(event, "GenMET")
 	    genParticles = Collection(event, "GenPart")
@@ -912,13 +935,14 @@ class HHbbWWProducer(Module):
 	    alljets_hadronFlavour = [jet.hadronFlavour for jet in alljets]
 	    alljets_partonFlavour = resize_alljets(alljets_partonFlavour)
 	    alljets_hadronFlavour = resize_alljets(alljets_hadronFlavour)
-	    self.out.fillBranch("alljets_genpartonFlavour", alljets_genpartonFlavour)
+            if self.CheckBtaggingEff:
+		self.out.fillBranch("alljets_genpartonFlavour", alljets_genpartonFlavour)
 	    self.out.fillBranch("jet1_partonFlavour",  flavour(jet1.partonFlavour));
 	    self.out.fillBranch("jet1_hadronFlavour",  flavour(jet1.hadronFlavour));
 	    self.out.fillBranch("jet2_partonFlavour",  flavour(jet2.partonFlavour));
 	    self.out.fillBranch("jet2_hadronFlavour",  flavour(jet2.hadronFlavour));
-	    self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
-	    self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
+	    #self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
+	    #self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
 	    self.out.fillBranch("genmet_pt",  genmet.pt);
 	    self.out.fillBranch("genmet_phi", genmet.phi);
 
