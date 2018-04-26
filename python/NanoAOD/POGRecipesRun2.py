@@ -1,7 +1,9 @@
 import ROOT
 import string
-from math import sqrt
+from math import sqrt, pi, degrees
 import os
+import json
+import numpy as np
 
 
 def electronImpactParameterCut( electron):
@@ -10,9 +12,10 @@ def electronImpactParameterCut( electron):
     dxy_barrel = 0.05
     dz_endcap  = 0.2
     dz_barrel = 0.1
-    if abs(electron.eta) < 1.479: ##barrel
+    superCluster_eta = electron.eta + electron.deltaEtaSC
+    if abs(superCluster_eta) < 1.479: ##barrel
 	return (abs(electron.dz) < dz_barrel and abs(electron.dxy) < dxy_barrel)
-    elif abs(electron.eta) >= 1.479 and abs(electron.eta) < 2.5:
+    elif abs(superCluster_eta) >= 1.479 and abs(electron.eta) < 2.5:
 	return (abs(electron.dz) < dz_endcap and abs(electron.dxy) < dxy_endcap)
     else:
 	return False
@@ -27,14 +30,41 @@ def electronIso( electron):
     ### electron iso cut
     return electron.pfRelIso03_all < 0.04
 
-def electronHLTSafeID( electron):
+def electronHLTSafeID( electron, jetRhoCalo):
     """ check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
     """https://twiki.cern.ch/twiki/bin/view/CMS/ChangesEGMHLTAlgo2014"""
+    """https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/RecoEgamma/ElectronIdentification/python/Identification/cutBasedElectronHLTPreselecition_Summer16_V1_cff.py"""
     ### extrac HLT safe ID cut is applied for electron selection for 2016 data only
-    return True
-    #if abs(electron.eta) < 1.479: #barrel
-    #return (abs(electron.sieie) < 0.11 and 
-    
+    ##
+    #GsfEleDEtaInSeedCut 
+    #ptCutOff  = 20.0
+    barrelCutOff  = 1.479
+    #isRelativeIso_Ecal = True
+    #isRelativeIso_Hcal = True
+    superCluster_eta = electron.eta + electron.deltaEtaSC
+    sieie = electron.sieie
+    hoe = electron.hoe
+    eInvMinusPInv = abs(electron.eInvMinusPInv)
+    ##Iso value here is not exact same as used in officialy analysis, Eff to be validated 
+    TrkPtIsoRel =  electron.dr03TkSumPt/electron.pt
+    ##quote from HWW https://github.com/latinos/LatinoAnalysis/blob/master/Gardener/python/variables/l2Sel.py#L188
+    eA_ecal = 0.165
+    eA_hcal = 0.06
+    if abs(superCluster_eta) > barrelCutOff:
+        eA_ecal = 0.132
+	eA_hcal = 0.131
+        
+    EcalPFClusterIsoRel = (electron.dr03EcalRecHitSumEt - eA_ecal * jetRhoCalo )/electron.pt
+    HcalPFClusterIsoRel = (electron.dr03HcalDepth1TowerSumEt - eA_hcal * jetRhoCalo )/electron.pt
+    normalizedGsfChi2cut = electron.isPFcand
+    missingHits = electron.lostHits
+    print "electron pt ",electron.pt," supercluter_eta ",superCluster_eta, " sieie ",sieie, " hoe ",hoe," eInvMinusPInv ",eInvMinusPInv, " EcalPFClusterIsoRel ",EcalPFClusterIsoRel, " HcalPFClusterIsoRel ",HcalPFClusterIsoRel, " TrkPtIsoRel ",TrkPtIsoRel," jetRhoCalo ",jetRhoCalo
+
+    if abs(superCluster_eta) <= barrelCutOff: #barrel
+        return (abs(sieie) < 0.11 and hoe < 0.06 and eInvMinusPInv < 0.013 and EcalPFClusterIsoRel < 0.16 and HcalPFClusterIsoRel < 0.12 and TrkPtIsoRel < 0.08)
+    else:
+        return (abs(sieie) < 0.31 and hoe < 0.065 and eInvMinusPInv < 0.013 and EcalPFClusterIsoRel < 0.12 and HcalPFClusterIsoRel < 0.12 and TrkPtIsoRel < 0.08 and normalizedGsfChi2cut) 
+
 def muonID( muon):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Muon_Isolation """
     #goodGlob = (muon.isGlobalMuon() and muon.globalTrack()->normalizedChi2() < 3 and muon.combinedQuality().chi2LocalPosition < 12 and muon.combinedQuality().trkKink < 20)
@@ -61,10 +91,10 @@ def leptonID(lepton):
 def leptonpairID(leptonpair):
     return (leptonID(leptonpair[0]) and leptonID(leptonpair[1]))
 
-def leptonHLTSafeID(lepton):
-    return ((abs(lepton.pdgId) == 11 and electronHLTSafeID(lepton)) or (abs(lepton.pdgId) == 13))
-def leptonpairHLTSafeID(leptonpair):
-    return (leptonHLTSafeID(leptonpair[0]) and leptonHLTSafeID(leptonpair[1]))
+def leptonHLTSafeID(lepton, jetRhoCalo):
+    return ((abs(lepton.pdgId) == 11 and electronHLTSafeID(lepton, jetRhoCalo)) or (abs(lepton.pdgId) == 13))
+def leptonpairHLTSafeID(leptonpair, jetRhoCalo):
+    return (leptonHLTSafeID(leptonpair[0], jetRhoCalo) and leptonHLTSafeID(leptonpair[1], jetRhoCalo))
 
 def jetMediumBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
@@ -74,6 +104,91 @@ def jetMediumBtagging(jet):
 
 def combinedError(err1, err2, weight1):
     return sqrt(err1*err1*weight1+err2*err2*(1.0-weight1));
+
+def phiconversion_radintodegree(phi):
+    if phi < 0:
+       phi = phi + pi*2
+    if phi > 2*pi:
+       phi = phi - pi*2 
+    return degrees(phi)
+
+def propagateToME2X_phi(lepton):
+    ##From Louvain
+    charge = lepton.charge
+    pt = lepton.pt
+    lep_p4 = ROOT.TLorentzVector()
+    lep_p4.SetPtEtaPhiM(lepton.pt, lepton.eta, lepton.phi, lepton.mass)
+    theta = degrees(lep_p4.Theta()) ##should be between 0, 180
+    if theta > 90:
+        theta = 180 - theta
+    return  lep_p4.Phi() + pi/180.0 * charge * (1. / pt) * (10.48 - 5.1412 * theta + 0.02308 * theta * theta)
+
+def checkMuonSector(lepton):
+    eta = lepton.eta
+    ##FIXME, use phi at 2nd CSC station
+    side = 1
+    if eta < 0.0:	side = -1
+    if(abs(eta)<1.25):		return 0
+    elif(abs(eta)<1.8):
+    #Code is: 1=> first 50 degrees of the sector, 11=> last 10 deg of previous sector
+	phi_ME2x = propagateToME2X_phi(lepton)
+	phiindegree = phiconversion_radintodegree( phi_ME2x )
+	if(phiindegree>=5   and phiindegree<15):     	return 11*side
+	if(phiindegree>=15  and phiindegree<65):    	return 1*side
+	if(phiindegree>=65  and phiindegree<75):    	return 12*side
+	if(phiindegree>=75  and phiindegree<125):   	return 2*side
+	if(phiindegree>=125 and phiindegree<135):  	return 13*side
+	if(phiindegree>=135 and phiindegree<185):  	return 3*side
+	if(phiindegree>=185 and phiindegree<195):  	return 14*side
+	if(phiindegree>=195 and phiindegree<245):  	return 4*side
+	if(phiindegree>=245 and phiindegree<255):  	return 15*side
+	if(phiindegree>=255 and phiindegree<305):  	return 5*side
+	if(phiindegree>=305 and phiindegree<315):  	return 16*side
+	if(phiindegree>=315 or phiindegree < 5): 	return 6*side
+    else:
+    #Code is: 1=> first 40 degrees of the sector, 11=> last 20 deg of previous sector
+	phi_ME2x = propagateToME2X_phi(lepton)
+	phiindegree = phiconversion_radintodegree( phi_ME2x )
+	if(phiindegree>=355 or  phiindegree<15):   	return 11*side
+	if(phiindegree>=15  and phiindegree<55):     	return 1*side
+	if(phiindegree>=55  and phiindegree<75):     	return 12*side
+	if(phiindegree>=75  and phiindegree<115):    	return 2*side
+	if(phiindegree>=115 and phiindegree<135):   	return 13*side
+	if(phiindegree>=135 and phiindegree<175):   	return 3*side
+	if(phiindegree>=175 and phiindegree<195):   	return 14*side
+	if(phiindegree>=195 and phiindegree<235):   	return 4*side
+	if(phiindegree>=235 and phiindegree<255):   	return 15*side
+	if(phiindegree>=255 and phiindegree<295):   	return 5*side
+	if(phiindegree>=295 and phiindegree<315):   	return 16*side;
+	if(phiindegree>=315 and phiindegree < 355): 	return 6*side;
+    return 0
+
+
+def checkMuonPairSectors(muon1, muon2):
+    ### 0, good event, no SF
+    ### 1, both in overlap region or non-overlap region
+    ### 2, one in overlap region and one in non-overlap region
+    if abs(muon1.pdgId) != 13 or abs(muon2.pdgId) != 13:
+        print "error in checkMuonPairSectors!! not both inputs are muon "
+        return 0
+    if muon1.eta*muon2.eta < 0 or abs(muon1.eta)<1.25 or abs(muon2.eta)<1.25:
+        return 0
+    sector1 = checkMuonSector(muon1)
+    sector2 = checkMuonSector(muon2)
+    if sector1*sector2 < 0: ## not same endcap
+        return 0
+    if sector1 == sector2: 
+        return 1
+    if abs(sector1 - sector2) == 10:
+        return 2
+    return 0
+
+def isMuonPairSameCSCRegion(muon1, muon2):
+    return checkMuonPairSectors(muon1, muon2) == 1
+
+
+def loadJsonFile(filename):
+    return json.loads(open(filename).read())
 
 class LeptonSFManager():
     ### to take the lumi into consideration?
@@ -166,6 +281,16 @@ class LeptonSFManager():
 	    
 	##from HHbbWW analysis note: AN_HIG-17-006
 	self.DZEffs = {"DoubleEle": 0.983, "DoubleMu":0.993, "MuEle":0.988, "EleMu":0.982}	
+	##apply for muon pairs in same endcap(abs(eta)>1.25) due to bug  in EMTF, 2016 Run
+	## case1 both two muons in CSC overlap region or non overlap region => if EMTFBug, eff = 0
+	## case2 one muon in overlap region and another in non overlap region => if EMTFBug, eff = 0.5
+	## should use phi at CSC station2 !!!
+	##https://twiki.cern.ch/twiki/bin/view/CMS/EndcapHighPtMuonEfficiencyProblem
+	self.EMTFBug_run2016_sameOverlap_or_SameNonOverlap = 0.564474
+	self.EMTFBug_run2016_oneOverlap_oneNonOverlap = 0.782237
+
+	self.Ele_HLTSafeID_file = 'leptonSF/Electron_MediumPlusHLTSafeID_moriond17.json'
+	self.Electron_MediumPlusHLTSafeID_moriond17 = loadJsonFile(self.Ele_HLTSafeID_file)
 
     #### FIXME, add uncertainty in next version
     def getSF(self,  th2, eta, pt):
@@ -179,6 +304,50 @@ class LeptonSFManager():
 	 errlow = th2.GetBinErrorLow(bin1, bin2)
 	 SF = th2.GetBinContent(bin1, bin2)
 	 return SF, SF+errup, SF-errlow
+	
+    def getSF_json(self, SFs_dict, eta, pt):
+	for etabin in SFs_dict:
+	    etas = re.findall(r"[-+]?\d*\.\d+|\d+", etabin)
+	    #print "etabin ",etabin," range ",etas
+	    if not ((eta >= etas[0] and eta < etas[1]) or (eta >= etas[1] and eta < etas[0])):
+		continue
+	    for ptbin in SFs_dict[etabin]:
+		pts = re.findall(r"[-+]?\d*\.\d+|\d+", ptbin)
+		#print "ptbin ", ptbin, " range ",pts
+		if (pt >= pts[0] and pt<pts[1]) or (pt <pts[0] and pt >= pts[1]):
+		    SF = SFs_dict[etabin][ptbin]['value']
+		    err = SFs_dict[etabin][ptbin]['error']
+		    return SF, SF+error, SF-error
+	return 1.0,1.0,1.0
+
+
+    def getSF_Ele_HLTSafeID(self, SFs_dict, eta, pt):
+	for etabin in SFs_dict:
+	    etas = etabin['bin']
+	    if not ((eta >= etas[0] and eta < etas[1]) or (eta >= etas[1] and eta < etas[0])):
+		continue
+	    for ptbin in etabin['values']:
+	        pts = ptbin['bin']
+	        if (pt >= pts[0] and pt<pts[1]) or (pt <pts[0] and pt >= pts[1]):
+		    SF = ptbin['value']
+		    SF_errup = ptbin['error_high']
+		    SF_errlow = ptbin['error_low']
+		    #print " getSF_Ele_HLTSafeID ", SF, " ele pt ",pt, " eta ",eta
+		    return SF, SF_errup, SF_errlow
+	return 1.0,1.0,1.0
+  
+    def getleptonHLTSafeIDSF(self, lep):
+        if abs(lep.pdgId) == 13:
+            return  1.0,1.0,1.0
+        elif  abs(lep.pdgId) == 11:	
+	    superCluster_eta = lep.eta + lep.deltaEtaSC
+	    return self.getSF_Ele_HLTSafeID(self.Electron_MediumPlusHLTSafeID_moriond17['data'], superCluster_eta, lep.pt)
+
+    def getleptonpairHTLSafeIDSF(self, leptonpair):
+	SF1 = self.getleptonHLTSafeIDSF(leptonpair[0])
+       	SF2 = self.getleptonHLTSafeIDSF(leptonpair[1])
+        return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
+
 
     def getEGSF(self, eta, pt):##final one ?
 	SF = self.getSF(self.EGSF_th2, eta, pt)
@@ -232,7 +401,13 @@ class LeptonSFManager():
 	elif  abs(leptonpair[0].pdgId) == 13 and abs(leptonpair[1].pdgId) == 13:
 	    legs.append("DoubleMuLegHigPt")
 	    legs.append("DoubleMuLegLowPt")
-	    Dzeff = self.DZEffs["DoubleMu"]
+	    cscsector_case  = checkMuonPairSectors(leptonpair[0], leptonpair[1])
+    	    EMTFeff = 1.0
+            if cscsector_case == 1:
+	       EMTFeff = self.EMTFBug_run2016_sameOverlap_or_SameNonOverlap 
+	    elif cscsector_case == 2:
+	       EMTFeff =  self.EMTFBug_run2016_oneOverlap_oneNonOverlap
+	    Dzeff = self.DZEffs["DoubleMu"]*EMTFeff
 	elif  abs(leptonpair[0].pdgId) == 11 and abs(leptonpair[1].pdgId) == 13:
 	    legs.append("EleMuLegHigPt")
 	    legs.append("EleMuLegLowPt")
@@ -263,7 +438,7 @@ class LeptonSFManager():
 
     def getleptonIDSF(self, lep):
 	if abs(lep.pdgId) == 11:
-	    return self.getEGSF(lep.eta, lep.pt)
+	    return self.getEGSF(lep.eta + lep.deltaEtaSC, lep.pt)#use super cluster eta
 	elif abs(lep.pdgId) == 13:
 	    return self.getMuonIDSF(abs(lep.eta), lep.pt)
 	else:

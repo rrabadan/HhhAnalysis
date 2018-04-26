@@ -8,6 +8,9 @@ import sys
 sys.argv.append( '-b' )
 sys.argv.append( '-q' )
 
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -18,7 +21,8 @@ channelcuts = {"MuMu":{"cut":"isMuMu","extraweight": 1.0,"Data":"DoubleMuon", "l
         "MuEl":{"cut":"(isMuEl || isElMu)", "extraweight": 1.0,"Data":"MuonEG", "latex":"e#mu"},
         "ElEl":{"cut":"isElEl","extraweight":1.0,"Data":"DoubleEG", "latex":"ee"},
 		}
-cutflows = ["All","Trigger","online-offline matching","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","nlepton>=3 veto","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
+#cutflows = ["All","Trigger","online-offline matching","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","nlepton>=3 veto","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
+cutflows = ["All","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","EMTFBug","HLT matching","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
 def get_xsection(shortname, samplename = ''):
     if len(full_local_samplelist[shortname].keys()) == 1:
         samplename = full_local_samplelist[shortname].keys()[0]
@@ -42,11 +46,56 @@ def get_event_weight_sum(shortname, samplename=''):
     tfile.Close()
     return event_weight_sum
 
+def plotCutflowHist_data(outdir):
+    colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
+    #channels = ["ElEl","MuEl","MuMu"]
+    channels = ["ElEl","MuMu"]
+
+    legend = ROOT.TLegend(0.65,0.62,0.88,0.84); 
+    legend.SetTextSize(0.04); legend.SetTextFont(42)
+    legend.SetHeader("cutflow")
+    #legend.SetBorderSize(0)
+    hs = ROOT.THStack("hs"," ")
+    allhist = []
+    shortname = "Data"
+    for i,ch in enumerate(channels):
+        dataname = channelcuts[ch]["Data"]
+	filepath = full_local_samplelist[shortname][dataname]["path"]
+	tfile = ROOT.TFile(filepath, "READ")
+	print "samplename ",dataname, " file ",filepath," h_cutflow_"+dataname
+        allhist.append(tfile.Get("h_cutflow_"+dataname))
+        allhist[-1].SetDirectory(0) 
+        allhist[-1].SetLineColor(colors[i])
+        allhist[-1].SetLineWidth(2)
+        ch_yield = allhist[-1].GetBinContent(len(cutflows))
+        hs.Add(allhist[-1])
+        entry = legend.AddEntry(allhist[-1], channelcuts[ch]["latex"]+": %.1f"%ch_yield,"l")
+        entry.SetTextColor(colors[i])
+        tfile.Close()
+
+    c1 = ROOT.TCanvas()
+    c1.SetGridx()
+    c1.SetGridy()
+    c1.SetLogy()
+    tex0 = ROOT.TLatex(0.1,0.92, " #scale[1.4]{#font[61]{CMS}} Simulation Preliminary"+"  "*6+"35.87 fb^{-1} (13 TeV),2016")
+    tex0.SetNDC(); tex0.SetTextSize(.045); tex0.SetTextFont(42)
+    tex1 = ROOT.TLatex(0.15, 0.83, "Data, Run2016 ")
+    tex1.SetNDC(); tex1.SetTextSize(.035); tex1.SetTextFont(42)
+    hs.Draw("nostackhist")
+    xaxis = hs.GetHistogram().GetXaxis()
+    for i, cut in enumerate(cutflows):
+        xaxis.SetBinLabel(i+1, cut)
+    legend.Draw("same")
+    tex0.Draw("same")
+    tex1.Draw("same")
+    c1.SaveAs(outdir+"Data_Run2016_cutflow.pdf")
 
 def plotCutflowHist(outdir, shortname, samplename = ""):
     colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
-    xsec = get_xsection(shortname, samplename)
-    event_weight_sum = get_event_weight_sum(shortname, samplename)
+    xsec = 1.0; event_weight_sum = 1.0
+    if shortname != "Data":
+	xsec = get_xsection(shortname, samplename)
+	event_weight_sum = get_event_weight_sum(shortname, samplename)
     channels = ["ElEl","MuEl","MuMu"]
     if len(full_local_samplelist[shortname].keys()) == 1:
         samplename = full_local_samplelist[shortname].keys()[0]
@@ -66,6 +115,8 @@ def plotCutflowHist(outdir, shortname, samplename = ""):
         datasetname = channelcuts[ch]["Data"]
         allhist.append(tfile.Get("h_cutflow_"+datasetname))
         weight = TotalLumi*xsec*1000.0/event_weight_sum
+	if shortname == "Data":
+	       weight = 1.0
         allhist[-1].Scale(weight)
         allhist[-1].SetLineColor(colors[i])
         allhist[-1].SetLineWidth(2)
@@ -372,7 +423,7 @@ def makeBackgroundshist(masspoints, variable, nbins, xtitle, outdir):
         suffix = ''
         histForlimits1D(bgnames, mass, todraw, cut, nbins, xtitle, suffix, outfile, plotname)
 
-variablesdir = "HHNtuple_20180412_variablehists/"
+variablesdir = "HHNtuple_20180412_variablehists_newTT/"
 os.system("mkdir -p "+variablesdir)
 varibales = ['jj_pt', 'll_pt', 'll_M', 'll_DR_l_l', 'jj_DR_j_j', 'llmetjj_DPhi_ll_jj', 'llmetjj_minDR_l_j', 'llmetjj_MTformula','mt2', 'jj_M','hme_h2mass_reco']
 #variables = ['lep1_pt']
@@ -382,24 +433,26 @@ def plotallkinematics():
     #print "Ntuple folder ",output_folder
     
     makeBackgroundshist([400], 'll_M', [50, 12.0, 76.0], "M_{ll}", variablesdir)
-    #makeBackgroundshist([400], 'll_DR_l_l', [50, .0, 6.0], "#DeltaR_{ll}", variablesdir)
-    #makeBackgroundshist([400], 'jj_M', [50, 0.0, 400.0], "M_{jj}",variablesdir)
-    #makeBackgroundshist([400], 'jj_DR_j_j', [50, .0, 6.0], "#DeltaR_{jj}",variablesdir)
-    #makeBackgroundshist([400], 'llmetjj_DPhi_ll_jj', [24, .0, 3.1415926],"#Delta#phi(ll,jj)", variablesdir)
-    #makeBackgroundshist([400], 'll_pt', [50, 0.0, 450.0], "Dilepton p_{T}", variablesdir)
-    #makeBackgroundshist([400], 'jj_pt', [50, 0.0, 450.0], "Dijet p_{T}", variablesdir)
-    #makeBackgroundshist([400], 'llmetjj_minDR_l_j', [50, .0, 5.0], "#DeltaR_{l,j}", variablesdir)
-    #makeBackgroundshist([400], 'llmetjj_MTformula', [50, 0.0, 500.0],"MT", variablesdir)
-    #makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET", variablesdir)
+    makeBackgroundshist([400], 'll_DR_l_l', [50, .0, 6.0], "#DeltaR_{ll}", variablesdir)
+    makeBackgroundshist([400], 'jj_M', [50, 0.0, 400.0], "M_{jj}",variablesdir)
+    makeBackgroundshist([400], 'jj_DR_j_j', [50, .0, 6.0], "#DeltaR_{jj}",variablesdir)
+    makeBackgroundshist([400], 'llmetjj_DPhi_ll_jj', [24, .0, 3.1415926],"#Delta#phi(ll,jj)", variablesdir)
+    makeBackgroundshist([400], 'll_pt', [50, 0.0, 450.0], "Dilepton p_{T}", variablesdir)
+    makeBackgroundshist([400], 'jj_pt', [50, 0.0, 450.0], "Dijet p_{T}", variablesdir)
+    makeBackgroundshist([400], 'llmetjj_minDR_l_j', [50, .0, 5.0], "#DeltaR_{l,j}", variablesdir)
+    makeBackgroundshist([400], 'llmetjj_MTformula', [50, 0.0, 500.0],"MT", variablesdir)
+    makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET", variablesdir)
 
 
 
-plotallkinematics()
+#plotallkinematics()
 #bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
 bgnames = ["TT","DY","sT","VV","ttV"]
-outcutflowdir = "HHNtuple_20180412_cutflows/"
+#outcutflowdir = "HHNtuple_20180412_cutflows_newTT/"
+outcutflowdir = "HHNtuple_20180425_cutflows/"
 #plotCutflowHist(outcutflowdir, "TT", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8")
-#plotCutflowHist(outcutflowdir, "RadionM400")
+plotCutflowHist(outcutflowdir, "TT")
+plotCutflowHist_data(outcutflowdir)
 mcnames = ["TT","DY","sT","Wjet","VV","ttV"]
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 750, 800, 900]
 for mass in masspoints:

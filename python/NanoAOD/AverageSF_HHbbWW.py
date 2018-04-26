@@ -168,9 +168,28 @@ def AverageDZEff(triggerMaps):
 	DZefffile.write(ch+" %.3f\n"%eff)
     
 	
+def AverageEMTFBUG(triggerMaps):
+    ##apply for muon pairs in same endcap(abs(eta)>1.25) due to bug  in EMTF, 2016 Run
+    ## case1 both two muons in CSC overlap region or non overlap region => if EMTFBug, eff = 0
+    ## case2 one muon in overlap region and another in non overlap region => if EMTFBug, eff = 0.5
+    ## should use phi at CSC station2 !!!
 
-
-	    
+    EMTFBUGEff = open("EMTFBUGEff2016.text","w")
+    totallumi = 0.0; totaleff1 = 0.0; totaleff2 = 0.0
+    for  i in triggerMaps.keys():
+	lumi = triggerMaps[i]["lumi"]
+	eff1 = 1.0; eff2 = 1.0
+	if triggerMaps[i]['EMTFBug']:
+	    eff1 = 0.0; eff2 = 0.5
+	totallumi +=  lumi
+	totaleff1 += eff1*lumi
+	totaleff2 += eff2*lumi
+    totaleff1  = totaleff1/totallumi
+    totaleff2 = totaleff2/totallumi
+    EMTFBUGEff.write("run2016_sameOverlap_or_SameNonOverlap: %f\n"%totaleff1)
+    EMTFBUGEff.write("run2016_oneOverlap_oneNonOverlap: %f\n"%totaleff2)
+    EMTFBUGEff.close()
+	
 
 
 
@@ -186,8 +205,8 @@ if __name__ == '__main__':
  
 --------------------------------------------------------------------------------------------------
 '''    
-
-    AverageDZEff( Trigger['Full2016'])
+    AverageEMTFBUG( Trigger['Full2016'] ) 
+    #AverageDZEff( Trigger['Full2016'])
     legs = ["DoubleEleLegHigPt","DoubleEleLegLowPt","DoubleMuLegHigPt","DoubleMuLegLowPt","MuEleLegHigPt", "MuEleLegLowPt","EleMuLegHigPt","EleMuLegLowPt"]
     #for leg in legs:
 	#AverageLeg(leg, Trigger['Full2016'])
