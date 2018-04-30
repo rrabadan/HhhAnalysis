@@ -5,6 +5,8 @@ import os
 import json
 import numpy as np
 
+def printObject(obj):
+    print " Id ",obj.pdgId, " pt ",obj.pt, " eta ", obj.eta," phi ",obj.phi
 
 def electronImpactParameterCut( electron):
     """ check electron impact parameter, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
@@ -13,9 +15,9 @@ def electronImpactParameterCut( electron):
     dz_endcap  = 0.2
     dz_barrel = 0.1
     superCluster_eta = electron.eta + electron.deltaEtaSC
-    if abs(superCluster_eta) < 1.479: ##barrel
+    if abs(superCluster_eta) <= 1.479: ##barrel
 	return (abs(electron.dz) < dz_barrel and abs(electron.dxy) < dxy_barrel)
-    elif abs(superCluster_eta) >= 1.479 and abs(electron.eta) < 2.5:
+    elif abs(superCluster_eta) > 1.479 and abs(electron.eta) < 2.5:
 	return (abs(electron.dz) < dz_endcap and abs(electron.dxy) < dxy_endcap)
     else:
 	return False
@@ -28,7 +30,8 @@ def electronID( electron):
 def electronIso( electron):
     """ check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
     ### electron iso cut
-    return electron.pfRelIso03_all < 0.04
+    #return electron.pfRelIso03_all < 0.04
+    return True
 
 def electronHLTSafeID( electron, jetRhoCalo):
     """ check electron isolation, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
@@ -47,7 +50,9 @@ def electronHLTSafeID( electron, jetRhoCalo):
     eInvMinusPInv = abs(electron.eInvMinusPInv)
     ##Iso value here is not exact same as used in officialy analysis, Eff to be validated 
     TrkPtIsoRel =  electron.dr03TkSumPt/electron.pt
+    ##https://indico.cern.ch/event/491507/contributions/2192817/attachments/1285452/1911768/EGM_HLTsafeCuts_31May16.pdf
     ##quote from HWW https://github.com/latinos/LatinoAnalysis/blob/master/Gardener/python/variables/l2Sel.py#L188
+
     eA_ecal = 0.165
     eA_hcal = 0.06
     if abs(superCluster_eta) > barrelCutOff:
@@ -58,7 +63,7 @@ def electronHLTSafeID( electron, jetRhoCalo):
     HcalPFClusterIsoRel = (electron.dr03HcalDepth1TowerSumEt - eA_hcal * jetRhoCalo )/electron.pt
     normalizedGsfChi2cut = electron.isPFcand
     missingHits = electron.lostHits
-    print "electron pt ",electron.pt," supercluter_eta ",superCluster_eta, " sieie ",sieie, " hoe ",hoe," eInvMinusPInv ",eInvMinusPInv, " EcalPFClusterIsoRel ",EcalPFClusterIsoRel, " HcalPFClusterIsoRel ",HcalPFClusterIsoRel, " TrkPtIsoRel ",TrkPtIsoRel," jetRhoCalo ",jetRhoCalo
+    #print "electron pt ",electron.pt," supercluter_eta ",superCluster_eta, " sieie ",sieie, " hoe ",hoe," eInvMinusPInv ",eInvMinusPInv, " EcalPFClusterIsoRel ",EcalPFClusterIsoRel, " HcalPFClusterIsoRel ",HcalPFClusterIsoRel, " TrkPtIsoRel ",TrkPtIsoRel," jetRhoCalo ",jetRhoCalo
 
     if abs(superCluster_eta) <= barrelCutOff: #barrel
         return (abs(sieie) < 0.11 and hoe < 0.06 and eInvMinusPInv < 0.013 and EcalPFClusterIsoRel < 0.16 and HcalPFClusterIsoRel < 0.12 and TrkPtIsoRel < 0.08)
@@ -69,7 +74,8 @@ def muonID( muon):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Muon_Isolation """
     #goodGlob = (muon.isGlobalMuon() and muon.globalTrack()->normalizedChi2() < 3 and muon.combinedQuality().chi2LocalPosition < 12 and muon.combinedQuality().trkKink < 20)
     ###check Muon ID
-    return muon.mediumId
+    #return muon.mediumId
+    return muon.tightId
 
 def muonIso(muon):
     ###check Muon iso , tight isolation: 0.15; loose iso: 0.25 
@@ -125,7 +131,6 @@ def propagateToME2X_phi(lepton):
 
 def checkMuonSector(lepton):
     eta = lepton.eta
-    ##FIXME, use phi at 2nd CSC station
     side = 1
     if eta < 0.0:	side = -1
     if(abs(eta)<1.25):		return 0
@@ -133,6 +138,7 @@ def checkMuonSector(lepton):
     #Code is: 1=> first 50 degrees of the sector, 11=> last 10 deg of previous sector
 	phi_ME2x = propagateToME2X_phi(lepton)
 	phiindegree = phiconversion_radintodegree( phi_ME2x )
+        print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
 	if(phiindegree>=5   and phiindegree<15):     	return 11*side
 	if(phiindegree>=15  and phiindegree<65):    	return 1*side
 	if(phiindegree>=65  and phiindegree<75):    	return 12*side
@@ -149,6 +155,7 @@ def checkMuonSector(lepton):
     #Code is: 1=> first 40 degrees of the sector, 11=> last 20 deg of previous sector
 	phi_ME2x = propagateToME2X_phi(lepton)
 	phiindegree = phiconversion_radintodegree( phi_ME2x )
+        print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
 	if(phiindegree>=355 or  phiindegree<15):   	return 11*side
 	if(phiindegree>=15  and phiindegree<55):     	return 1*side
 	if(phiindegree>=55  and phiindegree<75):     	return 12*side
@@ -173,8 +180,11 @@ def checkMuonPairSectors(muon1, muon2):
         return 0
     if muon1.eta*muon2.eta < 0 or abs(muon1.eta)<1.25 or abs(muon2.eta)<1.25:
         return 0
+    #print "muon1 ", printObject(muon1)
     sector1 = checkMuonSector(muon1)
+    #print "muon2 ", printObject(muon2)
     sector2 = checkMuonSector(muon2)
+    #print "sector1 ",sector1," sector2 ",sector2
     if sector1*sector2 < 0: ## not same endcap
         return 0
     if sector1 == sector2: 
@@ -218,8 +228,10 @@ class LeptonSFManager():
 	
 	### x-axis: eta,  y-axis: pt
 	self.EGSF_histname = "EGamma_SF2D"
-	self.MuonIDSF_histname = "MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
-	self.MuonIsoSF_histname = "TightISO_MediumID_pt_eta/abseta_pt_ratio"
+	#self.MuonIDSF_histname = "MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
+	#self.MuonIsoSF_histname = "TightISO_MediumID_pt_eta/abseta_pt_ratio"
+	self.MuonIDSF_histname = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
+	self.MuonIsoSF_histname = "TightISO_TightID_pt_eta/abseta_pt_ratio"
 	self.MuonTrgSF_histname = "IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"
 	self.MuonTrackingSF_tgraphname = "ratio_eff_eta3_dr030e030_corr"
 
@@ -434,6 +446,7 @@ class LeptonSFManager():
     def getleptonpairIsoSF(self, leptonpair):
 	SF1 = self.getleptonIsoSF(leptonpair[0])
        	SF2 = self.getleptonIsoSF(leptonpair[1])
+        #print "IsoSF lep1 ",printObject(leptonpair[0]), " SF1 ", SF1, " lep2 ",printObject(leptonpair[1])," SF2 ",SF2 
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
     def getleptonIDSF(self, lep):
@@ -447,6 +460,7 @@ class LeptonSFManager():
     def getleptonpairIDSF(self, leptonpair):
 	SF1 = self.getleptonIDSF(leptonpair[0])
        	SF2 = self.getleptonIDSF(leptonpair[1])
+        #print "IDSF lep1 ",printObject(leptonpair[0]), " SF1 ", SF1, " lep2 ",printObject(leptonpair[1])," SF2 ",SF2 
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
     def getMuonTrackingSF(self, eta):
