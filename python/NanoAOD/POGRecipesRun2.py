@@ -219,6 +219,7 @@ class LeptonSFManager():
 	##brilcalc lumi -u /pb  --normtag normtag_PHYSICS.json -i json.txt
 	## used delivered lumi for normalization
 
+	self.useJsonSFs = False
 	##self.Lumi_BCDEF = 5.750+2.573+4.242+4.025+3.105 ## recorded,23Sep2016ReReco
 	self.Lumi_BCDEF = 5.991+2.685+4.411+4.222+3.303 ##delievered
 	##self.Lumi_GH = 7.576+8.651 ## recorded, 23Sep2016ReReco
@@ -226,7 +227,8 @@ class LeptonSFManager():
 	self.totalLumi = self.Lumi_BCDEF  + self.Lumi_GH#fb-1
 	HhhPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD/"
 	#self.EGSF_filename  = "leptonSF/EGM2D_eleGSF.root" ## for electron ID
-	self.EGSF_filename  =             os.path.join(HhhPath , "leptonSF/egammaEffi.txt_EGM2D.root" )## for electron ID
+	self.EGIDSF_filename  =             os.path.join(HhhPath , "leptonSF/egammaEffi.txt_EGM2D_CutBasedId.root" )## for electron ID
+	self.EGRecoSF_filename  =             os.path.join(HhhPath , "leptonSF/egammaEffi.txt_EGM2D_reco.root" )## for electron ID
 	self.MuonIDSF_filename =          os.path.join(HhhPath , "leptonSF/EfficienciesAndSF_BCDEF_ID.root")
 	self.MuonIsoSF_filename =         os.path.join(HhhPath , "leptonSF/EfficienciesAndSF_BCDEF_ISO.root")
 	self.MuonTrgSF_filename =         os.path.join(HhhPath , "leptonSF/EfficienciesAndSF_BCDEF_trigger.root")
@@ -238,7 +240,8 @@ class LeptonSFManager():
 
 	
 	### x-axis: eta,  y-axis: pt
-	self.EGSF_histname = "EGamma_SF2D"
+	self.EGIDSF_histname = "EGamma_SF2D"
+	self.EGRecoSF_histname = "EGamma_SF2D"
 	#self.MuonIDSF_histname = "MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
 	#self.MuonIsoSF_histname = "TightISO_MediumID_pt_eta/abseta_pt_ratio"
 	self.MuonIDSF_histname = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio"
@@ -246,7 +249,8 @@ class LeptonSFManager():
 	self.MuonTrgSF_histname = "IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio"
 	self.MuonTrackingSF_tgraphname = "ratio_eff_eta3_dr030e030_corr"
 
-	self.EGSF_tfile = ROOT.TFile(self.EGSF_filename,"READ")
+	self.EGIDSF_tfile = ROOT.TFile(self.EGIDSF_filename,"READ")
+	self.EGRecoSF_tfile = ROOT.TFile(self.EGRecoSF_filename,"READ")
 	self.MuonIDSF_tfile = ROOT.TFile(self.MuonIDSF_filename,"READ")
 	self.MuonIsoSF_tfile = ROOT.TFile(self.MuonIsoSF_filename,"READ")
 	#self.MuonTrgSF_tfile = ROOT.TFile(self.MuonTrgSF_filename,"READ")
@@ -256,7 +260,8 @@ class LeptonSFManager():
 	#self.MuonTrgSF_GH_tfile = ROOT.TFile(self.MuonTrgSF_GH_filename,"READ")
 	self.MuonTrackingSF_GH_tfile = ROOT.TFile(self.MuonTrackingSF_GH_filename,"READ")
 
-	self.EGSF_th2 = self.EGSF_tfile.Get(self.EGSF_histname)
+	self.EGIDSF_th2 = self.EGIDSF_tfile.Get(self.EGIDSF_histname)
+	self.EGRecoSF_th2 = self.EGRecoSF_tfile.Get(self.EGRecoSF_histname)
         #print "self.EGSF_th2 ",self.EGSF_th2.Print("ALL")
 	self.MuonIDSF_th2 = self.MuonIDSF_tfile.Get(self.MuonIDSF_histname)
 	self.MuonIsoSF_th2 = self.MuonIsoSF_tfile.Get(self.MuonIsoSF_histname)
@@ -312,8 +317,27 @@ class LeptonSFManager():
 	self.EMTFBug_run2016_sameOverlap_or_SameNonOverlap = 0.564474
 	self.EMTFBug_run2016_oneOverlap_oneNonOverlap = 0.782237
 
+	###SFs in Json files
 	self.Ele_HLTSafeID_file = 'leptonSF/Electron_MediumPlusHLTSafeID_moriond17.json'
 	self.Electron_MediumPlusHLTSafeID_moriond17 = loadJsonFile(self.Ele_HLTSafeID_file)
+
+        self.Muon_id_jsonfile = os.path.join(HhhPath, "leptonSF/Muon_TightID_genTracks_id_BCDEFGH_weighted.json")
+        self.Muon_iso_jsonfile = os.path.join(HhhPath, "leptonSF/Muon_TightISO_TightID_iso_BCDEFGH_weighted.json")
+        self.Muon_reco_jsonfile = os.path.join(HhhPath, "leptonSF/Muon_tracking_BCDEFGH.json")
+
+	self.Muon_id_dict = loadJsonFile(self.Muon_id_jsonfile)
+	self.Muon_iso_dict = loadJsonFile(self.Muon_iso_jsonfile)
+	self.Muon_reco_dict = loadJsonFile(self.Muon_reco_jsonfile)
+
+        self.Ele_id_jsonfile = os.path.join(HhhPath, 'leptonSF/Electron_EGamma_SF2D_medium_moriond17.json')
+        self.Ele_reco_jsonfile = os.path.join(HhhPath, 'leptonSF/Electron_EGamma_SF2D_reco_moriond17.json')
+	 
+	self.Ele_id_dict = loadJsonFile(self.Ele_id_jsonfile)
+	self.Ele_reco_dict = loadJsonFile(self.Ele_reco_jsonfile)
+
+    def useJsonFiles(self, x):
+	self.useJsonSFs = x
+
 
     #### FIXME, add uncertainty in next version
     def getSF(self,  th2, eta, pt):
@@ -344,19 +368,22 @@ class LeptonSFManager():
 	return 1.0,1.0,1.0
 
 
-    def getSF_Ele_HLTSafeID(self, SFs_dict, eta, pt):
+    def getSF_json_v2(self, SFs_dict, eta, pt):
+	#print "eta ",eta, " pt ",pt
 	for etabin in SFs_dict:
 	    etas = etabin['bin']
+	    #print "etabin  ",etabin
 	    if not ((eta >= etas[0] and eta < etas[1]) or (eta >= etas[1] and eta < etas[0])):
 		continue
 	    for ptbin in etabin['values']:
 	        pts = ptbin['bin']
+	        #print "ptbin ",ptbin
 	        if (pt >= pts[0] and pt<pts[1]) or (pt <pts[0] and pt >= pts[1]):
 		    SF = ptbin['value']
 		    SF_errup = ptbin['error_high']
 		    SF_errlow = ptbin['error_low']
 		    #print " getSF_Ele_HLTSafeID ", SF, " ele pt ",pt, " eta ",eta
-		    return SF, SF_errup, SF_errlow
+		    return SF, SF + SF_errup, SF - SF_errlow
 	return 1.0,1.0,1.0
   
     def getleptonHLTSafeIDSF(self, lep):
@@ -364,7 +391,7 @@ class LeptonSFManager():
             return  1.0,1.0,1.0
         elif  abs(lep.pdgId) == 11:	
 	    superCluster_eta = lep.eta + lep.deltaEtaSC
-	    return self.getSF_Ele_HLTSafeID(self.Electron_MediumPlusHLTSafeID_moriond17['data'], superCluster_eta, lep.pt)
+	    return self.getSF_json_v2(self.Electron_MediumPlusHLTSafeID_moriond17['data'], superCluster_eta, lep.pt)
 
     def getleptonpairHTLSafeIDSF(self, leptonpair):
 	SF1 = self.getleptonHLTSafeIDSF(leptonpair[0])
@@ -372,28 +399,50 @@ class LeptonSFManager():
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
 
-    def getEGSF(self, eta, pt):##final one ?
-	SF = self.getSF(self.EGSF_th2, eta, pt)
+    def getEGIDSF(self, eta, pt):##final one ?
+	SF = [1.0, 1.0, 1.0]
+        if self.useJsonSFs:
+	    SF = self.getSF_json_v2(self.Ele_id_dict['data'], eta, pt)
+	else:
+	    SF = self.getSF(self.EGIDSF_th2, eta, pt)
+        #print "Electron SFs ",SF
+	return SF
+
+    def getEGRecoSF(self, eta, pt):##final one ?
+	SF = [1.0, 1.0, 1.0]
+        if self.useJsonSFs:
+	    SF = self.getSF_json_v2(self.Ele_reco_dict['data'], eta, pt)
+	else:
+	    SF = self.getSF(self.EGRecoSF_th2, eta, pt)
         #print "Electron SFs ",SF
 	return SF
 
     def getMuonIDSF(self, eta, pt):
-	SF_BCDEF, errlow_BCDEF, errhigh_BCDEF = self.getSF(self.MuonIDSF_th2, abs(eta), pt)
-	SF_GH, errlow_GH, errhigh_GH = self.getSF(self.MuonIDSF_GH_th2, abs(eta), pt)
-	#print "MuonID SF_BCDEF ",SF_BCDEF, errlow_BCDEF, errhigh_BCDEF, " SF_GH ",SF_GH, errlow_GH, errhigh_GH
-	SF = SF_BCDEF*(1-self.MuonTrackingSF_GH_lumiratio) + SF_GH*self.MuonTrackingSF_GH_lumiratio
-	SF_low = SF - combinedError(errlow_GH-SF_GH, errlow_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio)
-	SF_high = SF + combinedError(errhigh_GH-SF_GH, errhigh_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio)
-	return SF, SF_high, SF_low
+	SF = [1.0, 1.0, 1.0]
+        if self.useJsonSFs:
+	    SF = self.getSF_json_v2(self.Muon_id_dict['data'], eta, pt)
+	else:
+	    SF_BCDEF, errlow_BCDEF, errhigh_BCDEF = self.getSF(self.MuonIDSF_th2, abs(eta), pt)
+	    SF_GH, errlow_GH, errhigh_GH = self.getSF(self.MuonIDSF_GH_th2, abs(eta), pt)
+	    #print "MuonID SF_BCDEF ",SF_BCDEF, errlow_BCDEF, errhigh_BCDEF, " SF_GH ",SF_GH, errlow_GH, errhigh_GH
+	    SF = []
+	    SF.append( SF_BCDEF*(1-self.MuonTrackingSF_GH_lumiratio) + SF_GH*self.MuonTrackingSF_GH_lumiratio )
+	    SF.append( SF - combinedError(errlow_GH-SF_GH, errlow_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio))
+	    SF.append( SF + combinedError(errhigh_GH-SF_GH, errhigh_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio))
+	return SF
 
     def getMuonIsoSF(self, eta, pt):
-	SF_BCDEF, errlow_BCDEF, errhigh_BCDEF = self.getSF(self.MuonIsoSF_th2, abs(eta), pt)
-	SF_GH, errlow_GH, errhigh_GH = self.getSF(self.MuonIsoSF_GH_th2, abs(eta), pt)
-	#print "MuonIso SF_BCDEF ",SF_BCDEF, errlow_BCDEF, errhigh_BCDEF, " SF_GH ",SF_GH, errlow_GH, errhigh_GH
-	SF = SF_BCDEF*(1-self.MuonTrackingSF_GH_lumiratio) + SF_GH*self.MuonTrackingSF_GH_lumiratio
-	SF_low = SF - combinedError(errlow_GH-SF_GH, errlow_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio)
-	SF_high = SF + combinedError(errhigh_GH-SF_GH, errhigh_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio)
-	return SF, SF_high, SF_low
+	SF = [1.0, 1.0, 1.0]
+        if self.useJsonSFs:
+	    SF = self.getSF_json_v2(self.Muon_iso_dict['data'], eta, pt)
+	else:
+	    SF_BCDEF, errlow_BCDEF, errhigh_BCDEF = self.getSF(self.MuonIsoSF_th2, abs(eta), pt)
+	    SF_GH, errlow_GH, errhigh_GH = self.getSF(self.MuonIsoSF_GH_th2, abs(eta), pt)
+	    #print "MuonIso SF_BCDEF ",SF_BCDEF, errlow_BCDEF, errhigh_BCDEF, " SF_GH ",SF_GH, errlow_GH, errhigh_GH
+	    SF.append(SF_BCDEF*(1-self.MuonTrackingSF_GH_lumiratio) + SF_GH*self.MuonTrackingSF_GH_lumiratio)
+	    SF.append(SF - combinedError(errlow_GH-SF_GH, errlow_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio))
+	    SF.append(SF + combinedError(errhigh_GH-SF_GH, errhigh_BCDEF-SF_BCDEF, self.MuonTrackingSF_GH_lumiratio))
+	return SF
 
 
     #def getMuonTrgSF(self, eta, pt):
@@ -462,7 +511,7 @@ class LeptonSFManager():
 
     def getleptonIDSF(self, lep):
 	if abs(lep.pdgId) == 11:
-	    return self.getEGSF(lep.eta + lep.deltaEtaSC, lep.pt)#use super cluster eta
+	    return self.getEGIDSF(lep.eta + lep.deltaEtaSC, lep.pt)#use super cluster eta
 	elif abs(lep.pdgId) == 13:
 	    return self.getMuonIDSF(abs(lep.eta), lep.pt)
 	else:
@@ -474,21 +523,30 @@ class LeptonSFManager():
         #print "IDSF lep1 ",printObject(leptonpair[0]), " SF1 ", SF1, " lep2 ",printObject(leptonpair[1])," SF2 ",SF2 
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
-    def getMuonTrackingSF(self, eta):
-	 for thisbin in self.MuonTrackingSF_allbins:
-	     if eta > thisbin["etalow"] and eta <= thisbin["etahigh"]:
-		 return thisbin["SF"],thisbin["SFerrhigh"], thisbin["SFerrlow"]
-	 return  1.0, 1.0, 1.0
+    def getMuonTrackingSF(self, eta, pt):
+        if self.useJsonSFs:
+	    SF = self.getSF_json_v2(self.Muon_reco_dict['data'], eta, pt)
+	    return SF
+	else:
+	    eta = abs(eta)
+	    for thisbin in self.MuonTrackingSF_allbins:
+		if eta > thisbin["etalow"] and eta <= thisbin["etahigh"]:
+		    return thisbin["SF"],thisbin["SFerrhigh"], thisbin["SFerrlow"]
+	return  1.0, 1.0, 1.0
 
 
     def getleptonTrackingSF(self, lep):
 	if abs(lep.pdgId) == 13:
-	    return self.getMuonTrackingSF(abs(lep.eta))
+	    return self.getMuonTrackingSF(lep.eta, lep.pt)
+	elif abs(lep.pdgId) == 11:
+	    return self.getEGRecoSF(lep.eta + lep.deltaEtaSC, lep.pt)
 	else:
-	    return 1.0, 1.0, 1.0
+	    raise ValueError('Getting lepton ID SFs, not electron nor muon ', lep.pdgId)
+
     def getleptonpairTrackingSF(self, leptonpair):
 	SF1 = self.getleptonTrackingSF(leptonpair[0])
        	SF2 = self.getleptonTrackingSF(leptonpair[1])
+        #print "RecoSF lep1 ",printObject(leptonpair[0]), " SF1 ", SF1, " lep2 ",printObject(leptonpair[1])," SF2 ",SF2 
         return SF1[0]*SF2[0],  SF1[1]*SF2[1], SF1[2]*SF2[2]
 
 
