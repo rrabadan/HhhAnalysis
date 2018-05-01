@@ -255,8 +255,6 @@ class HHbbWWProducer(Module):
 				leptonpairs.append(( leptons_mu[imu1],  leptons_el[iel1] ))
 			    else:
 				leptonpairs.append(( leptons_el[iel1],  leptons_mu[imu1] ))
-	    else:
-	        print "error!! the L1 triggertype is not in list ",triggertype
 
 	if self.verbose > 2:
 	    for leps in leptonpairs:
@@ -673,9 +671,8 @@ class HHbbWWProducer(Module):
 	cutflow_bin += 1
 
 	###cut: JetPt, JetEta
-	ht_jets = sum([x.pt for x in jets])
-        #bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
-        bjets = [x for x in jets if x.puId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta] ## remove jetid > 0
+        bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
+        #bjets = [x for x in jets if x.puId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta] ## remove jetid > 0
 	if not(len(bjets) >= 2) :
 	    if self.verbose > 3:
 	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," jetPtEta "
@@ -701,6 +698,7 @@ class HHbbWWProducer(Module):
 	#### select final two jets: jets with maximum pT , for DY estimation 
         ## sort alljets with a cMVAv2 descreasing order 
         bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
+	ht_jets = sum([x.pt for x in bjets])
 	hJets = bjets[0:2]
 	hJets.sort(key=lambda x:x.pt, reverse=True)
 	hJidx = [jets.index(x) for x in hJets]
@@ -789,7 +787,7 @@ class HHbbWWProducer(Module):
         llmetjj_DPhi_llmet_jj =  deltaPhi(llmet_p4.Phi(), hbb_p4.Phi())
     
         cosThetaStar = cos(llmet_p4.Theta() - hbb_p4.Theta())
-    	ht = hj1_p4.Pt() + hj2_p4.Pt() + lep1_p4.Pt() + lep2_p4.Pt() + met_p4.Pt()
+    	ht = ht_jets + lep1_p4.Pt() + lep2_p4.Pt() 
         ###
 
         #jet selection, old

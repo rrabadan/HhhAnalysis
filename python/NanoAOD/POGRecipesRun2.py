@@ -8,6 +8,17 @@ import numpy as np
 def printObject(obj):
     print " Id ",obj.pdgId, " pt ",obj.pt, " eta ", obj.eta," phi ",obj.phi
 
+
+def jetLooseID(jet):
+    """https://twiki.cern.ch/twiki/bin/view/CMS/JetID#Recommendations_for_13_TeV_data"""
+    ##only for abs(jet.eta)<2.7 , does not care about jet.eta > 2.7     
+    #CHM = jet.nElectrons + jet.nMuons
+    CHM = 1 ## this cut not available in NANoAOD?
+    if abs(jet.eta)<2.7:
+       ##looseJetID = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((abs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || abs(eta)>2.4) && abs(eta)<=2.7
+       return  (jet.neHEF < 0.99 and jet.neEmEF<0.99 and jet.nConstituents>1 and ((abs(jet.eta)<= 2.4 and jet.chHEF>0 and CHM>0 and jet.chEmEF<0.99) or (abs(jet.eta)>2.4)))
+    else:
+      return False
 def electronImpactParameterCut( electron):
     """ check electron impact parameter, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
     dxy_endcap = 0.1 #cm
