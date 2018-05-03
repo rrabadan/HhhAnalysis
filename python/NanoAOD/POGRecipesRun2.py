@@ -149,7 +149,7 @@ def checkMuonSector(lepton):
     #Code is: 1=> first 50 degrees of the sector, 11=> last 10 deg of previous sector
 	phi_ME2x = propagateToME2X_phi(lepton)
 	phiindegree = phiconversion_radintodegree( phi_ME2x )
-        print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
+        #print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
 	if(phiindegree>=5   and phiindegree<15):     	return 11*side
 	if(phiindegree>=15  and phiindegree<65):    	return 1*side
 	if(phiindegree>=65  and phiindegree<75):    	return 12*side
@@ -166,7 +166,7 @@ def checkMuonSector(lepton):
     #Code is: 1=> first 40 degrees of the sector, 11=> last 20 deg of previous sector
 	phi_ME2x = propagateToME2X_phi(lepton)
 	phiindegree = phiconversion_radintodegree( phi_ME2x )
-        print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
+        #print "phi ",lepton.phi," phi in ME2x ", phi_ME2x, " phi in degree ",phiindegree
 	if(phiindegree>=355 or  phiindegree<15):   	return 11*side
 	if(phiindegree>=15  and phiindegree<55):     	return 1*side
 	if(phiindegree>=55  and phiindegree<75):     	return 12*side
@@ -191,10 +191,10 @@ def checkMuonPairSectors(muon1, muon2):
         return 0
     if muon1.eta*muon2.eta < 0 or abs(muon1.eta)<1.25 or abs(muon2.eta)<1.25:
         return 0
-    #print "muon1 ", printObject(muon1)
     sector1 = checkMuonSector(muon1)
-    #print "muon2 ", printObject(muon2)
     sector2 = checkMuonSector(muon2)
+    #print "muon1 ", printObject(muon1)
+    #print "muon2 ", printObject(muon2)
     #print "sector1 ",sector1," sector2 ",sector2
     if sector1*sector2 < 0: ## not same endcap
         return 0
@@ -205,7 +205,9 @@ def checkMuonPairSectors(muon1, muon2):
     return 0
 
 def isMuonPairSameCSCRegion(muon1, muon2):
-    return checkMuonPairSectors(muon1, muon2) == 1
+    case = checkMuonPairSectors(muon1, muon2)
+    #print "from checkMuonPairSectors, case ",case
+    return case == 1
 
 
 def loadJsonFile(filename):

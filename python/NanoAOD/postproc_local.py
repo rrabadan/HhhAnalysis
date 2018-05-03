@@ -10,6 +10,7 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import 
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
@@ -54,7 +55,8 @@ btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cM
 btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')
 outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD/"
 #p=PostProcessor(outputdir, filesTTbar,"1","keep_and_drop.txt",[ ], friend = True, provenance=True)
-p=PostProcessor(outputdir, filesTTbar,"1","keep_and_drop.txt",[puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 4) ], friend = True, provenance=True)
+p=PostProcessor(outputdir, filesTTbar,"1","keep_and_drop.txt",[puWeight(), btagSF2016_cMVA(), muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 4) ], friend = True, provenance=True)
+#p=PostProcessor(outputdir, filesTTbar,"1","keep_and_drop.txt",[puWeight(), btagSF2016_cMVA(), mht_hh() ], friend = True, provenance=True)
 #p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)

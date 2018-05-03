@@ -55,7 +55,7 @@ btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cM
 btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')
 outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD"
 #p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [ ], friend = False, provenance=True, outputbranchsel="keep_and_drop_out.txt")
-p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [puAutoWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True,  DYestimation = True,verbose = 1) ], friend = True, provenance=True)
+p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True,  DYestimation = True,verbose = 1) ], friend = True, provenance=True)
 #p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)

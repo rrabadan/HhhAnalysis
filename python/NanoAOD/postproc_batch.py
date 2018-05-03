@@ -11,6 +11,7 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import 
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
@@ -59,19 +60,19 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
 print "=============================================================="
 if "DoubleMuon" in jobtype:
     print "Dataset DoubleMuon "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
+    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
 elif "DoubleEG" in jobtype:
     print "Dataset DoubleEG "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "DoubleEG", verbose=1)]
+    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleEG", verbose=1)]
 elif "MuonEG" in jobtype:
     print "Dataset MuonEG "
-    modules = [mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=1)]
+    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=1)]
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
     ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
     btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
-    modules = [puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [puWeight(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 
     ##for 2017, no cMVAv2 available for 2017 ??
     #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?

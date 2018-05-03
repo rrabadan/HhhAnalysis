@@ -116,6 +116,7 @@ class HHbbWWProducer(Module):
 	self.out.branch("nJetsL",  "F")
 	self.out.branch("jj_M",  "F")
 	self.out.branch("el_hltsafeid", "F")
+	self.out.branch("llreco_weight",  "F")
 	self.out.branch("llid_weight",  "F")
 	self.out.branch("lliso_weight",  "F")
 	self.out.branch("lltrigger_weight",  "F")
@@ -191,13 +192,13 @@ class HHbbWWProducer(Module):
 		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
-	pass
 	self.h_eventcounter.Write()
 	self.h_cutflow.Write()
 	self.h_cutflowlist["DoubleMuon"].Write()
 	self.h_cutflowlist["DoubleEG"].Write()
 	self.h_cutflowlist["MuonEG"].Write()
 	self.h_cutflow_weight.Write()
+	#inputTree.SetBranchStatus("Jet_btagSF_*", 0)
 	#c1 = ROOT.TCanvas("h_cutflow","h_cutflow")
 	#self.h_cutflowlist["MuonEG"].Draw("hist")
 	#self.h_cutflowlist["DoubleEG"].Draw("histsame")
@@ -290,13 +291,21 @@ class HHbbWWProducer(Module):
 	    	if "TkMu" not in x:
 		    pt = int(x[2:])
 		for obj in trigobjs:
-		    if obj.id == 13 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 4.0 or obj.l1pt_2 >= 4.0):
+		    #if obj.id == 13 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 4.0 or obj.l1pt_2 >= 4.0):
+		    #if obj.id == 13 and obj.pt >= pt:
+		    if obj.id == 13 and obj.pt >= pt and obj.l1pt >= 4.0 and (obj.filterBits & 3) > 0:
 		    	selectedObjs.append(obj)
+		    elif  obj.id == 13 and  self.verbose >3 :
+		        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
 	    elif "Ele" in x:
 		pt = int(x[3:])
 		for obj in trigobjs:
-		    if obj.id == 11 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 10.0 or obj.l1pt_2 >= 10.0):##mini pt for L1 seed? 10GeV?
+		    #if obj.id == 11 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 10.0 or obj.l1pt_2 >= 10.0):##mini pt for L1 seed? 10GeV?
+		    #if obj.id == 11 and obj.pt >= pt:##mini pt for L1 seed? 10GeV?
+		    if obj.id == 11 and obj.pt >= pt and  (obj.filterBits & 1) > 0:##mini pt for L1 seed? 10GeV?
 		    	selectedObjs.append(obj)
+		    elif  obj.id == 11 and  self.verbose >3 :
+		        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
 
 	return set(selectedObjs)
 
@@ -332,19 +341,21 @@ class HHbbWWProducer(Module):
 	     print  "error!!! for data, the lepton's type is not the same as trigger type "
 	     return False
         allfiredHLTs = findfiredPaths(l1t)
+        if self.verbose > 3:
+	    print "all fired paths ",allfiredHLTs
         for  path in allfiredHLTs:
 	    ismatched_leps = [False, False]
 	    selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
+	    if self.verbose > 3: 
+		print "triggertype ",l1t, " firedpath ", path, " matched l1objs ", len(selectedObjs)
             if len(selectedObjs) <= 1:
 	        continue
-	    if self.verbose > 2: 
-		print "triggertype ",l1t, " firedpath ", path, " matched l1objs ", len(selectedObjs)
             for tobj in selectedObjs:	
 	       for i in range(0, len(leptons)):
 		    if tobj.id == abs(leptons[i].pdgId):
 			dR = deltaR(tobj.eta, tobj.phi, leptons[i].eta, leptons[i].phi)
 			dPtRel = abs(tobj.pt-leptons[i].pt)/leptons[i].pt 
-			if self.verbose > 2:
+			if self.verbose > 3:
 			    print "lepton pdgId ",leptons[i].pdgId," obj id ",tobj.id, " dR ",dR, " dPtRel ",dPtRel
 			ismatched_leps[i] = ismatched_leps[i] or (dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco)
 
@@ -438,12 +449,14 @@ class HHbbWWProducer(Module):
 
         electrons = list(Collection(event, "Electron"))
         muons = list(Collection(event, "Muon"))
-	#muon_pt_corrected = None 
-	#if hasattr(event, "Muon_pt_corrected"):
-	#    muon_pt_corrected = getattr(event, "Muon_pt_corrected")
-	#    for muon in muons:
-	#        imu = muons.index(muon)
-    	#	print "imu ",imu, " pt ",muon.pt," corrected pt ",muon_pt_corrected[imu]
+	muon_pt_corrected = None 
+	if hasattr(event, "Muon_pt_corrected"):
+	    muon_pt_corrected = getattr(event, "Muon_pt_corrected")
+	    for muon in muons:
+	        imu = muons.index(muon)
+    		#print "imu ",imu, " pt ",muon.pt," corrected pt ",muon_pt_corrected[imu]
+		muon.pt = muon_pt_corrected[imu]
+	
         jets = list(Collection(event, "Jet"))
 	mht = Object(event, "MHT")
 	jet_btagSF = None
@@ -455,23 +468,23 @@ class HHbbWWProducer(Module):
         ## di-leps selection
         #####################################
 
-        muons.sort(key=lambda x:x.pt,reverse=True)	
-        electrons.sort(key=lambda x:x.pt,reverse=True)	
+        #muons.sort(key=lambda x:x.pt,reverse=True)	
+        #electrons.sort(key=lambda x:x.pt,reverse=True)	
 
 
 	###cutstep: dilepton pt, and eta
 	for mu in muons:
 	    if  self.verbose > 3:
 	        print "Muon id ",mu.pdgId, " pt ",mu.pt," eta ",mu.eta
-	muons = list(filter(lambda x : abs(x.eta)<self.muonEta, muons))
+	lepton_muons = list(filter(lambda x : abs(x.eta)<self.muonEta, muons))
    
 	for el in electrons:
 	    if  self.verbose > 3:
 	        print "Electron id ", el.pdgId, " pt ", el.pt," eta ", el.eta
 	## check eta and whether it passes the conversion veto(not from photon conversion), convVeto = True: good electron
-	electrons = list(filter(lambda x :  abs(x.eta)<self.EGEta, electrons))
+	lepton_electrons = list(filter(lambda x :  abs(x.eta)<self.EGEta, electrons))
 
-        leptonpairs = self.findingLeptonPairs(muons, electrons)
+        leptonpairs = self.findingLeptonPairs(lepton_muons, lepton_electrons)
 	leptonpairs.sort(key=lambda x:x[0].pt+x[1].pt,reverse=True)	
         #ptsumlist = [x[0].pt+x[1].pt for x in leptonpairs]
 	#print "ptsumlist after sorting ", ptsumlist
@@ -549,19 +562,6 @@ class HHbbWWProducer(Module):
 	    return False
 	cutflow_bin += 1
 
-
-	### we should NOT see muon pairs in same CSC region with ETMF bug in real data, if we saw it, for safety, kill it 
-	### kill the muon pairs in same CSC region, either both in overlap or both in "non-overlap", for real datea, run < 278167
-	### efficiency correction applied for MC is in self.lepSFmanager.getleptonpairTrg
-	if not self.isMC and self.triggertype == "DoubleMuon" and run < 277166:
-	    leptonpairs = [ x for x in leptonpairs if POGRecipesRun2.isMuonPairSameCSCRegion(x[0], x[1]) ]
-	    if len(leptonpairs) == 0:
-		if self.verbose > 3:
-		   print "cutflow_bin ",cutflow_bin," failed , dimuon in same CSC region and due to EMTF bug , run ", run
-		return False
-	cutflow_bin += 1
-
-
 	
         ### Trigger matching here: data, 
 	### we apply trigger SFs to MC and do not cut on trigger matching 
@@ -571,8 +571,23 @@ class HHbbWWProducer(Module):
 	    if len(leptonpairs) == 0:
 		if self.verbose > 3:
 		   print "cutflow_bin ",cutflow_bin," failed, HTL matching for real data only "
+		self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 		return False
 	cutflow_bin += 1
+
+	### we should NOT see muon pairs in same CSC region with ETMF bug in real data, if we saw it, for safety, kill it 
+	### kill the muon pairs in same CSC region, either both in overlap or both in "non-overlap", for real datea, run < 278167
+	### efficiency correction applied for MC is in self.lepSFmanager.getleptonpairTrg
+	if not self.isMC and self.triggertype == "DoubleMuon" and run < 277166:
+	    leptonpairs = [ x for x in leptonpairs if not(POGRecipesRun2.isMuonPairSameCSCRegion(x[0], x[1])) ]
+	    if len(leptonpairs) == 0:
+		if self.verbose > 3:
+		   print "cutflow_bin ",cutflow_bin," failed , dimuon in same CSC region and due to EMTF bug , run ", run
+		self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
+		return False
+	cutflow_bin += 1
+
+
 
 	def dileptonMass(leptons):
 	    lep1_p4 = ROOT.TLorentzVector()
@@ -686,7 +701,7 @@ class HHbbWWProducer(Module):
 	cutflow_bin += 1
 
 	###cut: the seperation between jet and lepton
-        bjets.sort(key=lambda x:x.pt,reverse=True)	
+        #bjets.sort(key=lambda x:x.pt,reverse=True)	
     	deltaRl1j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[0].eta, leptons[0].phi) > self.deltaR_j_l
     	deltaRl2j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[1].eta, leptons[1].phi) > self.deltaR_j_l
         bjets = [x for x in bjets if deltaRl1j(x) and deltaRl2j(x)]
@@ -726,7 +741,7 @@ class HHbbWWProducer(Module):
         alljets_cMVAv2 = resize_alljets(alljets_cMVAv2)
 	
             		
-	###cut: jet btagging , normal selection
+	###cut: jet btagging , normal selection, skip it for DY estimation
 	if not self.DYestimation:
 	    bjets = [x for x in bjets if POGRecipesRun2.jetMediumBtagging(x)]
 	    if not(len(bjets) >= 2): 
@@ -739,6 +754,7 @@ class HHbbWWProducer(Module):
 
 	    #### select final two bjets: jets with maximum btagging  and then fill cutflow hist
 	    hJets = sorted(bjets, key = lambda jet : jet.btagCMVA, reverse=True)[0:2]
+	    hJets.sort(key=lambda x:x.pt, reverse=True)
 	    hJidx = [jets.index(x) for x in hJets]
 	    jet1 = hJets[0]; jet2 = hJets[1]
 	    hJets_BtagSF = [1.0, 1.0]
@@ -833,6 +849,8 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("ht_jets",  ht_jets)
 	self.out.fillBranch("nJetsL",  nJetsL)
 	self.out.fillBranch("jj_M",  jj_M)
+	self.out.fillBranch("el_hltsafeid", llHLTsafeIDsf)
+	self.out.fillBranch("llreco_weight",  lltrackingsf)
 	self.out.fillBranch("llid_weight",  llIDsf)
 	self.out.fillBranch("lliso_weight",  llIsosf)
 	self.out.fillBranch("lltrigger_weight",  lltrgsf)
@@ -863,7 +881,6 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("event_reco_weight",  event_reco_weight)
 	self.out.fillBranch("event_run",  run)
 	self.out.fillBranch("event_lumiblock",  luminosityBlock)
-	self.out.fillBranch("el_hltsafeid", llHLTsafeIDsf)
 	#self.out.fillBranch("event_weight",  "F")
 	#self.out.fillBranch("DY_BDT_flat",  "F")
 	#self.out.fillBranch("dy_nobtag_to_btagM_weight",  "F")

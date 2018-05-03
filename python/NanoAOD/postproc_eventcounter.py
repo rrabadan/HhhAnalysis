@@ -5,14 +5,15 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
+sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
 from HHbbWWProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
-from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.countHistogramsModule import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
 
 import argparse
@@ -59,19 +60,20 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
 print "=============================================================="
 if "DoubleMuon" in jobtype:
     print "Dataset DoubleMuon "
-    modules = [mht_hh(), muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleMuon", DYestimation = True, verbose=1)]
+    modules = [countHistogramsModule()]
 elif "DoubleEG" in jobtype:
     print "Dataset DoubleEG "
-    modules = [mht_hh(), muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleEG", DYestimation = True, verbose=1)]
+    modules = [countHistogramsModule()]
 elif "MuonEG" in jobtype:
     print "Dataset MuonEG "
-    modules = [mht_hh(), muonScaleRes2016(), HHbbWWProducer(False, triggertype = "MuonEG", DYestimation = True, verbose=1)]
+    modules = [countHistogramsModule()]
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
     ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
-    btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
-    modules = [puWeight(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    #btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
+    #modules = [puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [puWeight(), countHistogramsModule() ]
 
     ##for 2017, no cMVAv2 available for 2017 ??
     #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?
@@ -84,7 +86,6 @@ print "inputfiles ", inputfiles
 print "=============================================================="
 print "outputdir ", outputdir
 print "=============================================================="
-#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, friend = True, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
