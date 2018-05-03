@@ -444,10 +444,10 @@ def histForlimits1D(bgnames, mass, todraw, cut, xbins, xtitle, suffix, outfile, 
         pad2.SetGridy()
         pad2.Draw()
         pad2.cd()
-        hratio = hist_bg_all.Clone()
+        hratio = hist_data.Clone()
         hratio.SetMarkerStyle(20)
         hratio.SetMarkerColor(1)
-        hratio.Divide(hist_data)
+        hratio.Divide(hist_bg_all)
         deltaY = 0.4
         hratio.SetMaximum(1.0 + deltaY)
         hratio.SetMinimum(1.0 - deltaY)
