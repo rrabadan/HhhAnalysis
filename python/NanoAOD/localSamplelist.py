@@ -14,8 +14,8 @@ def get_event_weight_sum_file(filepath):
     return event_weight_sum
 
 full_local_samplelist = {}
-#localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180502_dataTT/"
-localdir = "/data/taohuang/HHNtuple_20180502_dataTT/"
+localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180502_dataTT/"
+#localdir = "/data/taohuang/HHNtuple_20180502_dataTT/"
 for i,isample in enumerate(Slist.NumSample):
     
     if int(isample) <0:
@@ -35,8 +35,8 @@ for i,isample in enumerate(Slist.NumSample):
 full_local_samplelist["Data"] = {}
 datanames = ["DoubleMuon", "DoubleEG","MuonEG"]
 for dataname in datanames:
-    localdatadir = "/data/taohuang/HHNtuple_20180502_dataonly_HLT_v2/"
-    #localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180502_dataonly_HLT_v2/"
+    #localdatadir = "/data/taohuang/HHNtuple_20180502_dataonly_HLT_v2/"
+    localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180502_dataonly_HLT_v2/"
     full_local_samplelist["Data"][dataname] = {}
     full_local_samplelist["Data"][dataname]["path"] =  os.path.join(localdatadir,dataname+"Run2016.root")
 #print full_local_samplelist
