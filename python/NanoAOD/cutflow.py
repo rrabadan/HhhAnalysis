@@ -22,7 +22,8 @@ channelcuts = {"MuMu":{"cut":"isMuMu","extraweight": 1.0,"Data":"DoubleMuon", "l
         "ElEl":{"cut":"isElEl","extraweight":1.0,"Data":"DoubleEG", "latex":"ee"},
 		}
 #cutflows = ["All","Trigger","online-offline matching","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","nlepton>=3 veto","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
-cutflows = ["All","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","EMTFBug","HLT matching","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
+#cutflows = ["All","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","EMTFBug","HLT matching","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
+cutflows = ["All","dilepton PtEta","dilepton IP","dilepton ID","dilepton Iso","HLT Safe ID","HLT matching","EMTFBUG","M_{ll}>12","NJets>=2","dijet PtEta","DR_j_l > 0.3","dijet btagging","M_{ll}<76"]
 def get_xsection(shortname, samplename = ''):
     if len(full_local_samplelist[shortname].keys()) == 1:
         samplename = full_local_samplelist[shortname].keys()[0]
@@ -48,8 +49,8 @@ def get_event_weight_sum(shortname, samplename=''):
 
 def plotCutflowHist_data(outdir):
     colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
-    #channels = ["ElEl","MuEl","MuMu"]
-    channels = ["ElEl","MuMu"]
+    channels = ["ElEl","MuEl","MuMu"]
+    #channels = ["ElEl","MuMu"]
 
     legend = ROOT.TLegend(0.65,0.62,0.88,0.84); 
     legend.SetTextSize(0.04); legend.SetTextFont(42)
@@ -409,7 +410,7 @@ def makeBackgroundshist(masspoints, variable, nbins, xtitle, outdir):
 
     #bgnames = ["ttV","Wjet","sT","DY","TT"]
     #bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
-    bgnames = ["TT","DY","sT","VV","ttV"]
+    bgnames = ["TT","DY","sT","VV", "Wjet","ttV"]
     #bgnames = ["TT"]
     outfile = os.path.join(outdir, "Backgrounds_signal_allinputs.root")
     plotname = os.path.join(outdir, "Kinematics_%s"%variable)
@@ -423,7 +424,7 @@ def makeBackgroundshist(masspoints, variable, nbins, xtitle, outdir):
         suffix = ''
         histForlimits1D(bgnames, mass, todraw, cut, nbins, xtitle, suffix, outfile, plotname)
 
-variablesdir = "HHNtuple_20180412_variablehists_newTT/"
+variablesdir = "HHNtuple_20180502_variablehists/"
 os.system("mkdir -p "+variablesdir)
 varibales = ['jj_pt', 'll_pt', 'll_M', 'll_DR_l_l', 'jj_DR_j_j', 'llmetjj_DPhi_ll_jj', 'llmetjj_minDR_l_j', 'llmetjj_MTformula','mt2', 'jj_M','hme_h2mass_reco']
 #variables = ['lep1_pt']
@@ -432,6 +433,16 @@ def plotallkinematics():
     #output_folder = "/Users/taohuang/Documents/DiHiggs/20180316_NanoAOD/HHNtuple_20180328_fixedleptonDZeff"
     #print "Ntuple folder ",output_folder
     
+    makeBackgroundshist([400], 'lep1_pt', [60, 10.0, 200], "lep1 p_{T}", variablesdir)
+    makeBackgroundshist([400], 'lep2_pt', [60, 10.0, 200], "lep2 p_{T}", variablesdir)
+    makeBackgroundshist([400], 'lep1_eta', [60, -2.4, 2.4], "lep1 #eta", variablesdir)
+    makeBackgroundshist([400], 'lep2_eta', [60, -2.4, 2.4], "lep2 #eta", variablesdir)
+    makeBackgroundshist([400], 'jet1_pt', [70, 20.0, 300], "jet1 p_{T}", variablesdir)
+    makeBackgroundshist([400], 'jet2_pt', [70, 20.0, 300], "jet2 p_{T}", variablesdir)
+    makeBackgroundshist([400], 'jet1_eta', [70, -2.5, 2.5], "jet1 #eta", variablesdir)
+    makeBackgroundshist([400], 'jet2_eta', [70, -2.5, 2.5], "jet2 #eta", variablesdir)
+    makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET p_{T}", variablesdir)
+    makeBackgroundshist([400], 'met_phi', [60, -3.2, 3.20],"MET #phi", variablesdir)
     makeBackgroundshist([400], 'll_M', [50, 12.0, 76.0], "M_{ll}", variablesdir)
     makeBackgroundshist([400], 'll_DR_l_l', [50, .0, 6.0], "#DeltaR_{ll}", variablesdir)
     makeBackgroundshist([400], 'jj_M', [50, 0.0, 400.0], "M_{jj}",variablesdir)
@@ -441,21 +452,21 @@ def plotallkinematics():
     makeBackgroundshist([400], 'jj_pt', [50, 0.0, 450.0], "Dijet p_{T}", variablesdir)
     makeBackgroundshist([400], 'llmetjj_minDR_l_j', [50, .0, 5.0], "#DeltaR_{l,j}", variablesdir)
     makeBackgroundshist([400], 'llmetjj_MTformula', [50, 0.0, 500.0],"MT", variablesdir)
-    makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET", variablesdir)
 
 
 
-#plotallkinematics()
-#bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
-bgnames = ["TT","DY","sT","VV","ttV"]
+plotallkinematics()
+bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
+#bgnames = ["TT","DY","sT","VV","ttV"]
 #outcutflowdir = "HHNtuple_20180412_cutflows_newTT/"
-outcutflowdir = "HHNtuple_20180425_cutflows/"
-#plotCutflowHist(outcutflowdir, "TT", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8")
+outcutflowdir = "HHNtuple_20180502_dataonly_cutflows_HLT_v2/"
+os.system("mkdir -p "+outcutflowdir)
+##plotCutflowHist(outcutflowdir, "TT", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8")
 plotCutflowHist(outcutflowdir, "TT")
 plotCutflowHist_data(outcutflowdir)
 mcnames = ["TT","DY","sT","Wjet","VV","ttV"]
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 750, 800, 900]
 for mass in masspoints:
     mcnames.append("RadionM%d"%mass)
-#plotCutflowHist_allMC(outcutflowdir, bgnames)
-#runallCutflowhist(outcutflowdir, mcnames)
+plotCutflowHist_allMC(outcutflowdir, bgnames)
+runallCutflowhist(outcutflowdir, mcnames)
