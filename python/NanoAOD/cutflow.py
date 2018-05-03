@@ -31,7 +31,17 @@ def get_xsection(shortname, samplename = ''):
         raise ValueError("no proper samplename found: ",samplename )
 
     return full_local_samplelist[shortname][samplename]["cross_section"]
+def get_xsection_file(filename):
+    tfile = ROOT.TFile(filename, "READ")
+    xsec = tfile.Get("cross_section")
+    return xsec.GetVal()
 
+def get_event_weight_sum_file(filepath):
+    tfile = ROOT.TFile(filepath, "READ")
+    hist = tfile.Get("h_cutflow")
+    event_weight_sum = hist.GetBinContent(1)
+    tfile.Close()
+    return event_weight_sum
 
 def get_event_weight_sum(shortname, samplename=''):
     if len(full_local_samplelist[shortname].keys()) == 1:
@@ -41,11 +51,7 @@ def get_event_weight_sum(shortname, samplename=''):
 
     filepath = full_local_samplelist[shortname][samplename]["path"]
     #print "samplename ",samplename, " file ",filepath
-    tfile = ROOT.TFile(filepath, "READ")
-    hist = tfile.Get("h_cutflow")
-    event_weight_sum = hist.GetBinContent(1)
-    tfile.Close()
-    return event_weight_sum
+    return get_event_weight_sum_file(filepath)
 
 def plotCutflowHist_data(outdir):
     colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
@@ -199,6 +205,77 @@ def plotCutflowHist_allMC(outdir, bgnames):
     tex0.Draw("same")
     c1.SaveAs(outdir+"HHbbWW_backgrounds_Run2016_cutflow.pdf")
 
+
+def DrellYanDataDriven(channel, filedict, todraw, cut, xbins, xtitle, suffix, plotname):
+
+    if len(xbins) == 3:
+        nbins = xbins[0]; xmin = xbins[1]; xmax =  xbins[2]
+        xbins = []
+        binwidth = (xmax-xmin)/nbins
+        for i in range(0, nbins+1):
+            xbins.append(xmin + i*binwidth)
+        xbins = np.asarray(xbins)
+
+    hist_data = ROOT.TH1F("untagged_data_"+channel+"_%s"%(suffix), "untagged_Data_"+channel+"_%s"%(suffix), len(xbins)-1, xbins)
+    hist_TT = ROOT.TH1F("untagged_TT_"+channel+"_%s"%(suffix), "untagged_TT_"+channel+"_%s"%(suffix), len(xbins)-1, xbins)
+    TT_dict = filedict["TT"]["TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8"]
+    fileTT = TT_dict['path']
+    xsec = TT_dict['cross_section']
+    #xsec = get_xsection_file(fileTT)
+    event_weight_sum = get_event_weight_sum_file(full_local_samplelist['TT']['TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8']['path'])
+    Mbtag_weight = "dy_Mbtag_weight"
+    weight = "dy_Mbtag_weight*sample_weight*event_reco_weight*{totallumi}*{cross_section}*1000.0/{event_weight_sum}".format(totallumi = TotalLumi, cross_section = xsec, event_weight_sum = event_weight_sum)
+    print "channel ",channel
+    finalcut = "("+ cut + " && "+ channelcuts[channel]["cut"] +")*"+weight
+    ch_d = ROOT.TChain("Friends")
+    ch_d.AddFile(filedict["Data"][channelcuts[channel]["Data"]]["path"])
+    ch_d.Draw(todraw + ">> " + hist_data.GetName(), "("+ cut + " && "+ channelcuts[channel]["cut"] +")" + "*"+Mbtag_weight)
+
+    ch_TT = ROOT.TChain("Friends")
+    ch_TT.AddFile(fileTT)
+    ch_TT.Draw(todraw + ">> " + hist_TT.GetName(), finalcut)
+
+    
+    
+    #hist_DY = ROOT.TH1F("untagged_DY_"+channel+"_%s"%(suffix), "untagged_DY_"+channel+"_%s"%(suffix), len(xbins)-1, xbins)
+    hist_DY = hist_data.Clone()
+    hist_DY.SetName("DY_"+channel+"_%s"%(suffix))
+    hist_DY.Add(hist_TT, -1)
+    print "Data-driven DY estimation, ch: ",channel," data ",hist_data.Integral(), " TT ",hist_TT.Integral()," DY ",hist_DY.Integral()
+    makeDYplots = True
+    if makeDYplots:
+        hs = ROOT.THStack("datadrivenDY_"+channel+"_"+suffix, "Data Driven Estimation for Drell-Yan")
+        colors = [800-4, 820-3, 900-3, 860-3, 616-7, 432+2, 400+2]
+        hist_TT.SetFillColor(colors[0])
+        hist_DY.SetFillColor(colors[1])
+        hist_data.SetMarkerColor(1)
+        hist_data.SetMarkerStyle(20)
+        hs.Add(hist_TT)
+        hs.Add(hist_DY)
+        legend = ROOT.TLegend(0.74,0.62,0.84,0.65+3*.05); 
+	legend.SetTextSize(0.04); legend.SetTextFont(42)
+        legend.SetBorderSize(0)
+        legend.AddEntry(hist_data, "Data: %.1f"%hist_data.Integral(),"p")
+        legend.AddEntry(hist_TT, "TT: %.1f"%hist_TT.Integral(),"f")
+        legend.AddEntry(hist_DY, "DY = Data-TT","f")
+ 
+        c1 =  ROOT.TCanvas()
+        hs.Draw("hist")
+        hist_data.Draw("epsame")
+        legend.Draw("same")
+        hs.GetHistogram().GetXaxis().SetTitle(xtitle)
+        hs.GetHistogram().GetYaxis().SetTitle("Events")
+	tex1 = ROOT.TLatex(0.17,0.8, channelcuts[channel]["latex"]+" channel, "+cut)
+	tex1.SetNDC(); tex1.SetTextSize(.055)
+        tex1.Draw("same")
+        #plotdir = "DataDriven_DY_plots/"
+        c1.SaveAs(plotname+"_"+channel+"_"+suffix+".pdf")
+          
+        
+        
+    hist_DY.SetDirectory(0)
+
+    return hist_DY
 
 
 
@@ -408,8 +485,16 @@ def histForlimits1D(bgnames, mass, todraw, cut, xbins, xtitle, suffix, outfile, 
 
 def makeBackgroundshist(masspoints, variable, nbins, xtitle, outdir):
 
-    #bgnames = ["ttV","Wjet","sT","DY","TT"]
+    def makeDYEstimationplots():
+        for channel in ["MuMu","ElEl"]:
+	    plotdir = "dataDriven_DYestimation/"
+            plotname1 = os.path.join(plotdir, "Kinematics_%s"%variable+"_llMLT76")
+            #plotname2 = os.path.join(plotdir, "Kinematics_%s"%variable+"_llMGT76")
+            DrellYanDataDriven(channel, untagged_samplelist, variable, "ll_M<76", nbins, xtitle, "v0", plotname1)
+            #DrellYanDataDriven(channel, untagged_samplelist, variable, "ll_M>76", nbins, xtitle, "v0", plotname2)
     #bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
+    makeDYEstimationplots()
+    pass
     bgnames = ["TT","DY","sT","VV", "Wjet","ttV"]
     #bgnames = ["TT"]
     outfile = os.path.join(outdir, "Backgrounds_signal_allinputs.root")
@@ -433,25 +518,25 @@ def plotallkinematics():
     #output_folder = "/Users/taohuang/Documents/DiHiggs/20180316_NanoAOD/HHNtuple_20180328_fixedleptonDZeff"
     #print "Ntuple folder ",output_folder
     
-    makeBackgroundshist([400], 'lep1_pt', [60, 10.0, 200], "lep1 p_{T}", variablesdir)
-    makeBackgroundshist([400], 'lep2_pt', [60, 10.0, 200], "lep2 p_{T}", variablesdir)
-    makeBackgroundshist([400], 'lep1_eta', [60, -2.4, 2.4], "lep1 #eta", variablesdir)
-    makeBackgroundshist([400], 'lep2_eta', [60, -2.4, 2.4], "lep2 #eta", variablesdir)
-    makeBackgroundshist([400], 'jet1_pt', [70, 20.0, 300], "jet1 p_{T}", variablesdir)
-    makeBackgroundshist([400], 'jet2_pt', [70, 20.0, 300], "jet2 p_{T}", variablesdir)
-    makeBackgroundshist([400], 'jet1_eta', [70, -2.5, 2.5], "jet1 #eta", variablesdir)
-    makeBackgroundshist([400], 'jet2_eta', [70, -2.5, 2.5], "jet2 #eta", variablesdir)
-    makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET p_{T}", variablesdir)
-    makeBackgroundshist([400], 'met_phi', [60, -3.2, 3.20],"MET #phi", variablesdir)
+    #makeBackgroundshist([400], 'lep1_pt', [60, 10.0, 200], "lep1 p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'lep2_pt', [60, 10.0, 200], "lep2 p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'lep1_eta', [60, -2.4, 2.4], "lep1 #eta", variablesdir)
+    #makeBackgroundshist([400], 'lep2_eta', [60, -2.4, 2.4], "lep2 #eta", variablesdir)
+    #makeBackgroundshist([400], 'jet1_pt', [70, 20.0, 300], "jet1 p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'jet2_pt', [70, 20.0, 300], "jet2 p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'jet1_eta', [70, -2.5, 2.5], "jet1 #eta", variablesdir)
+    #makeBackgroundshist([400], 'jet2_eta', [70, -2.5, 2.5], "jet2 #eta", variablesdir)
+    #makeBackgroundshist([400], 'met_pt', [50, 0.0, 500.0],"MET p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'met_phi', [60, -3.2, 3.20],"MET #phi", variablesdir)
     makeBackgroundshist([400], 'll_M', [50, 12.0, 76.0], "M_{ll}", variablesdir)
-    makeBackgroundshist([400], 'll_DR_l_l', [50, .0, 6.0], "#DeltaR_{ll}", variablesdir)
-    makeBackgroundshist([400], 'jj_M', [50, 0.0, 400.0], "M_{jj}",variablesdir)
-    makeBackgroundshist([400], 'jj_DR_j_j', [50, .0, 6.0], "#DeltaR_{jj}",variablesdir)
-    makeBackgroundshist([400], 'llmetjj_DPhi_ll_jj', [24, .0, 3.1415926],"#Delta#phi(ll,jj)", variablesdir)
-    makeBackgroundshist([400], 'll_pt', [50, 0.0, 450.0], "Dilepton p_{T}", variablesdir)
-    makeBackgroundshist([400], 'jj_pt', [50, 0.0, 450.0], "Dijet p_{T}", variablesdir)
-    makeBackgroundshist([400], 'llmetjj_minDR_l_j', [50, .0, 5.0], "#DeltaR_{l,j}", variablesdir)
-    makeBackgroundshist([400], 'llmetjj_MTformula', [50, 0.0, 500.0],"MT", variablesdir)
+    #makeBackgroundshist([400], 'll_DR_l_l', [50, .0, 6.0], "#DeltaR_{ll}", variablesdir)
+    #makeBackgroundshist([400], 'jj_M', [50, 0.0, 400.0], "M_{jj}",variablesdir)
+    #makeBackgroundshist([400], 'jj_DR_j_j', [50, .0, 6.0], "#DeltaR_{jj}",variablesdir)
+    #makeBackgroundshist([400], 'llmetjj_DPhi_ll_jj', [24, .0, 3.1415926],"#Delta#phi(ll,jj)", variablesdir)
+    #makeBackgroundshist([400], 'll_pt', [50, 0.0, 450.0], "Dilepton p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'jj_pt', [50, 0.0, 450.0], "Dijet p_{T}", variablesdir)
+    #makeBackgroundshist([400], 'llmetjj_minDR_l_j', [50, .0, 5.0], "#DeltaR_{l,j}", variablesdir)
+    #makeBackgroundshist([400], 'llmetjj_MTformula', [50, 0.0, 500.0],"MT", variablesdir)
 
 
 
@@ -460,13 +545,12 @@ bgnames = ["TT","DY","sT","Wjet","VV","ttV"]
 #bgnames = ["TT","DY","sT","VV","ttV"]
 #outcutflowdir = "HHNtuple_20180412_cutflows_newTT/"
 outcutflowdir = "HHNtuple_20180502_dataonly_cutflows_HLT_v2/"
-os.system("mkdir -p "+outcutflowdir)
-##plotCutflowHist(outcutflowdir, "TT", "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8")
-plotCutflowHist(outcutflowdir, "TT")
-plotCutflowHist_data(outcutflowdir)
+#os.system("mkdir -p "+outcutflowdir)
+#plotCutflowHist(outcutflowdir, "TT")
+#plotCutflowHist_data(outcutflowdir)
 mcnames = ["TT","DY","sT","Wjet","VV","ttV"]
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 750, 800, 900]
 for mass in masspoints:
     mcnames.append("RadionM%d"%mass)
-plotCutflowHist_allMC(outcutflowdir, bgnames)
-runallCutflowhist(outcutflowdir, mcnames)
+#plotCutflowHist_allMC(outcutflowdir, bgnames)
+#runallCutflowhist(outcutflowdir, mcnames)
