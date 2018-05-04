@@ -283,31 +283,68 @@ class HHbbWWProducer(Module):
             return (met.pt,met.phi)
 	   
     def matchTriggerObjwithHLT(self, path, trigobjs):
-	allhltlist = path.split('_')[1:-1]
-	selectedObjs = []
-	for x in allhltlist:
+	alllegs = path.split('_')[1:-1]
+	leg_trigobj_map  = {};
+        leg_trigobj_map['leg1'] = []
+        leg_trigobj_map['leg2'] = []
+	foundleg1 = False; foundleg2 = False
+	for x in alllegs:
+	    legobjmap = None
 	    if "Mu" in x:
 	    	pt = 8.0
 	    	if "TkMu" not in x:
 		    pt = int(x[2:])
-		for obj in trigobjs:
-		    #if obj.id == 13 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 4.0 or obj.l1pt_2 >= 4.0):
-		    #if obj.id == 13 and obj.pt >= pt:
-		    if obj.id == 13 and obj.pt >= pt and obj.l1pt >= 4.0 and (obj.filterBits & 3) > 0:
-		    	selectedObjs.append(obj)
-		    elif  obj.id == 13 and  self.verbose >3 :
-		        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
+		matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.l1pt > pt/2.0 and (obj.filterBits & 3) > 0, trigobjs))
+	        if not(foundleg1):
+		    leg_trigobj_map['leg1'] = matchedobjs
+		    foundleg1 = True
+		elif not (foundleg2):
+		    leg_trigobj_map['leg2'] = matchedobjs
+		    foundleg2 = True
+		else:
+		    print "error in matching HLT to trigger objects ", path
 	    elif "Ele" in x:
 		pt = int(x[3:])
-		for obj in trigobjs:
-		    #if obj.id == 11 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 10.0 or obj.l1pt_2 >= 10.0):##mini pt for L1 seed? 10GeV?
-		    #if obj.id == 11 and obj.pt >= pt:##mini pt for L1 seed? 10GeV?
-		    if obj.id == 11 and obj.pt >= pt and  (obj.filterBits & 1) > 0:##mini pt for L1 seed? 10GeV?
-		    	selectedObjs.append(obj)
-		    elif  obj.id == 11 and  self.verbose >3 :
-		        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
+		matchedobjs = list(filter(lambda obj: obj.id == 11 and obj.pt >= pt and (obj.filterBits & 1) > 0, trigobjs))
+	        if not(foundleg1):
+		    leg_trigobj_map['leg1'] = matchedobjs
+		    foundleg1 = True
+		elif not (foundleg2):
+		    leg_trigobj_map['leg2'] = matchedobjs
+		    foundleg2 = True
+		else:
+		    print "error in matching HLT to trigger objects ", path
 
-	return set(selectedObjs)
+	if self.verbose > 3: 
+	    print "firedpath ", path, " matched l1objsi, leg1 ",len(leg_trigobj_map['leg1']), " leg2 ",len(leg_trigobj_map['leg2'])
+
+	return leg_trigobj_map 
+         
+	#selectedObjs = []
+	#for x in alllegs:
+	#    if "Mu" in x:
+	#    	pt = 8.0
+	#    	if "TkMu" not in x:
+	#	    pt = int(x[2:])
+	#	for obj in trigobjs:
+	#	    #if obj.id == 13 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 4.0 or obj.l1pt_2 >= 4.0):
+	#	    #if obj.id == 13 and obj.pt >= pt:
+	#	    #if obj.id == 13 and obj.pt >= pt and obj.l1pt >= 4.0 and (obj.filterBits & 3) > 0:
+	#	    if obj.id == 13 and obj.pt >= pt and (obj.filterBits & 3) > 0:
+	#	    	selectedObjs.append(obj)
+	#	    elif  obj.id == 13 and  self.verbose >3 :
+	#	        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
+	#    elif "Ele" in x:
+	#	pt = int(x[3:])
+	#	for obj in trigobjs:
+	#	    #if obj.id == 11 and (obj.filterBits & 1)>0 and obj.pt >= pt and (obj.l1pt >= 10.0 or obj.l1pt_2 >= 10.0):##mini pt for L1 seed? 10GeV?
+	#	    #if obj.id == 11 and obj.pt >= pt:##mini pt for L1 seed? 10GeV?
+	#	    if obj.id == 11 and obj.pt >= pt and  (obj.filterBits & 1) > 0:##mini pt for L1 seed? 10GeV?
+	#	    	selectedObjs.append(obj)
+	#	    elif  obj.id == 11 and  self.verbose >3 :
+	#	        print "path ",path, " trig pt ",pt, " trig obj pt ",obj.pt, " l1pt ",obj.l1pt," filterbits ",obj.filterBits
+
+	#return set(selectedObjs)
 
     def findTriggerType(self, leptons):
 	if abs(leptons[0].pdgId) == 13 and abs(leptons[1].pdgId) == 13:
@@ -325,6 +362,11 @@ class HHbbWWProducer(Module):
 	##1 = CaloIdL_TrackIdL_IsoVL, 2 = WPLoose, 4 = WPTight, 8 = OverlapFilter PFTau for Electron (PixelMatched e/gamma); 
 	##1 = TrkIsoVVL, 2 = Iso, 4 = OverlapFilter PFTau for Muon
 
+	##whether cut on l1pt for triggerobjects?
+	## DoubleMu, L1 seed: DoubleMu_11_4 or 12_5
+	## MuonEG: L1 seed: Mu20_EG10, L1_Mu5_IsoEG18..
+	##DoubleEG: L1_SingleIsoEG22, L1_DoubleEG_15_10...
+
 
 	""" check which HLT is fired """
 	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
@@ -335,7 +377,14 @@ class HHbbWWProducer(Module):
 			}
         def findfiredPaths(l1trigger):
 	    return filter(lambda path : hasattr(hlt, path) and getattr(hlt,  path, False), L1t_hlt[l1trigger])
+	def printLepton(lep, string):
+	    print string," pdgid ",lep.pdgId," pt ",lep.pt, " eta ",lep.eta, " phi ",lep.phi
+	def printTrigObjs(objs, string):
+	    print string
+	    for obj in objs:
+	        print "trigger obj id ",obj.id, " pt ",obj.pt, " eta ",obj.eta, " phi ", obj.phi 
         
+	trigobjs.sort(key=lambda x: x.pt,reverse=True)##sort trigobjs by pt increasing order
 	l1t = self.findTriggerType(leptons)	
         if not  self.isMC and l1t != self.triggertype:
 	     print  "error!!! for data, the lepton's type is not the same as trigger type "
@@ -343,24 +392,42 @@ class HHbbWWProducer(Module):
         allfiredHLTs = findfiredPaths(l1t)
         if self.verbose > 3:
 	    print "all fired paths ",allfiredHLTs
-        for  path in allfiredHLTs:
-	    ismatched_leps = [False, False]
-	    selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
-	    if self.verbose > 3: 
-		print "triggertype ",l1t, " firedpath ", path, " matched l1objs ", len(selectedObjs)
-            if len(selectedObjs) <= 1:
-	        continue
-            for tobj in selectedObjs:	
-	       for i in range(0, len(leptons)):
-		    if tobj.id == abs(leptons[i].pdgId):
-			dR = deltaR(tobj.eta, tobj.phi, leptons[i].eta, leptons[i].phi)
-			dPtRel = abs(tobj.pt-leptons[i].pt)/leptons[i].pt 
-			if self.verbose > 3:
-			    print "lepton pdgId ",leptons[i].pdgId," obj id ",tobj.id, " dR ",dR, " dPtRel ",dPtRel
-			ismatched_leps[i] = ismatched_leps[i] or (dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco)
+	    printLepton(leptons[0], "leading lep"); printLepton(leptons[1], "subleading lep")
 
-	    if ismatched_leps[0] and ismatched_leps[1]:
-	        return True
+        matchTolep1 = lambda tobj : tobj.id == abs(leptons[0].pdgId) and deltaR(tobj.eta, tobj.phi, leptons[0].eta, leptons[0].phi) < self.deltaR_trigger_reco and abs(tobj.pt-leptons[0].pt)/leptons[0].pt < self.deltaPtRel_trigger_reco 
+        matchTolep2 = lambda tobj : tobj.id == abs(leptons[1].pdgId) and deltaR(tobj.eta, tobj.phi, leptons[1].eta, leptons[1].phi) < self.deltaR_trigger_reco and abs(tobj.pt-leptons[1].pt)/leptons[1].pt < self.deltaPtRel_trigger_reco 
+        for  path in allfiredHLTs:
+	    leg_trigobj_map = self.matchTriggerObjwithHLT(path, trigobjs)
+            goodLeg1objs_lep1 = list(filter(matchTolep1, leg_trigobj_map['leg1']))
+            goodLeg2objs_lep1 = list(filter(matchTolep1, leg_trigobj_map['leg2']))
+            goodLeg1objs_lep2 = list(filter(matchTolep2, leg_trigobj_map['leg1']))
+            goodLeg2objs_lep2 = list(filter(matchTolep2, leg_trigobj_map['leg2']))
+	    if self.verbose > 3: 
+		printTrigObjs( leg_trigobj_map['leg1'], "triggerobj matched to leg1")
+		printTrigObjs( leg_trigobj_map['leg2'], "triggerobj matched to leg2")
+		print "goodLeg1objs_lep1 ",len(goodLeg1objs_lep1), " goodLeg2objs_lep1 ",len(goodLeg2objs_lep1)," goodLeg1objs_lep2 ",len(goodLeg1objs_lep2)," goodLeg2objs_lep2 ",len(goodLeg2objs_lep2)
+	         
+	    fired_option1 = (len(goodLeg1objs_lep1) > 0 and len(goodLeg2objs_lep2)>0 and not(goodLeg1objs_lep1 == goodLeg2objs_lep2 and len(goodLeg1objs_lep1) == 1))
+	    fired_option2 = (len(goodLeg2objs_lep1) > 0 and len(goodLeg1objs_lep2)>0 and not(goodLeg2objs_lep1 == goodLeg1objs_lep2 and len(goodLeg2objs_lep1) == 1))
+            if fired_option1  or fired_option2:
+    		return True
+
+	    #ismatched_leps = [False, False]
+	    #selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
+	    #if self.verbose > 3: 
+	    #    print "triggertype ",l1t, " firedpath ", path, " matched l1objs ", len(selectedObjs)
+            #if len(selectedObjs) <= 1:
+	    #    continue
+            #for tobj in selectedObjs:	
+	    #   for i in range(0, len(leptons)):
+	    #        if tobj.id == abs(leptons[i].pdgId):
+	    #    	dR = deltaR(tobj.eta, tobj.phi, leptons[i].eta, leptons[i].phi)
+	    #    	dPtRel = abs(tobj.pt-leptons[i].pt)/leptons[i].pt 
+	    #    	if self.verbose > 3:
+	    #    	    print "lepton pdgId ",leptons[i].pdgId," obj id ",tobj.id, " dR ",dR, " dPtRel ",dPtRel
+	    #    	ismatched_leps[i] = ismatched_leps[i] or (dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco)
+	    #if ismatched_leps[0] and ismatched_leps[1]:
+	    #    return True
 	        
 	return False
 
@@ -566,7 +633,7 @@ class HHbbWWProducer(Module):
         ### Trigger matching here: data, 
 	### we apply trigger SFs to MC and do not cut on trigger matching 
 	if not self.isMC:
-	    trigobjs = Collection(event, "TrigObj")
+	    trigobjs = list(Collection(event, "TrigObj"))
 	    leptonpairs = [ x for x in leptonpairs if  self.matchHLTPath(event, trigobjs, x)]
 	    if len(leptonpairs) == 0:
 		if self.verbose > 3:
