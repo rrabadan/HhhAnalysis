@@ -294,7 +294,9 @@ class HHbbWWProducer(Module):
 	    	pt = 8.0
 	    	if "TkMu" not in x:
 		    pt = int(x[2:])
-		matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.l1pt > pt/2.0 and (obj.filterBits & 3) > 0, trigobjs))
+		#matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.l1pt > pt/2.0 and (obj.filterBits & 3) > 0, trigobjs))
+		matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.filterBits > 0 , trigobjs))
+
 	        if not(foundleg1):
 		    leg_trigobj_map['leg1'] = matchedobjs
 		    foundleg1 = True
@@ -316,7 +318,7 @@ class HHbbWWProducer(Module):
 		    print "error in matching HLT to trigger objects ", path
 
 	if self.verbose > 3: 
-	    print "firedpath ", path, " matched l1objsi, leg1 ",len(leg_trigobj_map['leg1']), " leg2 ",len(leg_trigobj_map['leg2'])
+	    print "firedpath ", path, " matched l1objs, leg1 ",len(leg_trigobj_map['leg1']), " leg2 ",len(leg_trigobj_map['leg2'])
 
 	return leg_trigobj_map 
          
@@ -383,6 +385,31 @@ class HHbbWWProducer(Module):
 	    print string
 	    for obj in objs:
 	        print "trigger obj id ",obj.id, " pt ",obj.pt, " eta ",obj.eta, " phi ", obj.phi 
+	def l1ptcutForPath(path):
+	    l1ptcut = {}
+	    if "Mu17" in path and "Mu8" in path:
+	        l1ptcut["leg1"] = 11; l1ptcut["leg2"] = 4
+	    elif "Mu23" in path and "Ele12" in path:
+	        l1ptcut["leg1"] = 20; l1ptcut["leg2"] = 10
+	    elif "Mu8" in path and "Ele23" in path:
+	        l1ptcut["leg1"] = 5; l1ptcut["leg2"] = 18
+	    elif "Ele23" in path and "Ele12" in path:
+	        l1ptcut["leg1"] = 15; l1ptcut["leg2"] = 10
+	    return l1ptcut
+	def l1ptcut(path, leg1Objs, leg2Objs):
+	    if len(leg1Objs)  == 0 or len(leg2Objs) == 0:
+	        return False
+	    l1ptcut = l1ptcutForPath(path)
+	    leg1Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut["leg1"], leg1Objs))
+	    leg2Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut["leg2"], leg2Objs))
+	    passl1pt = (len(leg1Objs_l1ptcut)  >= 1 and len(leg2Objs_l1ptcut) >= 1 and not(leg1Objs_l1ptcut == leg2Objs_l1ptcut and len(leg1Objs_l1ptcut) == 1))
+	    if path == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ":
+		leg1Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= 22, leg1Objs))
+		leg2Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= 22, leg2Objs))
+		passl1pt = passl1pt or ((len(leg1Objs_l1ptcut)>=1  or len(leg2Objs_l1ptcut) >= 1) and not(leg1Objs == leg2Objs and len(leg1Objs) == 1))
+	    return passl1pt
+
+
         
 	trigobjs.sort(key=lambda x: x.pt,reverse=True)##sort trigobjs by pt increasing order
 	l1t = self.findTriggerType(leptons)	
@@ -407,8 +434,12 @@ class HHbbWWProducer(Module):
 		printTrigObjs( leg_trigobj_map['leg2'], "triggerobj matched to leg2")
 		print "goodLeg1objs_lep1 ",len(goodLeg1objs_lep1), " goodLeg2objs_lep1 ",len(goodLeg2objs_lep1)," goodLeg1objs_lep2 ",len(goodLeg1objs_lep2)," goodLeg2objs_lep2 ",len(goodLeg2objs_lep2)
 	         
-	    fired_option1 = (len(goodLeg1objs_lep1) > 0 and len(goodLeg2objs_lep2)>0 and not(goodLeg1objs_lep1 == goodLeg2objs_lep2 and len(goodLeg1objs_lep1) == 1))
-	    fired_option2 = (len(goodLeg2objs_lep1) > 0 and len(goodLeg1objs_lep2)>0 and not(goodLeg2objs_lep1 == goodLeg1objs_lep2 and len(goodLeg2objs_lep1) == 1))
+	    #fired_option1 = (len(goodLeg1objs_lep1) > 0 and len(goodLeg2objs_lep2)>0 and not(goodLeg1objs_lep1 == goodLeg2objs_lep2 and len(goodLeg1objs_lep1) == 1))
+	    #fired_option2 = (len(goodLeg2objs_lep1) > 0 and len(goodLeg1objs_lep2)>0 and not(goodLeg2objs_lep1 == goodLeg1objs_lep2 and len(goodLeg2objs_lep1) == 1))
+	    ##add l1pt cut:
+	    fired_option1 = l1ptcut(path, goodLeg1objs_lep1, goodLeg2objs_lep2)
+	    fired_option2 = l1ptcut(path, goodLeg1objs_lep2, goodLeg2objs_lep1)
+	    
             if fired_option1  or fired_option2:
     		return True
 
