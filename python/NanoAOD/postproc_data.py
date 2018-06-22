@@ -58,8 +58,8 @@ inputfiles = filesdata_MuMu
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(), hhbbWW()],provenance=True)
 #p=PostProcessor(".",filesSignal,"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
 #p=PostProcessor(outputdir, filesdata_MuMu,"1","keep_and_drop.txt",[muonScaleRes2016(),mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=4)], friend =True, jsonInput = jsonfile, provenance=True)
-p=PostProcessor(outputdir, filesdata_MuEl,"1","keep_and_drop.txt",[muonScaleRes2016(),mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=4)], friend = True, jsonInput = jsonfile, provenance=True)
-#p=PostProcessor(outputdir,filesdata_ElEl,"1","keep_and_drop.txt",[ muonScaleRes2016(),mht_hh(),  HHbbWWProducer(False, triggertype = "DoubleEG", verbose=4)], friend = True, provenance=True)
+#p=PostProcessor(outputdir, filesdata_MuEl,"1","keep_and_drop.txt",[muonScaleRes2016(),mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=4)], friend = True, jsonInput = jsonfile, provenance=True)
+p=PostProcessor(outputdir,filesdata_ElEl,"1","keep_and_drop.txt",[ muonScaleRes2016(),mht_hh(),  HHbbWWProducer(False, triggertype = "DoubleEG", verbose=4)], friend = True, provenance=True)
 
 p.run()
 

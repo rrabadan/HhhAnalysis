@@ -41,7 +41,15 @@ class HHbbWWProducer(Module):
 	self.CheckBtaggingEff = (self.CheckBtaggingEff and self.DYestimation and self.isMC)
         print "self.run_lumi  ",self.run_lumi," trigger type ",self.triggertype," verbose ",self.verbose, " DYestimation ",self.DYestimation
 
-	self.addGenToTree = True
+	self.addGenToTree = False
+	self.addSystematic = True
+
+	self.ll_sys_branchname = ["Isosf","IDsf","trgsf","trackingsf","HLTsafeIDsf"]
+	self.jjbtag_sys_branchname = ["jjbtag_light","jjbtag_heavy"]
+	self.lep1_branchname_sysvalue = {}
+	self.lep2_branchname_sysvalue = {}
+	self.jjbtag_branchname_sysvalue = {}
+
 
 	### for debug
 	self.nEv_DoubleEG = 0
@@ -77,6 +85,7 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
 	
         self.out = wrappedOutputTree
+        self.out.branch("jet1_idx",  "I");
         self.out.branch("jet1_pt",  "F");
         self.out.branch("jet1_E",  "F");
         self.out.branch("jet1_eta",  "F");
@@ -84,6 +93,7 @@ class HHbbWWProducer(Module):
         self.out.branch("jet1_cMVAv2",  "F");
         self.out.branch("jet1_partonFlavour",  "I");
         self.out.branch("jet1_hadronFlavour",  "I");
+        self.out.branch("jet2_idx",  "I");
         self.out.branch("jet2_pt",  "F");
         self.out.branch("jet2_E",  "F");
         self.out.branch("jet2_eta",  "F");
@@ -149,6 +159,7 @@ class HHbbWWProducer(Module):
         self.out.branch("genweight",  "F");
         self.out.branch("sample_weight",  "F");
 	self.out.branch("event_reco_weight",  "F")
+	self.out.branch("total_weight",  "F")
 	self.out.branch("pu",  "F")
 	self.out.branch("event_run",  "I")
 	self.out.branch("event_lumiblock",  "I")
@@ -159,19 +170,52 @@ class HHbbWWProducer(Module):
 	#self.out.branch("mt2_bb",  "F")
 	#self.out.branch("mt2_ll",  "F")
 	#self.out.branch("event_number",  "I")
+
+	if self.isMC and self.addSystematic:
+	    for name in self.ll_sys_branchname:
+		self.out.branch("lep1%s_up"%name,"F")
+		self.out.branch("lep1%s_down"%name,"F")
+		self.out.branch("lep2%s_up"%name,"F")
+		self.out.branch("lep2%s_down"%name,"F")
+	    for name in self.jjbtag_sys_branchname:
+		self.out.branch("%s_up"%name,"F")
+		self.out.branch("%s_down"%name,"F")
+
+	    self.out.branch("event_pu_weight_up",  "F")
+	    self.out.branch("event_pu_weight_down",  "F")
+	    self.out.branch("event_pdf_weight_up",  "F")
+	    self.out.branch("event_pdf_weight_down",  "F")
+	    #self.out.branch("LHEScaleWeight", "F", lenVar = "nLHEScaleWeight")
+	    for i in range(0, 9):
+		self.out.branch("LHEScaleWeight_%d"%i, "F")
+	if self.DYestimation or self.addGenToTree:	
+	    self.out.branch("genjet1_partonFlavour",  "I");
+	    self.out.branch("genjet2_partonFlavour",  "I");
+	    self.out.branch("genmet_pt",  "F");
+	    self.out.branch("genmet_phi",  "F");
 	##how to add gen information???
 	if self.isMC and self.addGenToTree:
+	    self.out.branch("genb1_pt",  "F");##quark level
 	    self.out.branch("genjet1_pt",  "F");
 	    self.out.branch("genjet1_E",  "F");
 	    self.out.branch("genjet1_eta",  "F");
 	    self.out.branch("genjet1_phi",  "F");
-	    self.out.branch("genjet1_partonFlavour",  "I");
+	    self.out.branch("genb2_pt",  "F");
 	    self.out.branch("genjet2_pt",  "F");
 	    self.out.branch("genjet2_E",  "F");
 	    self.out.branch("genjet2_eta",  "F");
 	    self.out.branch("genjet2_phi",  "F");
-	    self.out.branch("genjet2_partonFlavour",  "I");
-	    self.out.branch("genl1_pt",  "F");
+	    #self.out.branch("genW1_pt",  "F");
+	    #self.out.branch("genW1_mass",  "F");
+	    #self.out.branch("genW2_pt",  "F");
+	    #self.out.branch("genW2_mass",  "F");
+	    #self.out.branch("gennu1_pt",  "F");##nu1 from W1
+	    #self.out.branch("gennu1_eta",  "F");
+	    #self.out.branch("gennu1_phi",  "F");
+	    #self.out.branch("gennu2_pt",  "F");
+	    #self.out.branch("gennu2_eta",  "F");
+	    #self.out.branch("gennu2_phi",  "F");
+	    self.out.branch("genl1_pt",  "F");##genl1 from lep1, leading 
 	    self.out.branch("genl1_E",  "F");
 	    self.out.branch("genl1_eta",  "F");
 	    self.out.branch("genl1_phi",  "F");
@@ -181,8 +225,16 @@ class HHbbWWProducer(Module):
 	    self.out.branch("genl2_eta",  "F");
 	    self.out.branch("genl2_phi",  "F");
 	    self.out.branch("genl2_id",  "I");
-	    self.out.branch("genmet_pt",  "F");
-	    self.out.branch("genmet_phi",  "F");
+	    self.out.branch("dR_genb1_genjet1",  "F");
+	    self.out.branch("dR_genb1_genjet2",  "F");
+	    self.out.branch("dR_genb2_genjet1",  "F");
+	    self.out.branch("dR_genb2_genjet2",  "F");
+	    self.out.branch("dR_genl1_lepFromW1",  "F");
+	    self.out.branch("dR_genl1_lepFromW2",  "F");
+	    self.out.branch("dR_genl2_lepFromW1",  "F");
+	    self.out.branch("dR_genl2_lepFromW2",  "F");
+	    self.out.branch("met_diNuetrino_pt",  "F");
+	    self.out.branch("met_diNuetrino_phi",  "F");
 	    if self.CheckBtaggingEff:
 		self.out.branch("alljets_pt", "F", n=self.maxnjets)
 		self.out.branch("alljets_eta", "F", n=self.maxnjets)
@@ -516,7 +568,8 @@ class HHbbWWProducer(Module):
         self.h_eventcounter.Fill(1)	
         ### PV	
 	PV = Object(event, "PV")
-	event_pu_weight = 1.0
+	event_pu_weight = 1.0; event_pu_weight_up = 1.0; event_pu_weight_down = 1.0
+	LHEPdfweight_stddev = 0.0; LHEScaleWeight = None
 	pu = PV.npvsGood
         run = getattr(event,"run", False)	
 	luminosityBlock = getattr(event, "luminosityBlock", False)
@@ -527,8 +580,18 @@ class HHbbWWProducer(Module):
 	genweight = 1.0
 	if self.isMC:
 	    event_pu_weight = event.puWeight
+	    event_pu_weight_up = event.puWeightUp/event_pu_weight
+	    event_pu_weight_down = event.puWeightDown/event_pu_weight
 	    genweight = getattr(event, "genWeight", 1)
 	    sample_weight = genweight * event.puWeight
+	    
+	    if self.addSystematic and hasattr(event, "LHEPdfWeight"):
+		LHEPdfWeight   = event.LHEPdfWeight
+		LHEPdfweight_tmplist = [(x -1.0)*(x-1.0)for x in LHEPdfWeight]
+		LHEPdfweight_stddev = sqrt(sum(LHEPdfweight_tmplist)/(len(LHEPdfWeight)-1.0))
+	    if self.addSystematic and hasattr(event, "LHEScaleWeight"):
+		LHEScaleWeight = list(event.LHEScaleWeight)
+    		#print "LHEScaleWeight ",LHEScaleWeight, " type ", type(LHEScaleWeight)
 
 	if self.verbose > 1:
 	    print "run ",run," luminosityBlock ",luminosityBlock," ievent ",ievent," sample_weight ",sample_weight
@@ -557,9 +620,11 @@ class HHbbWWProducer(Module):
 	
         jets = list(Collection(event, "Jet"))
 	mht = Object(event, "MHT")
-	jet_btagSF = None
+	jet_btagSF = None; jet_btagSF_up = None; jet_btagSF_down = None
 	if self.isMC:
-	    jet_btagSF = event.Jet_btagSF
+	    jet_btagSF      = event.Jet_btagSF
+	    jet_btagSF_up   = event.Jet_btagSF_up
+	    jet_btagSF_down = event.Jet_btagSF_down
 	
 
         #####################################
@@ -623,10 +688,21 @@ class HHbbWWProducer(Module):
 	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
 	    return False
 	cutflow_bin += 1
-	llIDsf = 1.0; llIDsf_up = 1.0; llIDsf_low = 1.0;
+	llIDsf = 1.0; llIsosf = 1.0; lltrackingsf, lltrgsf, llHLTsafeIDsf  = 1.0, 1.0, 1.0
+	########
+	##for lep uncertainty
+	#######
+	l1Isosf       = [1.0, 1.0, 1.0]; l2Isosf       = [1.0, 1.0, 1.0]
+	l1IDsf        = [1.0, 1.0, 1.0]; l2IDsf        = [1.0, 1.0, 1.0] 
+	l1trgsf       = [1.0, 1.0, 1.0]; l2trgsf       = [1.0, 1.0, 1.0] 
+        l1trackingsf  = [1.0, 1.0, 1.0]; l2trackingsf  = [1.0, 1.0, 1.0] 
+	l1HLTsafeIDsf = [1.0, 1.0, 1.0]; l2HLTsafeIDsf = [1.0, 1.0, 1.0] 
 	if self.isMC: ##may need to update the SFs for trigging since leading lepton pair  may change
 	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	    llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+            #print "l1IDsf  ",l1IDsf, " l2IDsf ",l2IDsf
+	    llIDsf  = l1IDsf[0] * l2IDsf[0]
+	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
 
 
 	###cutstep: dilepton, ISO
@@ -641,11 +717,14 @@ class HHbbWWProducer(Module):
 	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
 	    return False
 	cutflow_bin += 1
-	llIsosf, llIsosf_up, llIsosf_low = 1.0, 1.0, 1.0
 	if self.isMC:
 	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	    llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    l1Isosf, l2Isosf                       = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
+	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+            llIsosf = l1Isosf[0] * l2Isosf[0]
+	    llIDsf  = l1IDsf[0] * l2IDsf[0]
+	    #llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
+	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
 
 	###cutstep: dilepton, HLTSafeID
 	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairHLTSafeID(x, RhoFastjetCentralCalo)]
@@ -720,18 +799,37 @@ class HHbbWWProducer(Module):
 	leptonpairs.sort(key=lambda x:x[0].pt+x[1].pt, reverse=True)	
 	leptons = leptonpairs[0]##leading lepton first
 	event_lep_weight = 1.0
-	lltrackingsf, lltrackingsf_up, lltrackingsf_low  = 1.0, 1.0, 1.0
-	lltrgsf, lltrgsf_up, lltrgsf_low  = 1.0, 1.0, 1.0
-	llHLTsafeIDsf, llHLTsafeIDsf_up, llHLTsafeIDsf_low  = 1.0, 1.0, 1.0
 	if self.isMC:
-	    llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-	    lltrgsf, lltrgsf_up, lltrgsf_low = self.lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
-	    lltrackingsf, lltrackingsf_up, lltrackingsf_low = self.lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
-	    llHLTsafeIDsf, llHLTsafeIDsf_up, llHLTsafeIDsf_low = self.lepSFmanager.getleptonpairHTLSafeIDSF(leptonpairs[0])
+	    #llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
+	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    #lltrgsf, lltrgsf_up, lltrgsf_low = self.lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+	    #lltrackingsf, lltrackingsf_up, lltrackingsf_low = self.lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
+	    #llHLTsafeIDsf, llHLTsafeIDsf_up, llHLTsafeIDsf_low = self.lepSFmanager.getleptonpairHTLSafeIDSF(leptonpairs[0])
+	    l1Isosf, l2Isosf                       = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
+	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
+	    l1trgsf, l2trgsf                       = self.lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
+	    l1trackingsf, l2trackingsf             = self.lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
+	    l1HLTsafeIDsf, l2HLTsafeIDsf           = self.lepSFmanager.getleptonpairHTLSafeIDSF(leptonpairs[0])
+            llIsosf = l1Isosf[0] * l2Isosf[0]
+	    llIDsf  = l1IDsf[0] * l2IDsf[0]
+	    lltrgsf  = l1trgsf[0] * l2trgsf[0]
+	    lltrackingsf  = l1trackingsf[0] * l2trackingsf[0]
+	    llHLTsafeIDsf  = l1HLTsafeIDsf[0] * l2HLTsafeIDsf[0]
     	    event_lep_weight = llIsosf * llIDsf * lltrgsf * llHLTsafeIDsf * lltrackingsf
 	    ##finished the lepton selection, add lep weight to event_reco_weight
 	    event_reco_weight = event_reco_weight * event_lep_weight
+	    #################
+	    self.lep1_branchname_sysvalue["Isosf"]        = l1Isosf
+	    self.lep1_branchname_sysvalue["IDsf"]         = l1IDsf
+	    self.lep1_branchname_sysvalue["trgsf"]        = l1trgsf
+	    self.lep1_branchname_sysvalue["HLTsafeIDsf"]  = l1HLTsafeIDsf
+	    self.lep1_branchname_sysvalue["trackingsf"]   = l1trackingsf
+	    self.lep2_branchname_sysvalue["Isosf"]        = l2Isosf
+	    self.lep2_branchname_sysvalue["IDsf"]         = l2IDsf
+	    self.lep2_branchname_sysvalue["trgsf"]        = l2trgsf
+	    self.lep2_branchname_sysvalue["HLTsafeIDsf"]  = l2HLTsafeIDsf
+	    self.lep2_branchname_sysvalue["trackingsf"]   = l2trackingsf
+
 
         isMuMu = 0; isMuEl   = 0; isElMu = 0; isElEl = 0; isSF = 0;
 	if abs(leptons[0].pdgId) == 13 and abs(leptons[1].pdgId) == 13:
@@ -820,7 +918,6 @@ class HHbbWWProducer(Module):
 	hJets.sort(key=lambda x:x.pt, reverse=True)
 	hJidx = [jets.index(x) for x in hJets]
 	jet1 = hJets[0]; jet2 = hJets[1]
-	hJets_BtagSF = [1.0, 1.0]
 
 	##include all jets before btagging for eff measurement 
 	##only select jets up to self.maxnjets
@@ -855,12 +952,18 @@ class HHbbWWProducer(Module):
 	    hJets.sort(key=lambda x:x.pt, reverse=True)
 	    hJidx = [jets.index(x) for x in hJets]
 	    jet1 = hJets[0]; jet2 = hJets[1]
-	    hJets_BtagSF = [1.0, 1.0]
 
-	    if self.isMC:
-		hJets_BtagSF = [jet_btagSF[x] for x in hJidx]
-		## FIXME, how to apply SFs:  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
-		event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
+	### add btagging weight 
+	hJets_BtagSF      = [1.0, 1.0]
+	hJets_BtagSF_up   = [1.0, 1.0]
+	hJets_BtagSF_down = [1.0, 1.0]
+
+	if self.isMC:
+	    hJets_BtagSF       = [jet_btagSF[x] for x in hJidx]
+	    hJets_BtagSF_up    = [jet_btagSF_up[x] for x in hJidx]
+	    hJets_BtagSF_down  = [jet_btagSF_down[x] for x in hJidx]
+	    ## FIXME, how to apply SFs:  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
+	    event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
 
 	if ll_M < 76:
 	    cutflow_bin += 1
@@ -911,11 +1014,13 @@ class HHbbWWProducer(Module):
         #jet selection, old
         #jetsForHiggs = [x for x in jets if x.lepFilter and x.puId>0 and x.jetId>0 and x.Pt>20 and abs(x.eta)<2.5]
         #if (len(jetsForHiggs) < 2): return False
+        self.out.fillBranch("jet1_idx",  hJidx[0]);
         self.out.fillBranch("jet1_pt",  hj1_p4.Pt());
         self.out.fillBranch("jet1_E",  hj1_p4.E());
         self.out.fillBranch("jet1_eta",  hj1_p4.Eta());
         self.out.fillBranch("jet1_phi",  hj1_p4.Phi());
         self.out.fillBranch("jet1_cMVAv2",  jet1.btagCMVA);
+        self.out.fillBranch("jet2_idx",  hJidx[1]);
         self.out.fillBranch("jet2_pt", hj2_p4.Pt());
         self.out.fillBranch("jet2_E",  hj2_p4.E());
         self.out.fillBranch("jet2_eta", hj2_p4.Eta());
@@ -977,6 +1082,7 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("sample_weight",  sample_weight)
         self.out.fillBranch("genweight",  genweight)
 	self.out.fillBranch("event_reco_weight",  event_reco_weight)
+	self.out.fillBranch("total_weight",  event_reco_weight * sample_weight)
 	self.out.fillBranch("event_run",  run)
 	self.out.fillBranch("event_lumiblock",  luminosityBlock)
 	#self.out.fillBranch("event_weight",  "F")
@@ -986,64 +1092,218 @@ class HHbbWWProducer(Module):
 	#self.out.fillBranch("mt2_bb",  "F")
 	#self.out.fillBranch("mt2_ll",  "F")
 	#self.out.fillBranch("event_number",  ievent)
+	if self.isMC and self.addSystematic:
+	    for name in self.ll_sys_branchname:
+		self.out.fillBranch("lep1%s_up"%name,     self.lep1_branchname_sysvalue[name][1])
+		self.out.fillBranch("lep1%s_down"%name,   self.lep1_branchname_sysvalue[name][2])
+		self.out.fillBranch("lep2%s_up"%name,     self.lep2_branchname_sysvalue[name][1])
+		self.out.fillBranch("lep2%s_down"%name,   self.lep2_branchname_sysvalue[name][2])
+	    self.out.fillBranch("event_pu_weight_up",    event_pu_weight_up)
+	    self.out.fillBranch("event_pu_weight_down",  event_pu_weight_down)
+	    self.out.fillBranch("event_pdf_weight_up",   1.0 + LHEPdfweight_stddev)
+	    self.out.fillBranch("event_pdf_weight_down", 1.0 - LHEPdfweight_stddev)
+	    #self.out.fillBranch("LHEScaleWeight", LHEScaleWeight)
+	    #print "len(LHEScaleWeight) ",len(LHEScaleWeight)
+	    for i in range(0, len(LHEScaleWeight)):
+		self.out.fillBranch("LHEScaleWeight_%d"%i, LHEScaleWeight[i])
+
 	if self.isMC:
 	    genmet = Object(event, "GenMET")
 	    genParticles = Collection(event, "GenPart")
 	    genjets = Collection(event, "GenJet")
 	    nGenPart = getattr(event, "nGenPart", False)
 	    nGenJet = getattr(event, "nGenJet", False)
-	    genjet1_partonflavour = 0; genjet2_partonflavour = 0
-	    jjbtag_heavy = 1.0; jjbtag_light = 1.0
+
+	    nGenW1FromHiggs=0; nGenW2FromHiggs=0; nGenLepFromW1FromHiggs=0; nGenLepFromW2FromHiggs=0; nGenNuFromW1FromHiggs =0; nGenNuFromW2FromHiggs=0
+	    nGenBQuarkFromHiggs=0
+	    if hasattr(event, "nGenX"):
+	        #nGenX   =  getattr(event, "nGenX", 0) 
+		nGenW1FromHiggs = getattr(event, "nGenW1FromHiggs", 0) 
+		nGenW2FromHiggs = getattr(event, "nGenW2FromHiggs", 0) 
+		nGenLepFromW1FromHiggs = getattr(event, "nGenLepFromW1FromHiggs", 0)
+		nGenNuFromW1FromHiggs = getattr(event, "nGenNuFromW1FromHiggs", 0)
+		nGenLepFromW2FromHiggs = getattr(event, "nGenLepFromW2FromHiggs", 0)
+		nGenNuFromW2FromHiggs = getattr(event, "nGenNuFromW2FromHiggs", 0)
+		nGenBQuarkFromHiggs = getattr(event, "nGenBQuarkFromHiggs", 0)
+	    if nGenW1FromHiggs  == 1 and nGenW2FromHiggs  == 1:
+	        GenW1FromHiggs_mass = getattr(event, "GenW1FromHiggs_mass")
+	        GenW1FromHiggs_pt = getattr(event, "GenW1FromHiggs_pt")
+	        GenW2FromHiggs_mass = getattr(event, "GenW2FromHiggs_mass")
+	        GenW2FromHiggs_pt = getattr(event, "GenW2FromHiggs_pt")
+	        #self.out.fillBranch("genW1_pt",    GenW1FromHiggs_pt[0])
+	        #self.out.fillBranch("genW1_mass",  GenW1FromHiggs_mass[0])
+	        #self.out.fillBranch("genW2_pt",    GenW2FromHiggs_pt[0])
+	        #self.out.fillBranch("genW2_mass",  GenW2FromHiggs_mass[0])
+		if self.verbose > 3:
+		  print "Gen W1 from Higgs, mass ", GenW1FromHiggs_mass[0], " pt ",GenW1FromHiggs_pt[0],\
+		    "Gen W2 from Higgs, mass ",GenW2FromHiggs_mass[0], " pt ",GenW2FromHiggs_pt[0]
+	    genNuFromW1_p4 = ROOT.TLorentzVector()
+	    genNuFromW2_p4 = ROOT.TLorentzVector()
+	    genLepFromW1_p4 = ROOT.TLorentzVector()
+	    genLepFromW2_p4 = ROOT.TLorentzVector()
+            dR_genl1_lepFromW1 = 99.0            
+            dR_genl1_lepFromW2 = 99.0            
+            dR_genl2_lepFromW1 = 99.0            
+            dR_genl2_lepFromW2 = 99.0            
+            foundLepsfromWs = False
+	    if nGenLepFromW1FromHiggs == 1 and nGenNuFromW1FromHiggs == 1 and nGenLepFromW2FromHiggs == 1 and nGenNuFromW2FromHiggs == 1:
+	        foundLepsfromWs = True
+	        GenLepFromW1FromHiggs_pt   = getattr(event, "GenLepFromW1FromHiggs_pt")
+	        GenLepFromW1FromHiggs_eta  = getattr(event, "GenLepFromW1FromHiggs_eta")
+	        GenLepFromW1FromHiggs_phi  = getattr(event, "GenLepFromW1FromHiggs_phi")
+	        GenNuFromW1FromHiggs_pt   = getattr(event, "GenNuFromW1FromHiggs_pt")
+	        GenNuFromW1FromHiggs_eta  = getattr(event, "GenNuFromW1FromHiggs_eta")
+	        GenNuFromW1FromHiggs_phi  = getattr(event, "GenNuFromW1FromHiggs_phi")
+	        GenLepFromW2FromHiggs_pt   = getattr(event, "GenLepFromW2FromHiggs_pt")
+	        GenLepFromW2FromHiggs_eta  = getattr(event, "GenLepFromW2FromHiggs_eta")
+	        GenLepFromW2FromHiggs_phi  = getattr(event, "GenLepFromW2FromHiggs_phi")
+	        GenNuFromW2FromHiggs_pt   = getattr(event, "GenNuFromW2FromHiggs_pt")
+	        GenNuFromW2FromHiggs_eta  = getattr(event, "GenNuFromW2FromHiggs_eta")
+	        GenNuFromW2FromHiggs_phi  = getattr(event, "GenNuFromW2FromHiggs_phi")
+		genLepFromW1_p4.SetPtEtaPhiM(GenLepFromW1FromHiggs_pt[0], GenLepFromW1FromHiggs_eta[0], GenLepFromW1FromHiggs_phi[0], 0.0)
+		genNuFromW1_p4.SetPtEtaPhiM(GenNuFromW1FromHiggs_pt[0], GenNuFromW1FromHiggs_eta[0], GenNuFromW1FromHiggs_phi[0], 0.0)
+		genLepFromW2_p4.SetPtEtaPhiM(GenLepFromW2FromHiggs_pt[0], GenLepFromW2FromHiggs_eta[0], GenLepFromW2FromHiggs_phi[0], 0.0)
+		genNuFromW2_p4.SetPtEtaPhiM(GenNuFromW2FromHiggs_pt[0], GenNuFromW2FromHiggs_eta[0], GenNuFromW2FromHiggs_phi[0], 0.0)
+                diNu_p4 = genNuFromW1_p4+genNuFromW2_p4
+		met_diNu_pt = diNu_p4.Pt()
+		met_diNu_phi = diNu_p4.Phi()
+		if  self.addGenToTree:
+		    self.out.fillBranch("met_diNuetrino_pt",  met_diNu_pt);
+		    self.out.fillBranch("met_diNuetrino_phi",  met_diNu_phi);
+		    #self.out.fillBranch("gennu1_pt",  GenNuFromW1FromHiggs_pt[0]) #nu1 from W1
+		    #self.out.fillBranch("gennu1_eta", GenNuFromW1FromHiggs_eta[0]) 
+		    #self.out.fillBranch("gennu1_phi", GenNuFromW1FromHiggs_phi[0]) 
+		    #self.out.fillBranch("gennu2_pt",  GenNuFromW2FromHiggs_pt[0]) 
+		    #self.out.fillBranch("gennu2_eta", GenNuFromW2FromHiggs_eta[0]) 
+		    #self.out.fillBranch("gennu2_phi", GenNuFromW2FromHiggs_phi[0]) 
+		if self.verbose > 3:
+                  print "GenLepFromW1 pt ",GenLepFromW1FromHiggs_pt[0], " eta ",GenLepFromW1FromHiggs_eta[0], " phi ",GenLepFromW1FromHiggs_phi[0],\
+		      " GenLepFromW2 pt ",GenLepFromW2FromHiggs_pt[0], " eta ",GenLepFromW2FromHiggs_eta[0], " phi ",GenLepFromW2FromHiggs_phi[0]
+		  print "MET from two nuetrinos pt ",met_diNu_pt, " phi ",met_diNu_phi
+		  print "genmet_pt ",genmet.pt," phi ",genmet.phi
+
+	    genb1FromHiggs_p4 = ROOT.TLorentzVector()
+	    genb2FromHiggs_p4 = ROOT.TLorentzVector()
+            dR_genb1_genjet1 = 99.0
+            dR_genb1_genjet2 = 99.0
+            dR_genb2_genjet1 = 99.0
+            dR_genb2_genjet2 = 99.0
+            foundBQuarkFromHiggs = False
+	    if nGenBQuarkFromHiggs == 2 :
+	        foundBQuarkFromHiggs = True
+	        GenBQuarkFromHiggs_pt = getattr(event, "GenBQuarkFromHiggs_pt")
+	        GenBQuarkFromHiggs_mass = getattr(event, "GenBQuarkFromHiggs_mass")
+	        GenBQuarkFromHiggs_eta = getattr(event, "GenBQuarkFromHiggs_eta")
+	        GenBQuarkFromHiggs_phi = getattr(event, "GenBQuarkFromHiggs_phi")
+		genb1FromHiggs_p4.SetPtEtaPhiM(GenBQuarkFromHiggs_pt[0], GenBQuarkFromHiggs_eta[0], GenBQuarkFromHiggs_phi[0], GenBQuarkFromHiggs_mass[0])
+		genb2FromHiggs_p4.SetPtEtaPhiM(GenBQuarkFromHiggs_pt[1], GenBQuarkFromHiggs_eta[1], GenBQuarkFromHiggs_phi[1], GenBQuarkFromHiggs_mass[1])
+		if  self.addGenToTree:
+		    self.out.fillBranch("genb1_pt",  GenBQuarkFromHiggs_pt[0]) #b1
+		    self.out.fillBranch("genb2_pt",  GenBQuarkFromHiggs_pt[1]) #b2
+		    #self.out.fillBranch("genb1_eta",  GenBQuarkFromHiggs_eta[0]) #b1
+		    #self.out.fillBranch("genb1_phi",  GenBQuarkFromHiggs_phi[0]) #b1
+		    #self.out.fillBranch("genb2_eta",  GenBQuarkFromHiggs_eta[1]) #b2
+		    #self.out.fillBranch("genb2_phi",  GenBQuarkFromHiggs_phi[1]) #b2
+		if self.verbose > 3:
+		    print "GEn B quark from Higgs pt ",GenBQuarkFromHiggs_pt, " eta ",GenBQuarkFromHiggs_eta, " phi ",GenBQuarkFromHiggs_phi
 	    
 	    lep1_genindex = leptons[0].genPartIdx
 	    lep2_genindex = leptons[1].genPartIdx
 	    if lep1_genindex >= 0 and lep1_genindex < nGenPart and self.addGenToTree:
 		genl1 = genParticles[lep1_genindex]
+		if self.verbose > 3:
+		    print "lep1 pt ",genl1.pt," eta ",genl1.eta, " phi ",genl1.phi
 		genl1_p4 = ROOT.TLorentzVector(); genl1_p4.SetPtEtaPhiM(genl1.pt, genl1.eta, genl1.phi, genl1.mass)
 		self.out.fillBranch("genl1_pt",  genl1_p4.Pt());
 		self.out.fillBranch("genl1_E",  genl1_p4.E());
 		self.out.fillBranch("genl1_eta",  genl1_p4.Eta());
 		self.out.fillBranch("genl1_phi",  genl1_p4.Phi());
 		self.out.fillBranch("genl1_id",  abs(genl1.pdgId));
+		if foundLepsfromWs:
+		    dR_genl1_lepFromW1 = genl1_p4.DeltaR(genLepFromW1_p4)
+		    dR_genl1_lepFromW2 = genl1_p4.DeltaR(genLepFromW2_p4)
 	    if lep2_genindex >= 0 and lep2_genindex < nGenPart and self.addGenToTree:
 		genl2 = genParticles[lep2_genindex]
+		if self.verbose > 3:
+		    print "lep2 pt ",genl2.pt," eta ",genl2.eta, " phi ",genl2.phi
 		genl2_p4 = ROOT.TLorentzVector(); genl2_p4.SetPtEtaPhiM(genl2.pt, genl2.eta, genl2.phi, genl2.mass)
 		self.out.fillBranch("genl2_pt",  genl2_p4.Pt());
 		self.out.fillBranch("genl2_E",  genl2_p4.E());
 		self.out.fillBranch("genl2_eta",  genl2_p4.Eta());
 		self.out.fillBranch("genl2_phi",  genl2_p4.Phi());
 		self.out.fillBranch("genl2_id",  abs(genl2.pdgId));
-    	    if jet1.genJetIdx >= 0 and jet1.genJetIdx < nGenJet and self.addGenToTree:
+		if foundLepsfromWs:
+		    dR_genl2_lepFromW1 = genl2_p4.DeltaR(genLepFromW1_p4)
+		    dR_genl2_lepFromW2 = genl2_p4.DeltaR(genLepFromW2_p4)
+	    ## jet matching  
+            genjet1_partonflavour = 0; genjet2_partonflavour = 0
+	    jjbtag_heavy = 1.0; jjbtag_light = 1.0
+    	    if jet1.genJetIdx >= 0 and jet1.genJetIdx < nGenJet:
 		genjet1 = genjets[jet1.genJetIdx]
 		genjet1_p4 = ROOT.TLorentzVector(); 
+		if self.verbose > 3:
+		    print "genjet1 pt ",genjet1.pt," eta ",genjet1.eta, " phi ",genjet1.phi
 		genjet1_p4.SetPtEtaPhiM(genjet1.pt, genjet1.eta, genjet1.phi, genjet1.mass)
 		genjet1_partonflavour = flavour(genjet1.partonFlavour)
-		self.out.fillBranch("genjet1_pt", genjet1_p4.Pt());
-		self.out.fillBranch("genjet1_E",  genjet1_p4.E());
-		self.out.fillBranch("genjet1_eta",  genjet1_p4.Eta());
-		self.out.fillBranch("genjet1_phi",  genjet1_p4.Phi());
-		self.out.fillBranch("genjet1_partonFlavour",  genjet1_partonflavour);
-    	    if jet2.genJetIdx >= 0 and jet2.genJetIdx < nGenJet and self.addGenToTree:
+    		if self.addGenToTree:
+		    self.out.fillBranch("genjet1_pt", genjet1_p4.Pt());
+		    self.out.fillBranch("genjet1_E",  genjet1_p4.E());
+		    self.out.fillBranch("genjet1_eta",  genjet1_p4.Eta());
+		    self.out.fillBranch("genjet1_phi",  genjet1_p4.Phi());
+		if self.DYestimation or self.addGenToTree:	
+		    self.out.fillBranch("genjet1_partonFlavour",  genjet1_partonflavour);
+		if foundBQuarkFromHiggs:
+		    dR_genb1_genjet1 = genjet1_p4.DeltaR(genb1FromHiggs_p4)
+		    dR_genb2_genjet1 = genjet1_p4.DeltaR(genb2FromHiggs_p4)
+		    
+    	    if jet2.genJetIdx >= 0 and jet2.genJetIdx < nGenJet :
 		genjet2 = genjets[jet2.genJetIdx]
 		genjet2_p4 = ROOT.TLorentzVector(); 
+		if self.verbose > 3:
+		    print "genjet2 pt ",genjet2.pt," eta ",genjet2.eta, " phi ",genjet2.phi
 		genjet2_partonflavour = flavour(genjet2.partonFlavour)
 		genjet2_p4.SetPtEtaPhiM(genjet2.pt, genjet2.eta, genjet2.phi, genjet2.mass)
-		self.out.fillBranch("genjet2_pt", genjet2_p4.Pt());
-		self.out.fillBranch("genjet2_E",  genjet2_p4.E());
-		self.out.fillBranch("genjet2_eta",  genjet2_p4.Eta());
-		self.out.fillBranch("genjet2_phi",  genjet2_p4.Phi());
-		self.out.fillBranch("genjet2_partonFlavour",  genjet2_partonflavour);
+    		if self.addGenToTree:
+		    self.out.fillBranch("genjet2_pt", genjet2_p4.Pt());
+		    self.out.fillBranch("genjet2_E",  genjet2_p4.E());
+		    self.out.fillBranch("genjet2_eta",  genjet2_p4.Eta());
+		    self.out.fillBranch("genjet2_phi",  genjet2_p4.Phi());
+		if self.DYestimation or self.addGenToTree:	
+		    self.out.fillBranch("genjet2_partonFlavour",  genjet2_partonflavour);
 
+		if foundBQuarkFromHiggs:
+		    dR_genb1_genjet2 = genjet2_p4.DeltaR(genb1FromHiggs_p4)
+		    dR_genb2_genjet2 = genjet2_p4.DeltaR(genb2FromHiggs_p4) 
+	    #self.jjbtag_sys_branchname = ["jjbtag_light","jjbtag_heavy"]
+            self.jjbtag_branchname_sysvalue["jjbtag_heavy"] = [1.0, 1.0, 1.0]
+            self.jjbtag_branchname_sysvalue["jjbtag_light"] = [1.0, 1.0, 1.0]
 	    if genjet1_partonflavour > 0:
 	        jjbtag_heavy = jjbtag_heavy * hJets_BtagSF[0] 
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][0] = jjbtag_heavy
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][1] = self.jjbtag_branchname_sysvalue["jjbtag_heavy"][1]* hJets_BtagSF_up[0]/hJets_BtagSF[0]
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][2] = self.jjbtag_branchname_sysvalue["jjbtag_heavy"][2]* hJets_BtagSF_down[0]/hJets_BtagSF[0]
 	    else:
 	        jjbtag_light = jjbtag_light * hJets_BtagSF[0] 
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][0] = jjbtag_light
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][1] = self.jjbtag_branchname_sysvalue["jjbtag_light"][1]* hJets_BtagSF_up[0]/hJets_BtagSF[0]
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][2] = self.jjbtag_branchname_sysvalue["jjbtag_light"][2]* hJets_BtagSF_down[0]/hJets_BtagSF[0]
 	    if genjet2_partonflavour > 0:
 	        jjbtag_heavy = jjbtag_heavy * hJets_BtagSF[1] 
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][0] = jjbtag_heavy
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][1] = self.jjbtag_branchname_sysvalue["jjbtag_heavy"][1]* hJets_BtagSF_up[1]/hJets_BtagSF[1]
+		self.jjbtag_branchname_sysvalue["jjbtag_heavy"][2] = self.jjbtag_branchname_sysvalue["jjbtag_heavy"][2]* hJets_BtagSF_down[1]/hJets_BtagSF[1]
 	    else:
 	        jjbtag_light = jjbtag_light * hJets_BtagSF[1] 
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][0] = jjbtag_light
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][1] = self.jjbtag_branchname_sysvalue["jjbtag_light"][1]* hJets_BtagSF_up[1]/hJets_BtagSF[1]
+		self.jjbtag_branchname_sysvalue["jjbtag_light"][2] = self.jjbtag_branchname_sysvalue["jjbtag_light"][2]* hJets_BtagSF_down[1]/hJets_BtagSF[1]
 	    self.out.fillBranch("jjbtag_heavy", jjbtag_heavy);
 	    self.out.fillBranch("jjbtag_light", jjbtag_light);
+	    if self.addSystematic:
+		for name in self.jjbtag_branchname_sysvalue.keys():
+		    self.out.fillBranch(name+"_up",   self.jjbtag_branchname_sysvalue[name][1])
+		    self.out.fillBranch(name+"_down", self.jjbtag_branchname_sysvalue[name][2])
+
 
 	    #genflavour = lambda jet : (jet.genJetIdx < nGenJet and jet.genJetIdx >=0)*flavour(genjets[abs(jet.genJetIdx)].partonFlavour)
             if self.CheckBtaggingEff:
@@ -1065,12 +1325,24 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("alljets_genpartonFlavour", alljets_genpartonFlavour)
 		#self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
 		#self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
-	    self.out.fillBranch("jet1_partonFlavour",  flavour(jet1.partonFlavour));
-	    self.out.fillBranch("jet1_hadronFlavour",  flavour(jet1.hadronFlavour));
-	    self.out.fillBranch("jet2_partonFlavour",  flavour(jet2.partonFlavour));
-	    self.out.fillBranch("jet2_hadronFlavour",  flavour(jet2.hadronFlavour));
-	    self.out.fillBranch("genmet_pt",  genmet.pt);
-	    self.out.fillBranch("genmet_phi", genmet.phi);
+
+	    if self.DYestimation or self.addGenToTree:	
+		self.out.fillBranch("jet1_partonFlavour",  flavour(jet1.partonFlavour));
+		self.out.fillBranch("jet1_hadronFlavour",  flavour(jet1.hadronFlavour));
+		self.out.fillBranch("jet2_partonFlavour",  flavour(jet2.partonFlavour));
+		self.out.fillBranch("jet2_hadronFlavour",  flavour(jet2.hadronFlavour));
+		self.out.fillBranch("genmet_pt",  genmet.pt);
+		self.out.fillBranch("genmet_phi", genmet.phi);
+
+    	    if  self.addGenToTree:
+		self.out.fillBranch("dR_genb1_genjet1",  dR_genb1_genjet1);
+		self.out.fillBranch("dR_genb1_genjet2",  dR_genb1_genjet2);
+		self.out.fillBranch("dR_genb2_genjet1",  dR_genb2_genjet1);
+		self.out.fillBranch("dR_genb2_genjet2",  dR_genb2_genjet2);
+		self.out.fillBranch("dR_genl1_lepFromW1",  dR_genl1_lepFromW1);
+		self.out.fillBranch("dR_genl1_lepFromW2",  dR_genl1_lepFromW2);
+		self.out.fillBranch("dR_genl2_lepFromW1",  dR_genl2_lepFromW1);
+		self.out.fillBranch("dR_genl2_lepFromW2",  dR_genl2_lepFromW2);
 
 
 

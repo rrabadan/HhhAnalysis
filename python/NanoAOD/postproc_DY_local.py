@@ -7,13 +7,18 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import Pos
 
 from HHbbWWProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
 
+sys.path.append("/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD/")
+from countHistogramProducer import *
+from genParticleProducer import *
 
 files = ["root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV-madgraph-v2/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/00000/82738046-5711-E811-ADAF-0CC47A4D75F0.root"]
 filesTTbar= [
@@ -55,7 +60,7 @@ btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cM
 btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')
 outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD"
 #p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [ ], friend = False, provenance=True, outputbranchsel="keep_and_drop_out.txt")
-p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True,  DYestimation = True,verbose = 1) ], friend = True, provenance=True)
+p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop.txt", modules = [puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(), muonScaleRes2016(), mht_hh(), HHbbWWProducer(True,  DYestimation = True,verbose = 1) ], friend = True, provenance=True)
 #p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)

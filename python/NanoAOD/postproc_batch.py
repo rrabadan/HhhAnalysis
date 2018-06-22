@@ -2,11 +2,19 @@
 import os, sys
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+#sys.argv.append( '-b' )
+#sys.argv.append( '-q' )
+
+import warnings
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+from countHistogramProducer import *
+from genParticleProducer import *
 from HHbbWWProducer import *
+
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
@@ -72,7 +80,8 @@ elif jobtype != "":
     jsonfile = None
     ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
     btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
-    modules = [puWeight(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    #modules = [genHHAndTTbar(), puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [ puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 
     ##for 2017, no cMVAv2 available for 2017 ??
     #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?
