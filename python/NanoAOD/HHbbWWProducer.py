@@ -587,8 +587,12 @@ class HHbbWWProducer(Module):
 	    
 	    if self.addSystematic and hasattr(event, "LHEPdfWeight"):
 		LHEPdfWeight   = event.LHEPdfWeight
-		LHEPdfweight_tmplist = [(x -1.0)*(x-1.0)for x in LHEPdfWeight]
+	        LHEPdfWeight_sum = sum(LHEPdfWeight)
+		nLHEPdfWeight = len(LHEPdfWeight)
+		LHEPdfWeight_ave = LHEPdfWeight_sum/nLHEPdfWeight
+		LHEPdfweight_tmplist = [(x - LHEPdfWeight_ave)*(x-LHEPdfWeight_ave) for x in LHEPdfWeight]
 		LHEPdfweight_stddev = sqrt(sum(LHEPdfweight_tmplist)/(len(LHEPdfWeight)-1.0))
+    		#print "sum ",sum(LHEPdfWeight)," ave ",LHEPdfWeight_ave," LHEPdfweight_stddev ",LHEPdfweight_stddev
 	    if self.addSystematic and hasattr(event, "LHEScaleWeight"):
 		LHEScaleWeight = list(event.LHEScaleWeight)
     		#print "LHEScaleWeight ",LHEScaleWeight, " type ", type(LHEScaleWeight)
