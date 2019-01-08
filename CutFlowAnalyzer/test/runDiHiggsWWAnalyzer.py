@@ -16,10 +16,12 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         #'file:/eos/uscms/store/user/tahuang/DiHiggs/out_sim.root'
 	#'file:/eos/uscms/store/user/tahuang/DiHiggs/out_miniaod.root'
-	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
+	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/GravitonM400-02DF7FEF-74D9-E611-956A-02163E013746.root'
-	'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
+	#'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v3/000/300/742/00000/00CE998C-717E-E711-AD9B-02163E019CB5.root'
+	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM500_ZZBB_AE43375F-2BDC-E611-9FDB-001E67DFFB31.root'
     )
 )
 
@@ -29,7 +31,7 @@ from HhhAnalysis.MCProduction.InputFileHelpers import *
 #process = useInputDir(process, inputdir)
 
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(-1) 
+    input = cms.untracked.int32(10000) 
 )
 
 process.MessageLogger = cms.Service("MessageLogger", 
@@ -69,7 +71,10 @@ muonPOGSFdir = os.getenv( "CMSSW_BASE" ) +"/src/HhhAnalysis/CutFlowAnalyzer/test
 process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   verbose = cms.untracked.int32(0),
   #enum {Data = 0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, TTbar, DYJets, DY0Jets, DY1Jets, DY2Jets, ZZTo2L2Q, ZZTo2L2Nu, ZZTo4L, WWToLNuQQ, WWTo2L2Nu, WZTo2L2Q, WZTo1L3Nu, WZTo1L1Nu2Q, WZTo3LNu, ST_tchannel_top, ST_tchannel_antitop, ST_schannel, ST_tW_antitop, ST_tW_top, WJetsToLNu, WJetsToLNu_HT100To200, WJetsToLNu_HT200To400, WJetsToLNu_HT400To600, WJetsToLNu_HT600To800, WJetsToLNu_HT800To1200, WJetsToLNu_HT1200To2500, WJetsToLNu_HT2500ToInf, TTWJetsToQQ, TTWJetsToLNu, TTZToQQ, TTZToLLNuNu };//add other background
-  SampleType = cms.untracked.int32(3),
+  # enum {Rad_260_ZZbb=300 };
+  #enum {Rad_260=100, Rad_270, Rad_300, Rad_350, Rad_400, Rad_450, Rad_500, Rad_550, Rad_600, Rad_650, Rad_750, Rad_800, Rad_900,  Rad_1000, Grav_260, Grav_270, Grav_300, Grav_350, Grav_400, Grav_450, Grav_500, Grav_550, Grav_600, Grav_650, Grav_750, Grav_800, Grav_900,  Grav_1000};
+  #SampleType = cms.untracked.int32(4),
+  SampleType = cms.untracked.int32(0),
   #############gen level
   #genParticles = cms.InputTag("genParticles"),
   genParticles = cms.InputTag("prunedGenParticles"),#minAOD
@@ -109,11 +114,21 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   #TrackRefitter = cms.InputTag("TrackRefitter"),
   #Traj = cms.InputTag("TrackRefitter"),
 
-  debug = cms.untracked.bool(False),
+
+  debug = cms.untracked.bool(True),
   onlyGenLevel = cms.bool(False),
 
   #simulation = cms.bool(True),
-  runMMC = cms.bool(False)
+  runheavyMassEstimator = cms.bool(True),
+  iterations = cms.untracked.int32(10000),
+  bjetrescaleAlgo = cms.int32(2),
+  metcorrection = cms.int32(5),
+  weightfromonshellnupt_func = cms.bool(False),
+  weightfromonshellnupt_hist = cms.bool(True),
+  weightfromonoffshellWmass_hist = cms.bool(True),
+  useMET = cms.bool(True),
+  RefPDFfile = cms.string("/home/taohuang/DiHiggsAnalysis/CMSSW_8_0_26_patch2/src/HhhAnalysis/CutFlowAnalyzer/test/REFPDFPU40.root")
+
 )
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 

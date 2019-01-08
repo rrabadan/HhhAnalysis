@@ -34,6 +34,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 //POG
 #include "HhhAnalysis/CutFlowAnalyzer/interface/POGRecipesRun2.h"
+#include "HhhAnalysis/CutFlowAnalyzer/interface/heavyMassEstimator.h"
 //headers from root lib
 #include "TTree.h"
 #include "TFile.h"
@@ -54,7 +55,7 @@ float dz(const reco::Candidate *cand, const reco::Vertex *point){
   return ((cand->vz() - point->z()) - ((cand->vx() - point->x()) * cand->px() + (cand->vy() - point->y()) * cand->py()) /cand->pt()) * cand->pz() /cand->pt();
 };
 
-//class MMC;
+//class heavyMassEstimator;
 //#define WMass 80.385   // W mass
 //#define SMHMass 125.03 // SM module higgs mass
 class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
@@ -115,7 +116,6 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float bjetDiscrCut_tight_;
     float met_;
     float jetleptonDeltaR_;
-    float iterations_;
     //gen matching 
     float leptonsDeltaR_;//dR(gen, reco)
     float jetsDeltaR_;//gen matching 
@@ -140,6 +140,25 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
     //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
     //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+  private:
+    //bool runheavyMassEstimator_;
+    //heavyMassEstimator* thishme;
+    // heavyMassEstimator tree branches
+    bool runheavyMassEstimator_;
+    bool useRecoMET_;
+    bool useRecoMuon_;
+    bool useRecoBJet_;
+    int iterations_;
+    std::string RefPDFfile_;
+    bool weightfromonshellnupt_func_;
+    bool weightfromonshellnupt_hist_;
+    bool weightfromonoffshellWmass_hist_; 
+    bool useMET_;
+    int bjetrescaleAlgo_; //0.no corrections; 1. simpel rescale, 2. elaborate rescale, -1. ideal case
+    int metcorrection_; //0.no corrections; 1. simpel rescale, 2. elaborate rescale, -1. ideal case
+
+
+
   private:
     TH1F *hevent;
     TTree *evtree;
@@ -213,16 +232,21 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
 
     POGRecipesRun2::MuonPOGSFManager* muonPOGSFs;
   private:
+    //generator level lorentz
     TLorentzVector mu1_lorentz;
     TLorentzVector mu2_lorentz;
-    TLorentzVector bbar_lorentz;
+    TLorentzVector b1_lorentz;
+    TLorentzVector b2_lorentz;
     TLorentzVector nu1_lorentz;
     TLorentzVector nu2_lorentz;
     TLorentzVector met_lorentz;
-    TLorentzVector bjet_lorentz;
-    TLorentzVector bbarjet_lorentz;
+    TLorentzVector b1genjet_lorentz;
+    TLorentzVector b2genjet_lorentz;
+    TLorentzVector h2tohh_genp_lorentz;
+
     TLorentzVector stableDecendantsLorentz(const reco::Candidate* cand); 
     TLorentzVector calculateMET(); 
+
     float XsecBr;
     //gen particles
     bool findAllGenParticles;
@@ -233,6 +257,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float mu1_pz;
     float mu1_eta;
     float mu1_phi;
+    int mu1_charge;
     float w1_energy;
     float w1_pt;
     float w1_eta;
@@ -257,6 +282,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float mu2_pz;
     float mu2_eta;
     float mu2_phi;
+    int mu2_charge;
     float w2_energy;
     float w2_pt;
     float w2_eta;
@@ -423,9 +449,11 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float muon1_genpt;
     float muon1_geneta;
     float muon1_genphi;
+    int   muon1_genid;
+    float muon1_gendR;
+    int   muon1_genindex;
     //muonid loose, medium, tight
-    int muon1_id;
-    float dR_mu1;
+    int   muon1_id;
     float muon1_triggerSF;
     float muon1_isoSF;
     float muon1_idSF;
@@ -443,11 +471,7 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float muon2_isoVar;
     float muon2_dxy;
     float muon2_dz;
-    float muon2_genpt;
-    float muon2_geneta;
-    float muon2_genphi;
-    int muon2_id;
-    float dR_mu2;
+    int   muon2_id;
     float muon2_triggerSF;
     float muon2_isoSF;
     float muon2_idSF;
@@ -455,6 +479,12 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float muon2_pogSF;
     float muon2_trigger_dR;
     float muon2_trigger_dPtRel;
+    float muon2_genpt;
+    float muon2_geneta;
+    float muon2_genphi;
+    int   muon2_genid;
+    float muon2_gendR;
+    int   muon2_genindex;
     bool hastwomuons;
 
     float dR_b1jet;
@@ -489,6 +519,12 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float b1jet_vtxPosX;
     float b1jet_vtxPosY;
     float b1jet_vtxPosZ;
+    float b1jet_genpt;
+    float b1jet_geneta;
+    float b1jet_genphi;
+    int   b1jet_genid;
+    int   b1jet_genindex;
+    float b1jet_gendR;
     float b2jet_px;
     float b2jet_py;
     float b2jet_pz;
@@ -519,6 +555,12 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float b2jet_vtxPosX;
     float b2jet_vtxPosY;
     float b2jet_vtxPosZ;
+    float b2jet_genpt;
+    float b2jet_geneta;
+    float b2jet_genphi;
+    int   b2jet_genid;
+    int   b2jet_genindex;
+    float b2jet_gendR;
     bool hastwojets;
     bool hasb1jet;
     bool hasb2jet;
@@ -555,10 +597,23 @@ class DiHiggsWWBBAnalyzer : public edm::EDAnalyzer {
     float dphi_llbb;
     float dphi_llmet;
     float mass_trans;
-  private:
-    //bool runMMC_;
-    //MMC* thismmc;
-    // MMC tree branches
+    
+    //heavyMassEstimator
+    TTree* heavyMassEstimatortree;
+
+    float heavyMassEstimator_h2mass_prob;
+    float heavyMassEstimator_h2massweight1_prob;
+    float heavyMassEstimator_h2massweight4_prob;
+    float heavyMassEstimator_h2mass_Entries;
+    float heavyMassEstimator_h2mass_RMS;
+    float heavyMassEstimator_h2massweight1_RMS;
+    float heavyMassEstimator_h2massweight4_RMS;
+    float heavyMassEstimator_h2mass_Mean;
+    float heavyMassEstimator_h2mass_underflow;
+    float heavyMassEstimator_h2mass_overflow;
+    float heavyMassEstimator_h2mass_MaxBin;
+    float heavyMassEstimator_h2mass_weight1_MaxBin;
+    float heavyMassEstimator_h2mass_weight4_MaxBin;
 };
 
 DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
@@ -626,13 +681,20 @@ DiHiggsWWBBAnalyzer::DiHiggsWWBBAnalyzer(const edm::ParameterSet& iConfig){
   idSFhist_             = iConfig.getParameter<std::string>("idSFhist");
   trackingSFhist_       = iConfig.getParameter<std::string>("trackingSFhist");
 
-  //runMMC_               = iConfig.getParameter<bool>("runMMC");
-  /*
-     iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
-     seed_ = iConfig.getParameter<int>("seed");
-     RefPDFfile_ = iConfig.getParameter<std::string>("RefPDFfile");
-     std::cout <<" RefPDFfile_ " << RefPDFfile_ << std::endl;
-   */
+
+
+  runheavyMassEstimator_               = iConfig.getParameter<bool>("runheavyMassEstimator");
+  iterations_ = iConfig.getUntrackedParameter<int>("iterations",100000);
+  bjetrescaleAlgo_ = iConfig.getParameter<int>("bjetrescaleAlgo");
+  metcorrection_ = iConfig.getParameter<int>("metcorrection");
+  weightfromonshellnupt_func_ =  iConfig.getParameter<bool>("weightfromonshellnupt_func");
+  weightfromonshellnupt_hist_ = iConfig.getParameter<bool>("weightfromonshellnupt_hist");
+  weightfromonoffshellWmass_hist_ = iConfig.getParameter<bool>("weightfromonoffshellWmass_hist");
+  useMET_ =  iConfig.getParameter<bool>("useMET");
+  //seed_ = iConfig.getParameter<int>("seed");
+  RefPDFfile_ = iConfig.getParameter<std::string>("RefPDFfile");
+  std::cout <<" RefPDFfile_ " << RefPDFfile_ << std::endl;
+
   // initilize candidates pointer
   //now do what ever initialization is needed
   std::cout  <<"DiHiggs sampletype_ "<< sampleType_ << std::endl;
@@ -859,12 +921,9 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   muon1_phi = -9;
   muon1_pt = -1;
   muon1_energy = -1;
-  muon1_genpt = -1;
-  muon1_geneta = -9.0;
-  muon1_genphi = -9.0;
-  muon1_isoVar = 10.0;
   muon1_dxy = -999999.0;
   muon1_dz  = -999999.0;
+  muon1_isoVar = 10.0;
   muon1_triggerSF = 1.0;
   muon1_isoSF = 1.0;
   muon1_idSF = 1.0;
@@ -872,16 +931,18 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   muon1_pogSF = 1.0;
   muon1_trigger_dR = 999.0;
   muon1_trigger_dPtRel = 999.0;
+  muon1_genpt = -1;
+  muon1_geneta = -9.0;
+  muon1_genphi = -9.0;
+  muon1_genid = 0;
+  muon1_gendR = -1;
+  muon1_genindex = -1;
   muon2_px = -999999.0;
   muon2_py = -999999.0;
   muon2_pz = -999999.0;
   muon2_eta = -9;
   muon2_phi = -9;
   muon2_pt = -1;
-  muon2_energy = -1;
-  muon2_genpt = -1;
-  muon2_geneta = -9.0;
-  muon2_genphi = -9.0;
   muon2_isoVar = 10.0;
   muon2_dxy = -999999.0;
   muon2_dz  = -999999.0;
@@ -892,8 +953,13 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   muon2_pogSF = 1.0;
   muon2_trigger_dR = 999.0;
   muon2_trigger_dPtRel = 999.0;
-  dR_mu1 = 2.0;
-  dR_mu2 = 2.0;
+  muon2_energy = -1;
+  muon2_genpt = -1;
+  muon2_geneta = -9.0;
+  muon2_genphi = -9.0;
+  muon2_genid = 0;
+  muon2_genindex = -1;
+  muon2_gendR = -1;
   hastwomuons = false;
 
   dR_b1jet = jetsDeltaR_;
@@ -927,6 +993,10 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   b1jet_vtxPosX  = -999999.0;
   b1jet_vtxPosY = -999999.0;
   b1jet_vtxPosZ = -999999.0;
+  b1jet_genpt = -1;
+  b1jet_geneta = -9;
+  b1jet_genphi = -9;
+  b1jet_genid = -9;
 
   b2jet_px = -999999.0;
   b2jet_py = -999999.0;
@@ -957,6 +1027,10 @@ void DiHiggsWWBBAnalyzer::initBranches(){
   b2jet_vtxPosX = -999999.0;
   b2jet_vtxPosY = -999999.0;
   b2jet_vtxPosZ = -999999.0;
+  b2jet_genpt = -1;
+  b2jet_geneta = -9;
+  b2jet_genphi = -9;
+  b2jet_genid = -9;
   hastwojets = false;
   hasb1jet=false;
   hasb2jet=false;
@@ -1001,7 +1075,7 @@ DiHiggsWWBBAnalyzer::~DiHiggsWWBBAnalyzer(){
 
 //step 1 find gen particles if it is MC sample
 //step 2 select pat objects: matched by gen or not, and apply clear-up cuts at the same time 
-//step 3 run MMC on selected objects: gen level or reco level
+//step 3 run heavyMassEstimator on selected objects: gen level or reco level
 void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
   initBranches(); 
@@ -1075,8 +1149,8 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
       checkGenParticlesSignal(genParticleColl);
       if (not findAllGenParticles)
 	  checkGenParticlesZZbb(genParticleColl);
-      if (findAllGenParticles) std::cout <<"find all gen particles "<< std::endl;
-      else std::cout <<"Not all gen particles "<< std::endl;
+      //if (findAllGenParticles) std::cout <<"find all gen particles "<< std::endl;
+      //else std::cout <<"Not all gen particles "<< std::endl;
   }
   else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb_2L2J(genParticleColl);
   ///else if (sampleType_>=Rad_260_ZZbb)                                          checkGenParticlesZZbb(genParticleColl);
@@ -1084,9 +1158,29 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   else if (sampleType_>=DYJets and sampleType_<=DY2Jets)                checkGenParticlesDY(genParticleColl);
   if (sampleType_>Data and findAllGenParticles)  matchGenJet2Parton( genjetColl );
 
+  int onshellMarker_ = -1;
   if (findAllGenParticles) {
+      mu1_lorentz.SetPxPyPzE(mu1_px, mu1_py, mu1_pz, mu1_energy);
+      mu2_lorentz.SetPxPyPzE(mu2_px, mu2_py, mu2_pz, mu2_energy);
+      nu1_lorentz.SetPxPyPzE(nu1_px, nu1_py, nu1_pz, nu1_energy);
+      nu2_lorentz.SetPxPyPzE(nu2_px, nu2_py, nu2_pz, nu2_energy);
+      //which w is on shell, debug only
+      if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) ){
+	  if (w1_mass > w2_mass) onshellMarker_ = 1;
+	  else onshellMarker_ = 2;
+	  if (onshellMarker_ > 5) std::cout <<"error in onshellMarker_ "<< std::endl;//dummy statement to avoid compiling error
+      }
+      b1_lorentz.SetPxPyPzE(b1_px, b1_py, b2_pz, b1_energy);
+      b2_lorentz.SetPxPyPzE(b2_px, b2_py, b2_pz, b2_energy);
+      b1genjet_lorentz.SetPxPyPzE(b1genjet_px, b1genjet_py, b2genjet_pz, b1genjet_energy);
+      b2genjet_lorentz.SetPxPyPzE(b2genjet_px, b2genjet_py, b2genjet_pz, b2genjet_energy);
+      if ((sampleType_>Data and sampleType_<=B12) or (sampleType_>=Rad_260 and sampleType_<Rad_260_ZZbb) )
+          h2tohh_genp_lorentz.SetPxPyPzE(h2tohh_px, h2tohh_py, h2tohh_pz, h2tohh_energy);
+      else if (sampleType_==TTbar) h2tohh_genp_lorentz.SetPxPyPzE(t1_px+t2_px, t1_py+t2_py, t1_pz+t2_pz, t1_energy+t2_energy);
+      else h2tohh_genp_lorentz = TLorentzVector();
+
       fillbranches(); //fill Gen info into tree
-      std::cout <<"find all gen particles "<< std::endl;
+      //std::cout <<"find all gen particles "<< std::endl;
   }
  
 
@@ -1159,13 +1253,17 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   edm::Handle<pat::METCollection> mets;
   iEvent.getByToken(metToken_, mets);
   const pat::MET &met = mets->front();
+  TLorentzVector genMet_p4 = TLorentzVector();
   if (sampleType_ > Data){
       const reco::GenMET *genmet = met.genMET();
       genmet_px = genmet->px(); genmet_py = genmet->py(); genmet_phi = genmet->phi(); genmet_pt = genmet->pt();
+      genMet_p4.SetXYZT(genmet_px, genmet_py, 0.0, genmet_pt);
   }
   printf("MET: pt %5.1f, phi %+4.2f, sumEt (%.1f). MET with JES up/down: %.1f/%.1f\n", 
 	  met.pt(), met.phi(), met.sumEt(),met.shiftedPt(pat::MET::JetEnUp), met.shiftedPt(pat::MET::JetEnDown));
   met_px = met.px(); met_py = met.py(); met_phi = met.phi(); met_pt = met.pt();
+  TLorentzVector Met_p4 = TLorentzVector();
+  Met_p4.SetXYZT(met_px, met_py, 0, met_pt);
   //****************************************************************************
   //                Di-Leptons selection
   //                Medium ID + loose PF-based combined relative isolation with detaB correction
@@ -1271,12 +1369,24 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 
     hastwomuons = true;
     if (sampleType_>Data){
-	float dR_gen_reco11 = deltaR(mu1_eta, mu1_phi, muon1_eta, muon1_phi);
-	float dR_gen_reco12 = deltaR(mu1_eta, mu1_phi, muon2_eta, muon2_phi);
-	float dR_gen_reco21 = deltaR(mu2_eta, mu2_phi, muon1_eta, muon1_phi);
-	float dR_gen_reco22 = deltaR(mu2_eta, mu2_phi, muon2_eta, muon2_phi);
-	dR_mu1 = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
-	dR_mu2 = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+	if (findAllGenParticles){
+	    float dR_gen_reco11 = deltaR(mu1_eta, mu1_phi, muon1_eta, muon1_phi);
+	    float dR_gen_reco12 = deltaR(mu1_eta, mu1_phi, muon2_eta, muon2_phi);
+	    float dR_gen_reco21 = deltaR(mu2_eta, mu2_phi, muon1_eta, muon1_phi);
+	    float dR_gen_reco22 = deltaR(mu2_eta, mu2_phi, muon2_eta, muon2_phi);
+	    muon1_gendR = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
+	    muon2_gendR = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+	    muon1_genindex = (dR_gen_reco11 < dR_gen_reco21) ? 1:2;
+	    muon2_genindex = (dR_gen_reco12 < dR_gen_reco22) ? 1:2;
+	}
+	/*const reco::GenParticle * genp1 = selectedleadinglep->genParticle();
+	const reco::GenParticle * genp2 = selectedsubleadinglep->genParticle();
+	if (genp1){
+	    muon1_genid = genp1->pdgId(); muon1_geneta = genp1->eta(); muon1_genphi = genp1->phi(); muon1_genpt = genp1->pt();
+	}
+	if (genp2){
+	    muon2_genid = genp2->pdgId(); muon2_geneta = genp2->eta(); muon2_genphi = genp2->phi(); muon2_genpt = genp2->pt();
+	}*/
 	//apply SF for MC samplpes 
 	//float triggerSF1 =  POGRecipesRun2::getMuonTriggerSF(std::abs(muon1_eta), muon1_pt, triggerSFFile_, triggerSFhist_);
 	//float isoSF1 =  POGRecipesRun2::getMuonISOSF(std::abs(muon1_eta), muon1_pt, isoSFFile_, isoSFhist_);
@@ -1314,11 +1424,14 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   edm::Handle<pat::JetCollection> jets;
   iEvent.getByToken(jetToken_, jets);
   std::vector<pat::Jet> allbjets;
+  TLorentzVector totjets_p4 = TLorentzVector();
+
   for (const pat::Jet &j : *jets) {
     HT +=  j.pt();//scalar sum of all jet pt 
     if (j.pt() < jet_trailingpt_ or fabs(j.eta()) > jet_eta_) continue;
     if (hastwomuons){
 	TLorentzVector jet_p4(j.px(), j.py(), j.pz(), j.energy());    
+        totjets_p4 += jet_p4;
 	float dR1 = jet_p4.DeltaR(TLorentzVector(selectedPlep->px(), selectedPlep->py(), selectedPlep->pz(), selectedPlep->energy()));
 	float dR2 = jet_p4.DeltaR(TLorentzVector(selectedNlep->px(), selectedNlep->py(), selectedNlep->pz(), selectedNlep->energy()));
 	if (dR1 < jetleptonDeltaR_ or dR2 < jetleptonDeltaR_) continue;
@@ -1343,6 +1456,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   unsigned int jet1=0, jet2=0;
   int numOfMediumbtags  = 1;
   float diff_higgsmass = 9999;
+  //CMS HH->WWBB group, baseline selection: pick up jets with highest bDiscriminator sum
   for (unsigned int i=0; i<allbjets.size(); i++){
     for (unsigned int j=i+1; j<allbjets.size(); j++){
 	int mbtags = 0;
@@ -1460,8 +1574,20 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	float dR_gen_reco12 = deltaR(b1_eta, b1_phi, b2jet_eta, b2jet_phi);
 	float dR_gen_reco21 = deltaR(b2_eta, b2_phi, b1jet_eta, b1jet_phi);
 	float dR_gen_reco22 = deltaR(b2_eta, b2_phi, b2jet_eta, b2jet_phi);
-	dR_b1jet = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
-	dR_b2jet = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+	b1jet_gendR = (dR_gen_reco11 < dR_gen_reco21) ? dR_gen_reco11:dR_gen_reco21;
+	b2jet_gendR = (dR_gen_reco12 < dR_gen_reco22) ? dR_gen_reco12:dR_gen_reco22;
+	b1jet_genindex = (dR_gen_reco11 < dR_gen_reco21) ? 1: 2;
+	b2jet_genindex = (dR_gen_reco12 < dR_gen_reco22) ? 1: 2;
+
+        const reco::GenParticle * genp1 = allbjets[jet1].genParticle();
+        const reco::GenParticle * genp2 = allbjets[jet2].genParticle();
+	if (genp1){
+	    b1jet_genid = genp1->pdgId(); b1jet_genpt = genp1->pt(); b1jet_geneta = genp1->eta(); b1jet_genphi = genp1->phi();
+	}
+	if (genp2){
+	    b2jet_genid = genp2->pdgId(); b2jet_genpt = genp2->pt(); b2jet_geneta = genp2->eta(); b2jet_genphi = genp2->phi();
+	}
+	
     }
     
     printf("Jet1: pt %5.1f, eta %+4.2f, mt %5.1f, btag_var %+1.2f, \n", b1jet_pt, b1jet_eta, b1jet_mt, b1jet_bDiscVar);
@@ -1495,6 +1621,75 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     mass_l1l2 = ll_p4.M(); energy_l1l2 = ll_p4.Energy(); pt_l1l2 = ll_p4.Pt(); eta_l1l2 = ll_p4.Eta(); phi_l1l2 = ll_p4.Phi();
     mass_b1b2 = bjets_p4.M(); energy_b1b2 = bjets_p4.Energy(); pt_b1b2 = bjets_p4.Pt(); eta_b1b2 = bjets_p4.Eta(); phi_b1b2 = bjets_p4.Phi();
     mass_trans = sqrt(2*ll_p4.Pt()*met_pt*(1-cos(dphi_llmet)));
+
+
+    //run heavyMassEstimator
+    if (runheavyMassEstimator_){
+	bool PUSample_ = true;
+	//constructor1: with simulation info for debug
+	/*
+	heavyMassEstimator *thishme = new heavyMassEstimator(&Muon1_p4, &Muon2_p4, &b1jet_p4, &b2jet_p4, &totjets_p4, &Met_p4, 
+	    &nu1_lorentz, &nu2_lorentz, &b1_lorentz, &b2_lorentz, &h2tohh_genp_lorentz, // for debug
+	    onshellMarker_, findAllGenParticles, PUSample_, // for debug
+	    ievent, weightfromonshellnupt_func_, weightfromonshellnupt_hist_, weightfromonoffshellWmass_hist_,
+	    iterations_, RefPDFfile_, useMET_, bjetrescaleAlgo_, metcorrection_);
+	    */
+
+	//second constructor, reco level only
+	heavyMassEstimator *thishme = new heavyMassEstimator(&Muon1_p4, &Muon2_p4, &b1jet_p4, &b2jet_p4, &totjets_p4, &Met_p4, 
+	    PUSample_, ievent, weightfromonshellnupt_func_, weightfromonshellnupt_hist_, weightfromonoffshellWmass_hist_,
+	    iterations_, RefPDFfile_, useMET_, bjetrescaleAlgo_, metcorrection_);
+	bool runheavyMassEstimatorok = thishme->runheavyMassEstimator();
+	if (runheavyMassEstimatorok) {
+	  //heavyMassEstimatortree =  (thishme->getheavyMassEstimatorTree())->CloneTree();
+	    std::stringstream ss;
+	  ss <<"heavyMassEstimator_h2mass_event"<< ievent;
+	  const std::string histname(ss.str());
+	  std::stringstream ss1;
+	  ss1 <<"heavyMassEstimator_h2massweight1_event"<< ievent;
+	  const std::string histname1(ss1.str());
+	  std::stringstream ss4;
+	  ss4 <<"heavyMassEstimator_h2massweight4_event"<< ievent;
+	  const std::string histname4(ss4.str());
+	  TH1F* heavyMassEstimator_h2mass =(TH1F*)(thishme->getheavyMassEstimatorh2()).Clone(histname.c_str());
+	  TH1F* heavyMassEstimator_h2mass_weight1 =(TH1F*)(thishme->getheavyMassEstimatorh2weight1()).Clone(histname1.c_str());
+	  TH1F* heavyMassEstimator_h2mass_weight4 =(TH1F*)(thishme->getheavyMassEstimatorh2weight4()).Clone(histname4.c_str());
+	  //std::cout <<" Mass_h2mass in Analyzer " << std::endl;
+	  heavyMassEstimator_h2mass_prob = (heavyMassEstimator_h2mass->GetXaxis())->GetBinCenter(heavyMassEstimator_h2mass->GetMaximumBin());
+	  heavyMassEstimator_h2massweight1_prob = (heavyMassEstimator_h2mass_weight1->GetXaxis())->GetBinCenter(heavyMassEstimator_h2mass_weight1->GetMaximumBin());
+	  heavyMassEstimator_h2massweight4_prob = (heavyMassEstimator_h2mass_weight4->GetXaxis())->GetBinCenter(heavyMassEstimator_h2mass_weight4->GetMaximumBin());
+	  heavyMassEstimator_h2mass_RMS = heavyMassEstimator_h2mass->GetRMS();
+	  heavyMassEstimator_h2massweight1_RMS = heavyMassEstimator_h2mass_weight1->GetRMS();
+	  heavyMassEstimator_h2massweight4_RMS = heavyMassEstimator_h2mass_weight4->GetRMS();
+	  heavyMassEstimator_h2mass_Entries = heavyMassEstimator_h2mass->GetEntries();
+	  heavyMassEstimator_h2mass_Mean = heavyMassEstimator_h2mass->GetMean();
+	  int nbin=(heavyMassEstimator_h2mass->GetXaxis())->GetNbins();
+	  heavyMassEstimator_h2mass_overflow = heavyMassEstimator_h2mass->GetBinContent(nbin+1);
+	  heavyMassEstimator_h2mass_underflow = heavyMassEstimator_h2mass->GetBinContent(-1);
+	  heavyMassEstimator_h2mass_MaxBin = heavyMassEstimator_h2mass->GetBinContent( heavyMassEstimator_h2mass->GetMaximumBin() );
+	  heavyMassEstimator_h2mass_weight1_MaxBin = heavyMassEstimator_h2mass_weight1->GetBinContent( heavyMassEstimator_h2mass_weight1->GetMaximumBin() );
+	  heavyMassEstimator_h2mass_weight4_MaxBin = heavyMassEstimator_h2mass_weight4->GetBinContent( heavyMassEstimator_h2mass_weight4->GetMaximumBin() );
+	  std::cout <<"heavy higgs true mass "<< h2tohh_mass <<" heavyMassEstimator most prob " << heavyMassEstimator_h2mass_prob <<" RMS "<< heavyMassEstimator_h2mass_RMS << " entries " << heavyMassEstimator_h2mass_Entries << " most prob weight1 "<< heavyMassEstimator_h2massweight1_prob <<" weight4 "<< heavyMassEstimator_h2massweight4_prob <<std::endl;
+	  if (heavyMassEstimator_h2mass_prob < 245 ) {
+		std::cerr <<" error !!! heavyMassEstimator_h2mass_prob < 250, heavyMassEstimator_h2mass_prob: " <<heavyMassEstimator_h2mass_prob 
+			<<" eventid "<< ievent <<std::endl;
+		heavyMassEstimator_h2mass->Print("ALL");
+	  }
+	  if (heavyMassEstimator_h2massweight1_prob < 245 ) {
+		std::cerr <<" error !!! heavyMassEstimator_h2mass_prob < 250, heavyMassEstimator_h2massweight1_prob: " <<heavyMassEstimator_h2massweight1_prob 
+			<<" eventid "<< ievent <<std::endl;
+		heavyMassEstimator_h2mass_weight1->Print("ALL");
+	  }
+	      //##!! NOT ALL HISTOS 
+	      //if (keepheavyMassEstimatorhist_)
+	      //	file->WriteObject(heavyMassEstimator_h2mass, histname.c_str());
+	}//runheavyMassEstimatorok
+	delete thishme;
+    }//runheavyMassEstimator_	
+
+
+
+
     //if (dR_b1l1 > jetleptonDeltaR_ and dR_b1l2 > jetleptonDeltaR_ and dR_b2l1 > jetleptonDeltaR_ and dR_b2l2 > jetleptonDeltaR_) hasdRljet =true;
     //MINdR_bl = dR_b1l1*(dR_b1l1<dR_b1l2 && dR_b1l1<dR_b2l1 && dR_b1l1<dR_b2l2) + dR_b2l1*(dR_b2l1<dR_b2l2 && dR_b2l1<dR_b1l1 && dR_b2l1<dR_b1l2) + dR_b1l2*(dR_b1l2<dR_b1l1 && dR_b1l2<dR_b2l1 && dR_b1l2<dR_b2l2) + dR_b2l2*(dR_b2l2<dR_b1l1 && dR_b2l2<dR_b1l2 && dR_b2l2<dR_b2l1);
 
@@ -1708,6 +1903,12 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("muon1_trigger_dPtRel",&muon1_trigger_dPtRel, "muon1_trigger_dPtRel/F");
   evtree->Branch("muon1_dxy",&muon1_dxy, "muon1_dxy/F");
   evtree->Branch("muon1_dz",&muon1_dz, "muon1_dz/F");
+  evtree->Branch("muon1_genpt",&muon1_genpt, "muon1_genpt/F");
+  evtree->Branch("muon1_geneta",&muon1_geneta, "muon1_geneta/F");
+  evtree->Branch("muon1_genphi",&muon1_genphi, "muon1_genphi/F");
+  evtree->Branch("muon1_genid",&muon1_genid, "muon1_genid/I");
+  evtree->Branch("muon1_genindex",&muon1_genindex, "muon1_genindex/I");
+  evtree->Branch("muon1_gendR",&muon1_gendR, "muon1_gendR/F");
   evtree->Branch("muon2_px",&muon2_px, "muon2_px/F");
   evtree->Branch("muon2_py",&muon2_py, "muon2_py/F");
   evtree->Branch("muon2_pz",&muon2_pz, "muon2_pz/F");
@@ -1715,8 +1916,8 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("muon2_phi",&muon2_phi, "muon2_phi/F");
   evtree->Branch("muon2_pt",&muon2_pt, "muon2_pt/F");
   evtree->Branch("muon2_energy",&muon2_energy, "muon2_energy/F");
-  evtree->Branch("muon2_dxy",&muon1_dxy, "muon2_dxy/F");
-  evtree->Branch("muon2_dz",&muon1_dz, "muon2_dz/F");
+  evtree->Branch("muon2_dxy",&muon2_dxy, "muon2_dxy/F");
+  evtree->Branch("muon2_dz",&muon2_dz, "muon2_dz/F");
   evtree->Branch("muon2_isoVar",&muon2_isoVar, "muon2_isoVar/F");
   evtree->Branch("muon2_triggerSF",&muon2_triggerSF, "muon2_triggerSF/F");
   evtree->Branch("muon2_isoSF",&muon2_isoSF, "muon2_isoSF/F");
@@ -1725,8 +1926,12 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("muon2_pogSF",&muon2_pogSF, "muon2_pogSF/F");
   evtree->Branch("muon2_trigger_dR",&muon2_trigger_dR, "muon2_trigger_dR/F");
   evtree->Branch("muon2_trigger_dPtRel",&muon2_trigger_dPtRel, "muon2_trigger_dPtRel/F");
-  evtree->Branch("dR_mu1",&dR_mu1, "dR_mu1/F");
-  evtree->Branch("dR_mu2",&dR_mu2, "dR_mu2/F");
+  evtree->Branch("muon2_genpt",   &muon2_genpt,   "muon2_genpt/F");
+  evtree->Branch("muon2_geneta",  &muon2_geneta,  "muon2_geneta/F");
+  evtree->Branch("muon2_genphi",  &muon2_genphi,  "muon2_genphi/F");
+  evtree->Branch("muon2_genid",   &muon2_genid,   "muon2_genid/I");
+  evtree->Branch("muon2_genindex",&muon2_genindex,"muon2_genindex/F");
+  evtree->Branch("muon2_gendR",   &muon2_gendR,   "muon2_gendR/F");
   evtree->Branch("hastwomuons",&hastwomuons, "hastwomuons/B");
   //evtree->Branch("hasmuon1",&hasmuon1, "hasmuon1/B");
   //evtree->Branch("hasmuon2",&hasmuon2, "hasmuon2/B");
@@ -1765,6 +1970,12 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b1jet_vtxPosX",&b1jet_vtxPosX, "b1jet_vtxPosX/F");
   evtree->Branch("b1jet_vtxPosY",&b1jet_vtxPosY, "b1jet_vtxPosY/F");
   evtree->Branch("b1jet_vtxPosZ",&b1jet_vtxPosZ, "b1jet_vtxPosZ/F");
+  evtree->Branch("b1jet_genpt",   &b1jet_genpt,   "b1jet_genpt/F");
+  evtree->Branch("b1jet_geneta",  &b1jet_geneta,  "b1jet_geneta/F");
+  evtree->Branch("b1jet_genphi",  &b1jet_genphi,  "b1jet_genphi/F");
+  evtree->Branch("b1jet_genid",   &b1jet_genid,   "b1jet_genid/I");
+  evtree->Branch("b1jet_genindex",&b1jet_genindex,"b1jet_genindex/I");
+  evtree->Branch("b1jet_gendR",   &b1jet_gendR,   "b1jet_gendR/F");
 
   evtree->Branch("b2jet_px",&b2jet_px, "b2jet_px/F");
   evtree->Branch("b2jet_py",&b2jet_py, "b2jet_py/F");
@@ -1796,9 +2007,13 @@ void DiHiggsWWBBAnalyzer::beginJob(){
   evtree->Branch("b2jet_vtxPosX",&b2jet_vtxPosX, "b2jet_vtxPosX/F");
   evtree->Branch("b2jet_vtxPosY",&b2jet_vtxPosY, "b2jet_vtxPosY/F");
   evtree->Branch("b2jet_vtxPosZ",&b2jet_vtxPosZ, "b2jet_vtxPosZ/F");
+  evtree->Branch("b2jet_genpt",   &b2jet_genpt,   "b2jet_genpt/F");
+  evtree->Branch("b2jet_geneta",  &b2jet_geneta,  "b2jet_geneta/F");
+  evtree->Branch("b2jet_genphi",  &b2jet_genphi,  "b2jet_genphi/F");
+  evtree->Branch("b2jet_genid",   &b2jet_genid,   "b2jet_genid/I");
+  evtree->Branch("b2jet_genindex",&b2jet_genindex,"b2jet_genindex/I");
+  evtree->Branch("b2jet_gendR",   &b2jet_gendR,   "b2jet_gendR/F");
 
-  evtree->Branch("dR_b1jet", &dR_b1jet,"dR_b1jet/F");  
-  evtree->Branch("dR_b2jet", &dR_b2jet,"dR_b2jet/F");  
   evtree->Branch("hastwojets",&hastwojets, "hastwojets/B");
   evtree->Branch("hasb1jet",&hasb1jet, "hasb1jet/B");
   evtree->Branch("hasb2jet",&hasb2jet, "hasb2jet/B");
@@ -1867,22 +2082,24 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
   std::vector<reco::GenParticle*> W2Coll;
   std::vector<const reco::Candidate*> htoWWColl;
   std::vector<const reco::Candidate*> htoBBColl;
+  reco::GenParticle * h2tohh_pid35 = NULL;
 
   std::cout <<"*********** start to check GenParticles for Signal sample ***********"<< std::endl;
   bool h2tohh = false;
   for (reco::GenParticleCollection::const_iterator it = genParticleColl->begin(); it != genParticleColl->end(); ++it) {
     //particle id, (electron12)(muon13),(b5),(W+24),(SM higgs25)
     // particle id  it->pdgId()
-    //std::cout << "Gen paticles: id " << it->pdgId() << std::endl; 
     //if (it->pdgId() == 24 && hasDaughter(it->clone(), -13) )
     if (it->pdgId() == 24){
 	const reco::Candidate* tmpw1 = it->mother();
 	while (tmpw1->pdgId() == 24 && tmpw1->numberOfMothers() == 1) tmpw1 = tmpw1->mother();
+        std::cout << "Gen paticles: id " << it->pdgId() <<" its mother "<< tmpw1->pdgId() << std::endl; 
 	if (tmpw1->pdgId() == 25)  W1Coll.push_back(it->clone());
     }
     else if (it->pdgId() == -24){
 	const reco::Candidate* tmpw2 = it->mother();
 	while (tmpw2->pdgId() == -24 && tmpw2->numberOfMothers() == 1) tmpw2 = tmpw2->mother();
+        std::cout << "Gen paticles: id " << it->pdgId() <<" its mother "<< tmpw2->pdgId() << std::endl; 
 	if (tmpw2->pdgId() == 25)  W2Coll.push_back(it->clone());
     }
     else if (it->pdgId() == 5 && it->mother()->pdgId() == 25 )
@@ -1896,7 +2113,8 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
 	if (it->numberOfMothers() != 1) std::cout << "bquark has more than one mother particle" << std::endl;
 	// std::cout << "find bbarquark candidate" << std::endl;
 	b2Coll.push_back(it->clone());
-    }
+    }else if (it->pdgId() == 35)
+	h2tohh_pid35 = it->clone();
 
   }// all Gen particles
 
@@ -1951,6 +2169,8 @@ void DiHiggsWWBBAnalyzer::checkGenParticlesSignal(edm::Handle<reco::GenParticleC
     }
     if (h2tohh)
 	std::cout << "find h2 candidate, id "<< h2tohhcand->pdgId() <<" mass "<< h2tohhcand->mass() << std::endl;
+    else if (h2tohh_pid35)
+	std::cout <<"failed to find h2tohh->wwbb but find h2 candidate, id "<<  h2tohh_pid35->pdgId() <<" mass "<< h2tohhcand->mass() << std::endl;
     else std::cout <<"failed to find h2tohh "<< std::endl;
   }
 
