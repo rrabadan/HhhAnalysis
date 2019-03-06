@@ -7,6 +7,8 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import warnings
 
+from RunConfiguration import *
+
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
@@ -16,13 +18,37 @@ from HHbbWWProducer import *
 
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
+btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')## file is under NanoAODTools
+btagSF2017_deepCSV = lambda : btagSFProducer("2017", algo = 'deepcsv', sfFileName='DeepCSV_94XSF_V3_B_F.csv')
+def btagSFyear(year):
+    return{
+	2016: btagSF2016_cMVA(),
+	2017: btagSF2017_deepCSV()
+    }[year]
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
+def jetmetUncertaintiesyear(year):
+    """jet uncertainties and recalibration for MC"""
+    return{
+	2016: jetmetUncertainties2016(),
+	2017: jetmetUncertainties2017()
+    }[year]
+
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetRecalib import *
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
-from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducerTao import *
+muonScaleRes =  lambda year : muonScaleResProducer('roccor.Run2.v3', 'RoccoR%d.txt'%year) 
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
+def puWeightyear(year):
+    return {
+      2016: puWeight(),
+      2017: puAutoWeight()
+    }[year]
 
 import argparse
 
@@ -67,21 +93,26 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
 
 print "=============================================================="
 if "DoubleMuon" in jobtype:
-    print "Dataset DoubleMuon "
-    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
+    Runperiod = jobtype.replace("DoubleMuonRun","")[:5]
+    print "Dataset DoubleMuon ",Runperiod
+    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)]
 elif "DoubleEG" in jobtype:
-    print "Dataset DoubleEG "
-    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "DoubleEG", verbose=1)]
+    Runperiod = jobtype.replace("DoubleEGRun","")[:5]
+    print "Dataset DoubleEG ",Runperiod
+    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False, triggertype = "DoubleEG", verbose=1)]
 elif "MuonEG" in jobtype:
-    print "Dataset MuonEG "
-    modules = [mht_hh(),  muonScaleRes2016(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=1)]
+    Runperiod = jobtype.replace("MuonEGRun","")[:5]
+    print "Dataset MuonEG ",Runperiod
+    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False, triggertype = "MuonEG", verbose=1)]
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
     ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
-    btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
     #modules = [genHHAndTTbar(), puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
-    modules = [ puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [ puWeight(), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    #modules = [muonScaleRes(Runyear)]
+    #modules = [puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  HHbbWWProducer(True, verbose = 1)]
+
 
     ##for 2017, no cMVAv2 available for 2017 ??
     #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?

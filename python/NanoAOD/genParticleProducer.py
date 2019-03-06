@@ -578,8 +578,9 @@ def genXToHHTobbWWSelection(genParticles, choice, enable_consistency_checks = Tr
   finalXCandidates = filter(lambda X : X.genPartIdxMother not in XCandidatesidx, XCandidates)
      
   if len(finalXCandidates) != 1: 
-    print "Xcandidates is not one ",len(finalXCandidates)
-    printGenParticles(finalXCandidates, genParticles, "genXToHHTobbWWSelection")
+    #print "Xcandidates is not one ",len(finalXCandidates)
+    #printGenParticles(finalXCandidates, genParticles, "genXToHHTobbWWSelection")
+    ##avoid printout for non-signal MC
     return []
   
   ##step1 find X->HH
@@ -703,6 +704,7 @@ class genParticleProducer(Module):
         "charge"      : "I",
         "status"      : "I",
         "statusFlags" : "I",
+	"idx"         : "I",
       }
 
     for branchBaseName, selection in genEntry.items():
@@ -873,3 +875,26 @@ genHHAndTTbar = lambda : genParticleProducer(dict([
     genLepFromTopEntry,
     genNuFromTopEntry,
   ]))
+
+
+genHH = lambda : genParticleProducer(dict([
+    genXEntry,
+    genHiggsEntry,
+    genBQuarkFromHIGEntry,
+    genW1FromHIGEntry,
+    genW2FromHIGEntry,
+    genLepFromW1FromHIGEntry,
+    genNuFromW1FromHIGEntry,
+    genLepFromW2FromHIGEntry,
+    genNuFromW2FromHIGEntry,
+  ]))
+
+
+genTTbar = lambda : genParticleProducer(dict([
+    genTopEntry,
+    genBQuarkFromTopEntry,
+    genWFromTopEntry,
+    genLepFromTopEntry,
+    genNuFromTopEntry,
+  ]))
+

@@ -10,7 +10,15 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.tools import * #deltaR, matching etc..
 import sys
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
-import POGRecipesRun2
+
+from RunConfiguration import *
+if Runyear == 2016:
+    import POGRecipesRun2016 as POGRecipesRun2
+elif Runyear == 2017:
+    import POGRecipesRun2017 as POGRecipesRun2
+else:
+    print "wrong year run: %d !! "%Runyear
+    sys.exit()
 
 print "HHbbWWProducer, import finished here"
 
@@ -609,8 +617,11 @@ class HHbbWWProducer(Module):
 
 	### MET
         met = Object(event, "MET")
-        #metPt,metPhi = self.met(met,self.isMC)
 	metPt = met.pt; metPhi = met.phi
+	if hasattr(event, "MET_pt_nom"):
+	    metPt = getattr(event, "MET_pt_nom")
+	    metPhi = getattr(event, "MET_phi_nom")
+	    #print "use calibrated MET pt ",metPt," phi ",metPhi," old pt ",met.pt," phi ",met.phi
 
         electrons = list(Collection(event, "Electron"))
         muons = list(Collection(event, "Muon"))
@@ -889,6 +900,14 @@ class HHbbWWProducer(Module):
 	    return False
 	cutflow_bin += 1
 
+	### jet recalibration
+	if hasattr(event, "Jet_pt_nom"):
+	    jet_pt_corrected = getattr(event, "Jet_pt_nom")
+	    for jet in jets:
+                ijet = jets.index(jet)
+                #print "Jet pt from reCalibration : ",jet_pt_corrected[ijet]," old pt ",jet.pt
+                jets[ijet].pt = jet_pt_corrected[ijet]
+	
 	###cut: JetPt, JetEta
         bjets = [x for x in jets if x.puId>0 and x.jetId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
         #bjets = [x for x in jets if x.puId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta] ## remove jetid > 0
@@ -993,7 +1012,7 @@ class HHbbWWProducer(Module):
         jj_DEta_j_j = hj1_p4.Eta() - hj2_p4.Eta()
 
         met_p4 = ROOT.TLorentzVector()## mass=0, eta=0
-        met_p4.SetPtEtaPhiM(met.pt,0.,met.phi,0.) # only use met vector to derive transverse quantities
+        met_p4.SetPtEtaPhiM(metPt,0.,metPhi,0.) # only use met vector to derive transverse quantities
 	dR_b1l1 = hj1_p4.DeltaR(lep1_p4)
 	dR_b2l1 = hj2_p4.DeltaR(lep1_p4)
 	dR_b1l2 = hj1_p4.DeltaR(lep2_p4)
