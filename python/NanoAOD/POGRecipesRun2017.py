@@ -3,6 +3,7 @@ import string
 from math import sqrt, pi, degrees
 import os
 import json
+import re
 import numpy as np
 
 def printObject(obj):
@@ -117,7 +118,8 @@ def jetMediumBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
     ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
-    return (jet.btagCMVA > 0.4432)
+    ### Jet_btagDeepB
+    return (jet.btagDeepB > 0.4941)
 
 def combinedError(err1, err2, weight1):
     return sqrt(err1*err1*weight1+err2*err2*(1.0-weight1));
@@ -300,8 +302,8 @@ class LeptonSFManager():
         #self.Ele_id_jsonfile   = os.path.join(HhhPath, leptonSFfolder+'2017_ElectronMedium.json')
         #self.Ele_reco_jsonfile = os.path.join(HhhPath, leptonSFfolder+'egammaEffi.txt_EGM2D_runBCDEF_passingRECO.json')
 	### took it from 2016Calibration now, Tao 20190303
-        self.Ele_id_jsonfile   = os.path.join(HhhPath, leptonSFfolder+'Electron_EGamma_SF2D_medium_moriond17_onlyfor2016run.json')
-        self.Ele_reco_jsonfile = os.path.join(HhhPath, leptonSFfolder+'Electron_EGamma_SF2D_reco_moriond17_onlyfor2016run.json')
+        self.Ele_id_jsonfile   = os.path.join(HhhPath, leptonSFfolder+'2017_ElectronMedium.json')
+        self.Ele_reco_jsonfile = os.path.join(HhhPath, leptonSFfolder+'egammaEffi.txt_EGM2D_runBCDEF_passingRECO.json')
 
 	 
 	self.Ele_id_dict = loadJsonFile(self.Ele_id_jsonfile)
@@ -340,7 +342,7 @@ class LeptonSFManager():
 	return 1.0,1.0,1.0
 
 
-    def getSF_json_v2(self, SFs_dict, eta, pt):
+    def getSF_json2017(self, SFs_dict, eta, pt):
 	#print "eta ",eta, " pt ",pt
 	for etabin in SFs_dict:
 	    etas = re.findall(r"[-+]?\d*\.\d+|\d+", etabin)   
@@ -360,7 +362,7 @@ class LeptonSFManager():
   
 
 
-    def getSF_json2017(self, SFs_dict, eta, pt):
+    def getSF_json_v2(self, SFs_dict, eta, pt):
 	#print "eta ",eta, " pt ",pt
 	for etabin in SFs_dict:
 	    etas = etabin['bin']
@@ -395,7 +397,7 @@ class LeptonSFManager():
     def getEGIDSF(self, eta, pt):##final one ?
 	SF = [1.0, 1.0, 1.0]
         if self.useJsonSFs:
-	    SF = self.getSF_json_v2(self.Ele_id_dict['data'], eta, pt)
+	    SF = self.getSF_json2017(self.Ele_id_dict[self.EGIDSF_histname], eta, pt)
 	else:
 	    SF = self.getSF(self.EGIDSF_th2, eta, pt)
         #print "Electron SFs ",SF
@@ -404,7 +406,7 @@ class LeptonSFManager():
     def getEGRecoSF(self, eta, pt):##final one ?
 	SF = [1.0, 1.0, 1.0]
         if self.useJsonSFs:
-	    SF = self.getSF_json_v2(self.Ele_reco_dict['data'], eta, pt)
+	    SF = self.getSF_json2017(self.Ele_reco_dict[self.EGRECOSF_histname], eta, pt)
 	else:
 	    SF = self.getSF(self.EGRecoSF_th2, eta, pt)
         #print "Electron SFs ",SF
@@ -455,13 +457,13 @@ class LeptonSFManager():
 	elif  abs(leptonpair[0].pdgId) == 13 and abs(leptonpair[1].pdgId) == 13:
 	    legs.append("DoubleMuLegHigPt")
 	    legs.append("DoubleMuLegLowPt")
-	    cscsector_case  = checkMuonPairSectors(leptonpair[0], leptonpair[1])
-    	    EMTFeff = 1.0
-            if cscsector_case == 1:
-	       EMTFeff = self.EMTFBug_run2016_sameOverlap_or_SameNonOverlap 
-	    elif cscsector_case == 2:
-	       EMTFeff =  self.EMTFBug_run2016_oneOverlap_oneNonOverlap
-	    Dzeff = self.DZEffs["DoubleMu"]*EMTFeff
+	    #cscsector_case  = checkMuonPairSectors(leptonpair[0], leptonpair[1])
+    	    #EMTFeff = 1.0
+            #if cscsector_case == 1:
+	    #   EMTFeff = self.EMTFBug_run2016_sameOverlap_or_SameNonOverlap 
+	    #elif cscsector_case == 2:
+	    #   EMTFeff =  self.EMTFBug_run2016_oneOverlap_oneNonOverlap
+	    Dzeff = self.DZEffs["DoubleMu"]
 	elif  abs(leptonpair[0].pdgId) == 11 and abs(leptonpair[1].pdgId) == 13:
 	    legs.append("EleMuLegHigPt")
 	    legs.append("EleMuLegLowPt")
