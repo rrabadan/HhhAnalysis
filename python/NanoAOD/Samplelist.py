@@ -2,6 +2,8 @@
 import os
 import sys
 
+DateGlobalTag = "05Feb2018"
+MCGlobalTag = "RunIISummer16NanoAOD"
 fdatadir = "/fdata/hepx/store/user/taohuang/NANOAOD/"
 datasets  = []; NumSample = []; sampleN_short = []
 Nanodatasets = []; localdirs = {}

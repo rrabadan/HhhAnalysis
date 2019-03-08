@@ -17,8 +17,10 @@ if Runyear == 2016:
 elif Runyear == 2017:
     import POGRecipesRun2017 as POGRecipesRun2
 else:
-    print "wrong year run: %d !! "%Runyear
-    sys.exit()
+    sys.exit("wrong run year value: %d"%Runyear)
+
+
+import Run2DiLeptonTrigger as Run2Trigger
 
 print "HHbbWWProducer, import finished here"
 
@@ -64,7 +66,7 @@ class HHbbWWProducer(Module):
 	self.nEv_DoubleMuon = 0
 	self.nEv_MuonEG = 0
 	self.lepSFmanager = POGRecipesRun2.LeptonSFManager()
-        self.lepSFmanager.useJsonFiles(True)
+        self.lepSFmanager.useJsonFiles(False)
 
     def beginJob(self, histFile=None,histDirName=None):
 	print "BeginJob "
@@ -99,6 +101,7 @@ class HHbbWWProducer(Module):
         self.out.branch("jet1_eta",  "F");
         self.out.branch("jet1_phi",  "F");
         self.out.branch("jet1_cMVAv2",  "F");
+        self.out.branch("jet1_DeepCSV",  "F");
         self.out.branch("jet1_partonFlavour",  "I");
         self.out.branch("jet1_hadronFlavour",  "I");
         self.out.branch("jet2_idx",  "I");
@@ -107,6 +110,7 @@ class HHbbWWProducer(Module):
         self.out.branch("jet2_eta",  "F");
         self.out.branch("jet2_phi",  "F");
         self.out.branch("jet2_cMVAv2",  "F");
+        self.out.branch("jet2_DeepCSV",  "F");
         self.out.branch("jet2_partonFlavour",  "I");
         self.out.branch("jet2_hadronFlavour",  "I");
 	self.out.branch("isElEl",  "I") # 0 or 1
@@ -247,6 +251,7 @@ class HHbbWWProducer(Module):
 		self.out.branch("alljets_pt", "F", n=self.maxnjets)
 		self.out.branch("alljets_eta", "F", n=self.maxnjets)
 		self.out.branch("alljets_cMVAv2", "F", n=self.maxnjets)
+		self.out.branch("alljets_DeepCSV", "F", n=self.maxnjets)
 		#self.out.branch("alljets_partonFlavour", "I", n=self.maxnjets)
 		#self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
 		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
@@ -334,8 +339,6 @@ class HHbbWWProducer(Module):
     
     def met(self, met, isMC):
         ## the MC has JER smearing applied which has output branch met_[pt/phi]_smeared which should be compared 
-        ## the MC has JER smearing applied which has output branch met_[pt/phi]_smeared which should be compared 
-        ## the MC has JER smearing applied which has output branch met_[pt/phi]_smeared which should be compared 
         ## with data branch MET_[pt/phi]. This essentially aliases the two branches to one common variable.
         if isMC:
             return (met.pt_smeared,met.phi_smeared)
@@ -343,6 +346,14 @@ class HHbbWWProducer(Module):
             return (met.pt,met.phi)
 	   
     def matchTriggerObjwithHLT(self, path, trigobjs):
+	##triggerobj filterBits: 
+	##old one in 2018:
+	##1 = CaloIdL_TrackIdL_IsoVL, 2 = WPLoose, 4 = WPTight, 8 = OverlapFilter PFTau for Electron (PixelMatched e/gamma); 
+	##1 = TrkIsoVVL, 2 = Iso, 4 = OverlapFilter PFTau for Muon
+	##new one in 2019:
+	##1 = CaloIdL_TrackIdL_IsoVL, 2 = 1e (WPTight), 4 = 1e (WPLoose), 8 = OverlapFilter PFTau, 16 = 2e, 32 = 1e-1mu, 64 = 1e-1tau, 128 = 3e, 256 = 2e-1mu, 512 = 1e-2mu for Electron 
+	##1 = TrkIsoVVL, 2 = Iso, 4 = OverlapFilter PFTau, 8 = 1mu, 16 = 2mu, 32 = 1mu-1e, 64 = 1mu-1tau, 128 = 3mu, 256 = 2mu-1e, 512 =1mu-2e for Muon; 
+
 	alllegs = path.split('_')[1:-1]
 	leg_trigobj_map  = {};
         leg_trigobj_map['leg1'] = []
@@ -351,9 +362,11 @@ class HHbbWWProducer(Module):
 	for x in alllegs:
 	    legobjmap = None
 	    if "Mu" in x:
-	    	pt = 8.0
+	    	pt = 8.0 ## HLT obj pt
 	    	if "TkMu" not in x:
 		    pt = int(x[2:])
+                else: 
+		    pt = int(x[4:])
 		#matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.l1pt > pt/2.0 and (obj.filterBits & 3) > 0, trigobjs))
 		matchedobjs = list(filter(lambda obj: obj.id == 13 and obj.pt >= pt and obj.filterBits > 0 , trigobjs))
 
@@ -419,64 +432,49 @@ class HHbbWWProducer(Module):
 	    print "in findTriggerType, lepton id is 11 or 13, error!!!"
 	    return ""
 
-    def matchHLTPath(self, hlt, trigobjs, leptons):
-	##triggerobj filterBits: 
-	##1 = CaloIdL_TrackIdL_IsoVL, 2 = WPLoose, 4 = WPTight, 8 = OverlapFilter PFTau for Electron (PixelMatched e/gamma); 
-	##1 = TrkIsoVVL, 2 = Iso, 4 = OverlapFilter PFTau for Muon
+    def findfiredPaths(self, event, allHLTPaths):
+	return filter(lambda path : hasattr(event, path) and getattr(event,  path, False), allHLTPaths)
 
+    def matchHLTPath(self, event, run, trigobjs, leptons):
+	""" check which HLT is fired """
 	##whether cut on l1pt for triggerobjects?
 	## DoubleMu, L1 seed: DoubleMu_11_4 or 12_5
 	## MuonEG: L1 seed: Mu20_EG10, L1_Mu5_IsoEG18..
 	##DoubleEG: L1_SingleIsoEG22, L1_DoubleEG_15_10...
 
+	trigobjs.sort(key=lambda x: x.pt,reverse=True)##sort trigobjs by pt increasing order
+	l1t = self.findTriggerType(leptons)	
+        if not  self.isMC and l1t != self.triggertype:
+	     print  "error!!! for data, the lepton's type is not the same as trigger type "
+	     return False
 
-	""" check which HLT is fired """
-	L1t_hlt = {"DoubleMuon": ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
-				  "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"],
-	    	   "MuonEG": ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", 
-		   		"HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"],
-		   "DoubleEG": ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"],
-			}
-        def findfiredPaths(l1trigger):
-	    return filter(lambda path : hasattr(hlt, path) and getattr(hlt,  path, False), L1t_hlt[l1trigger])
+        HLTpaths, L1Pts = Run2Trigger.findHLTPathsAndL1Pts(Runyear, self.triggertype, run)
+
 	def printLepton(lep, string):
 	    print string," pdgid ",lep.pdgId," pt ",lep.pt, " eta ",lep.eta, " phi ",lep.phi
 	def printTrigObjs(objs, string):
 	    print string
 	    for obj in objs:
 	        print "trigger obj id ",obj.id, " pt ",obj.pt, " eta ",obj.eta, " phi ", obj.phi 
-	def l1ptcutForPath(path):
-	    l1ptcut = {}
-	    if "Mu17" in path and "Mu8" in path:
-	        l1ptcut["leg1"] = 11; l1ptcut["leg2"] = 4
-	    elif "Mu23" in path and "Ele12" in path:
-	        l1ptcut["leg1"] = 20; l1ptcut["leg2"] = 10
-	    elif "Mu8" in path and "Ele23" in path:
-	        l1ptcut["leg1"] = 5; l1ptcut["leg2"] = 18
-	    elif "Ele23" in path and "Ele12" in path:
-	        l1ptcut["leg1"] = 15; l1ptcut["leg2"] = 10
-	    return l1ptcut
+
 	def l1ptcut(path, leg1Objs, leg2Objs):
 	    if len(leg1Objs)  == 0 or len(leg2Objs) == 0:
 	        return False
-	    l1ptcut = l1ptcutForPath(path)
-	    leg1Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut["leg1"], leg1Objs))
-	    leg2Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut["leg2"], leg2Objs))
-	    passl1pt = (len(leg1Objs_l1ptcut)  >= 1 and len(leg2Objs_l1ptcut) >= 1 and not(leg1Objs_l1ptcut == leg2Objs_l1ptcut and len(leg1Objs_l1ptcut) == 1))
-	    if path == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ":
-		leg1Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= 22, leg1Objs))
-		leg2Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= 22, leg2Objs))
-		passl1pt = passl1pt or ((len(leg1Objs_l1ptcut)>=1  or len(leg2Objs_l1ptcut) >= 1) and not(leg1Objs == leg2Objs and len(leg1Objs) == 1))
-	    return passl1pt
+	    #l1ptcut = l1ptcutForPath(path)
+	    l1ptcut_list = L1Pts[path] #
+
+	    for l1ptcut in l1ptcut_list:
+		leg1Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut[0], leg1Objs))
+		leg2Objs_l1ptcut = list(filter(lambda obj : obj.l1pt >= l1ptcut[1], leg2Objs))
+		passl1pt_double = (len(leg1Objs_l1ptcut)  >= 1 and len(leg2Objs_l1ptcut) >= 1 and not(leg1Objs_l1ptcut == leg2Objs_l1ptcut and len(leg1Objs_l1ptcut) == 1))
+                passl1pt_single = (l1ptcut[1] < 0.1 and len(leg1Objs_l1ptcut)  >= 1) or (l1ptcut[0] < 0.1 and len(leg2Objs_l1ptcut)  >= 1) ## single seed
+                if passl1pt_double or passl1pt_single:
+		    return True
+	    return False
 
 
         
-	trigobjs.sort(key=lambda x: x.pt,reverse=True)##sort trigobjs by pt increasing order
-	l1t = self.findTriggerType(leptons)	
-        if not  self.isMC and l1t != self.triggertype:
-	     print  "error!!! for data, the lepton's type is not the same as trigger type "
-	     return False
-        allfiredHLTs = findfiredPaths(l1t)
+        allfiredHLTs = self.findfiredPaths(event, HLTpaths)
         if self.verbose > 3:
 	    print "all fired paths ",allfiredHLTs
 	    printLepton(leptons[0], "leading lep"); printLepton(leptons[1], "subleading lep")
@@ -494,31 +492,14 @@ class HHbbWWProducer(Module):
 		printTrigObjs( leg_trigobj_map['leg2'], "triggerobj matched to leg2")
 		print "goodLeg1objs_lep1 ",len(goodLeg1objs_lep1), " goodLeg2objs_lep1 ",len(goodLeg2objs_lep1)," goodLeg1objs_lep2 ",len(goodLeg1objs_lep2)," goodLeg2objs_lep2 ",len(goodLeg2objs_lep2)
 	         
-	    #fired_option1 = (len(goodLeg1objs_lep1) > 0 and len(goodLeg2objs_lep2)>0 and not(goodLeg1objs_lep1 == goodLeg2objs_lep2 and len(goodLeg1objs_lep1) == 1))
-	    #fired_option2 = (len(goodLeg2objs_lep1) > 0 and len(goodLeg1objs_lep2)>0 and not(goodLeg2objs_lep1 == goodLeg1objs_lep2 and len(goodLeg2objs_lep1) == 1))
+	    
 	    ##add l1pt cut:
 	    fired_option1 = l1ptcut(path, goodLeg1objs_lep1, goodLeg2objs_lep2)
 	    fired_option2 = l1ptcut(path, goodLeg1objs_lep2, goodLeg2objs_lep1)
-	    
             if fired_option1  or fired_option2:
+	        if self.verbose > 3:
+		    print "passing L1pt cuts, find fired HLT path finally!"
     		return True
-
-	    #ismatched_leps = [False, False]
-	    #selectedObjs = self.matchTriggerObjwithHLT(path, trigobjs)
-	    #if self.verbose > 3: 
-	    #    print "triggertype ",l1t, " firedpath ", path, " matched l1objs ", len(selectedObjs)
-            #if len(selectedObjs) <= 1:
-	    #    continue
-            #for tobj in selectedObjs:	
-	    #   for i in range(0, len(leptons)):
-	    #        if tobj.id == abs(leptons[i].pdgId):
-	    #    	dR = deltaR(tobj.eta, tobj.phi, leptons[i].eta, leptons[i].phi)
-	    #    	dPtRel = abs(tobj.pt-leptons[i].pt)/leptons[i].pt 
-	    #    	if self.verbose > 3:
-	    #    	    print "lepton pdgId ",leptons[i].pdgId," obj id ",tobj.id, " dR ",dR, " dPtRel ",dPtRel
-	    #    	ismatched_leps[i] = ismatched_leps[i] or (dR < self.deltaR_trigger_reco and dPtRel < self.deltaPtRel_trigger_reco)
-	    #if ismatched_leps[0] and ismatched_leps[1]:
-	    #    return True
 	        
 	return False
 
@@ -759,7 +740,7 @@ class HHbbWWProducer(Module):
 	### we apply trigger SFs to MC and do not cut on trigger matching 
 	if not self.isMC:
 	    trigobjs = list(Collection(event, "TrigObj"))
-	    leptonpairs = [ x for x in leptonpairs if  self.matchHLTPath(event, trigobjs, x)]
+	    leptonpairs = [ x for x in leptonpairs if  self.matchHLTPath(event, run, trigobjs, x)]
 	    if len(leptonpairs) == 0:
 		if self.verbose > 3:
 		   print "cutflow_bin ",cutflow_bin," failed, HTL matching for real data only "
@@ -770,7 +751,7 @@ class HHbbWWProducer(Module):
 	### we should NOT see muon pairs in same CSC region with ETMF bug in real data, if we saw it, for safety, kill it 
 	### kill the muon pairs in same CSC region, either both in overlap or both in "non-overlap", for real datea, run < 278167
 	### efficiency correction applied for MC is in self.lepSFmanager.getleptonpairTrg
-	if not self.isMC and self.triggertype == "DoubleMuon" and run < 277166:
+	if Runyear == 2016 and not self.isMC and self.triggertype == "DoubleMuon" and run < 277166:
 	    leptonpairs = [ x for x in leptonpairs if not(POGRecipesRun2.isMuonPairSameCSCRegion(x[0], x[1])) ]
 	    if len(leptonpairs) == 0:
 		if self.verbose > 3:
@@ -934,8 +915,15 @@ class HHbbWWProducer(Module):
 	cutflow_bin += 1
 
 	#### select final two jets: jets with maximum pT , for DY estimation 
-        ## sort alljets with a cMVAv2 descreasing order 
-        bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
+        ## Run2016: sort alljets with a cMVAv2 descreasing order 
+	## Run2017: use DeepCVS
+	if Runyear == 2016:
+	    bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
+        elif Runyear == 2017 or Runyear== 2018:
+	    bjets.sort(key=lambda x:x.btagDeepB, reverse=True)	
+        else:
+	    sys.exit("wrong run year value: %d"%Runyear)
+
 	ht_jets = sum([x.pt for x in bjets])
 	hJets = bjets[0:2]
 	hJets.sort(key=lambda x:x.pt, reverse=True)
@@ -953,10 +941,12 @@ class HHbbWWProducer(Module):
 	alljets_pt = [jet.pt for jet in alljets]
 	alljets_eta = [jet.eta for jet in alljets]
 	alljets_cMVAv2 = [jet.btagCMVA for jet in alljets]
+	alljets_DeepCSV = [jet.btagDeepB for jet in alljets]
 	flavour = lambda x : abs(x)*(abs(x) == 4 or abs(x) == 5)
         alljets_pt = resize_alljets(alljets_pt)
         alljets_eta = resize_alljets(alljets_eta)
         alljets_cMVAv2 = resize_alljets(alljets_cMVAv2)
+        alljets_DeepCSV = resize_alljets(alljets_DeepCSV)
 	
             		
 	###cut: jet btagging , normal selection, skip it for DY estimation
@@ -971,7 +961,11 @@ class HHbbWWProducer(Module):
 	    cutflow_bin += 1
 
 	    #### select final two bjets: jets with maximum btagging  and then fill cutflow hist
-	    hJets = sorted(bjets, key = lambda jet : jet.btagCMVA, reverse=True)[0:2]
+	    hJets = []
+	    if Runyear == 2016:
+		hJets = sorted(bjets, key = lambda jet : jet.btagCMVA, reverse=True)[0:2]
+	    elif Runyear == 2017 or Runyear == 2018:
+		hJets = sorted(bjets, key = lambda jet : jet.btagDeepB, reverse=True)[0:2]
 	    hJets.sort(key=lambda x:x.pt, reverse=True)
 	    hJidx = [jets.index(x) for x in hJets]
 	    jet1 = hJets[0]; jet2 = hJets[1]
@@ -985,7 +979,7 @@ class HHbbWWProducer(Module):
 	    hJets_BtagSF       = [jet_btagSF[x] for x in hJidx]
 	    hJets_BtagSF_up    = [jet_btagSF_up[x] for x in hJidx]
 	    hJets_BtagSF_down  = [jet_btagSF_down[x] for x in hJidx]
-	    ## FIXME, how to apply SFs:  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
+	    ## FIXME  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
 	    event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
 
 	if ll_M < 76:
@@ -994,6 +988,8 @@ class HHbbWWProducer(Module):
 	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
 	    if not self.DYestimation:##only keep ll_M >76 for DY estimation
+                if self.verbose > 3:
+		    print "cutflow_bin ",cutflow_bin," failed due to ll_M(%.1f) < 76"%(ll_M)
 		return False
 	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
 	if self.verbose > 3:
@@ -1043,12 +1039,14 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("jet1_eta",  hj1_p4.Eta());
         self.out.fillBranch("jet1_phi",  hj1_p4.Phi());
         self.out.fillBranch("jet1_cMVAv2",  jet1.btagCMVA);
+        self.out.fillBranch("jet1_DeepCSV",  jet1.btagDeepB);
         self.out.fillBranch("jet2_idx",  hJidx[1]);
         self.out.fillBranch("jet2_pt", hj2_p4.Pt());
         self.out.fillBranch("jet2_E",  hj2_p4.E());
         self.out.fillBranch("jet2_eta", hj2_p4.Eta());
         self.out.fillBranch("jet2_phi",  hj2_p4.Phi());
         self.out.fillBranch("jet2_cMVAv2",  jet2.btagCMVA);
+        self.out.fillBranch("jet2_DeepCSV",  jet2.btagDeepB);
 	self.out.fillBranch("isElEl", isElEl) # 0 or 1
 	self.out.fillBranch("isElMu",  isElMu) # 0 or 1, mu_pt<el_pt
 	self.out.fillBranch("isMuEl",  isMuEl) # 0 or 1
@@ -1345,6 +1343,7 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("alljets_pt", alljets_pt)
 		self.out.fillBranch("alljets_eta", alljets_eta)
 		self.out.fillBranch("alljets_cMVAv2", alljets_cMVAv2)
+		self.out.fillBranch("alljets_DeepCSV", alljets_DeepCSV)
 		self.out.fillBranch("alljets_genpartonFlavour", alljets_genpartonFlavour)
 		#self.out.fillBranch("alljets_partonFlavour", alljets_partonFlavour)
 		#self.out.fillBranch("alljets_hadronFlavour", alljets_hadronFlavour)
