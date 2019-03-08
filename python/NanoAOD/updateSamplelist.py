@@ -6,13 +6,13 @@ from RunConfiguration  import *
 import ROOT
 
 MCNanoAODGTlib = {
-    2016 : "RunIISummer16NanoAODv4",
+    2016 : "RunIISummer16NanoAODv3",
     2017 : "RunIIFall17NanoAODv4",
     2018 : "RunIIAutumn18NanoAODv4"
 }
 #DateGlobalTag = "05Feb2018"
 #MCGlobalTag = "RunIISummer16NanoAOD"
-newRunyear = 2017
+newRunyear = 2016
 newDateGT = "Nano14Dec2018"
 newMCNanoAODGT = MCNanoAODGTlib[newRunyear]
 oldDateGT = Slist.DateGlobalTag
@@ -30,9 +30,7 @@ torun_datasets = Slist.Nanodatasets
 
 newnanoaod = open("NewNanoAODSample%d.txt"%newRunyear,"w")
 newSamplelist = open("newSamplelist%d.py"%newRunyear, "w")
-newSamplelist.write("""
-#!/usr/bin/python                                                                                                                                        
-import os
+newSamplelist.write("""#!/usr/bin/python                                                                                                                 import os
 import sys
 
 datasets  = []; NumSample = []; sampleN_short = []
@@ -43,14 +41,16 @@ MCxsections = []
 
 newSamplelist.write("DateGlobalTag= '%s'\n"%newDateGT)
 newSamplelist.write("MCNanoAODGlobalTag= '%s'\n\n"%newMCNanoAODGT)
-def updateSamplelist(torun_datasets):
 
+def updateSamplelist(torun_datasets):
     for ijob, job in enumerate(torun_datasets):
 	index = Slist.Nanodatasets.index(job)
 	nsample = int(Slist.NumSample[index])
 	jobtype = Slist.sampleN_short[index]
 	Nanodataset =  Slist.Nanodatasets[index]
 	mc_cs = Slist.MCxsections[index]
+	if index ==0 or jobtype != Slist.sampleN_short[index-1]:
+	    newSamplelist.write("\n### "+jobtype+"\n")
 	sampletype = ""
 	sampletag = ""
 	#print "nsample ",nsample, " jobtype ",jobtype, "dataset ", job," NanoAOD ",Nanodataset
@@ -73,9 +73,11 @@ def updateSamplelist(torun_datasets):
 	if nsample < 0 and oldDateGT in Nanodataset:
 	    query = Nanodataset.replace(oldDateGT, newDateGT)
     	    if newRunyear != Runyear and 'Run%d'%Runyear in query:
-	        query = query.replace('Run%d'%Runyear, 'Run%d'%newRunyear)
+	          querylist = query.split('/')
+		  query = '/'+querylist[1]+'/'+'Run%d'%newRunyear+querylist[2][7]+"*"+newDateGT+"*"+'/NANOAOD'
         elif  nsample < 0:
             print "warning!!! no good query for data ", query
+	
 
 	#print "query ",query
 	#os.system("dasgoclient -limit=0 -query='{query}' >> {outfilename}".format(query = query, outfilename = outfile))
@@ -91,7 +93,10 @@ def updateSamplelist(torun_datasets):
     		newSamplelist.write("Nanodatasets.append('%s')\n"%newdas)
 		newSamplelist.write("NumSample.append('%d'); sampleN_short.append('%s'); MCxsections.append(%f)\n"%(nsample, jobtype, mc_cs))
 	if ifile > 1 or ifile == 0:
-	   print "Error!! get this sample by hand ",Nanodataset," query ",query
+	   print "Error!! found #samples :%d"%ifile," check sample by hand ",Nanodataset," query ",query
+	   newSamplelist.write("##Error!! found #samples :%d,check the sample by hand with query %s"%(ifile, query))
+	   if ifile == 0:
+	       newSamplelist.write("##NumSample.append('%d'); sampleN_short.append('%s'); MCxsections.append(%f)\n"%(nsample, jobtype, mc_cs))
                 
 
 
