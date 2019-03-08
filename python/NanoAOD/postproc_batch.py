@@ -80,13 +80,6 @@ if not os.path.isdir(outputdir):
     os.system("mkdir "+outputdir)
 
 modules = []
-#selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
-# Sum$(Muon_pt > 20) >= 2 ||
-# Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP80) >= 1   ||
-# Sum$(Muon_pt > 20 && Muon_tightId) >= 1 ||
-# (Sum$(Muon_pt > 20) == 0 && Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) == 0 && MET_pt > 150 ) ) 
-# &&  Sum$((abs(Jet_eta)<2.5 && Jet_pt > 20 && Jet_jetId)) >= 2 && Entry$ < 1000 
-###mhtProducer(jetSelection, muonSelection, electronSelection), adding the selected obj and filling MHT_pt and MHT_phi
 mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
@@ -107,16 +100,9 @@ elif "MuonEG" in jobtype:
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
-    ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
     #modules = [genHHAndTTbar(), puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
     modules = [ puWeight(), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
-    #modules = [muonScaleRes(Runyear)]
-    #modules = [puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  HHbbWWProducer(True, verbose = 1)]
 
-
-    ##for 2017, no cMVAv2 available for 2017 ??
-    #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?
-    #modules = [puAutoWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 else:
     print "jobtype to run is not found, exit "
     exit()
@@ -126,8 +112,6 @@ print "=============================================================="
 print "outputdir ", outputdir
 print "=============================================================="
 p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, friend = True, jsonInput = jsonfile, provenance=True)
-#p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
-#p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
 
 p.run()
 

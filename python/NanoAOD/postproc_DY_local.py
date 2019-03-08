@@ -3,18 +3,52 @@ import os, sys
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
+
+
+import warnings
+
+from RunConfiguration import *
+
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
+sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+from countHistogramProducer import *
+from genParticleProducer import *
 from HHbbWWProducer import *
+
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
-from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
+btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')## file is under NanoAODTools
+btagSF2017_deepCSV = lambda : btagSFProducer("2017", algo = 'deepcsv', sfFileName='DeepCSV_94XSF_V3_B_F.csv')
+def btagSFyear(year):
+    return{
+	2016: btagSF2016_cMVA(),
+	2017: btagSF2017_deepCSV()
+    }[year]
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
+def jetmetUncertaintiesyear(year):
+    """jet uncertainties and recalibration for MC"""
+    return{
+	2016: jetmetUncertainties2016(),
+	2017: jetmetUncertainties2017()
+    }[year]
+
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetRecalib import *
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
-from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducer import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducerTao import *
+muonScaleRes =  lambda year : muonScaleResProducer('roccor.Run2.v3', 'RoccoR%d.txt'%year) 
+
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
+def puWeightyear(year):
+    return {
+      2016: puWeight(),
+      2017: puAutoWeight()
+    }[year]
 
 sys.path.append("/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD/")
 from countHistogramProducer import *
@@ -30,37 +64,22 @@ filesdata_MuMu = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_DoubleMuo
 filesdata_ElEl = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_DoubleEG_E8EE52A1-4D0C-E811-BFE1-90E2BACC5EEC.root"]
 filesdata_MuEl = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_MuonEG_E480DF59-890C-E811-995A-0242AC130002.root"]
 filesDY0j = ["/fdata/hepx/store/user/taohuang/NANOAOD/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/84C5AEED-8E19-E811-9948-F04DA2757237.root"]
+filesDY2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/4A2E694C-80AD-E811-A871-0025905A612C.root"]
 
 
 #selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
-# Sum$(Muon_pt > 20) >= 2 ||
-# Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP80) >= 1   ||
-# Sum$(Muon_pt > 20 && Muon_tightId) >= 1 ||
-# (Sum$(Muon_pt > 20) == 0 && Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) == 0 && MET_pt > 150 ) ) 
-# &&  Sum$((abs(Jet_eta)<2.5 && Jet_pt > 20 && Jet_jetId)) >= 2 && Entry$ < 1000 
-#'''
-#
-#selectionALL='''Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
-# Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP80) >= 1   ||
-# Sum$(Jet_pt > 40 && Jet_jetId) >= 4   || 
-#Sum$(Jet_pt *(abs(Jet_eta)<2.5 && Jet_pt > 20 && Jet_jetId)) > 160  || 
-#MET_pt > 100  || Sum$(Muon_pt > 20 && Muon_tightId) >= 1
-#'''
-###mhtProducer(jetSelection, muonSelection, electronSelection), adding the selected obj and filling MHT_pt and MHT_phi
 mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
-#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016, hhbbWW()],provenance=True)
-#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 #p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(), hhbbWW()],provenance=True)
 #p=PostProcessor(".",filesSignal,"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
 ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
-btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
-btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')
 outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD"
 #p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [ ], friend = False, provenance=True, outputbranchsel="keep_and_drop_out.txt")
-p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop.txt", modules = [puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(), muonScaleRes2016(), mht_hh(), HHbbWWProducer(True,  DYestimation = True,verbose = 1) ], friend = True, provenance=True)
+modules = [puWeight(), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, DYestimation = True, verbose = 1)]
+p=PostProcessor(outputdir, filesDY2017,"1","keep_and_drop.txt", modules, friend = True, provenance=True)
+
 #p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
 #p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
 #p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
