@@ -7,11 +7,15 @@ from RunConfiguration  import *
 import ROOT
 
 
+dodata = True
+doDYEstimation = True
 jobdir = "producerbbWW%d"%Runyear
 #jobdir = "producerbbWWcounter"
-#jobdir = "producerbbWWDYestimation"
-outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20190304_addSys/"%(Runyear)
-#outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180618_DYEstimation/"
+#jobdir = "producerbbWWDYestimation%d"%Runyear
+outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20190309_addSys/"%(Runyear)
+if doDYEstimation:
+    jobdir = jobdir+'DYestimation'
+    outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20180309_DYEstimation/"%(Runyear)
 #outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180620_MC_eventcounter/"
 Nanoaoddir_tao = "/fdata/hepx/store/user/taohuang/NANOAOD/"
 os.system("mkdir -p %s" % jobdir)
@@ -22,12 +26,28 @@ os.system("mkdir -p %s" % outdir)
 squeues = ["stakeholder-4g","background","background-4g"]
 queue = "background-4g"
 #queue = "stakeholder"
-dodata = True
+config = "postproc_batch.py"
+if doDYEstimation:
+    config = "postproc_DY_batch.py"
 # kepperror > /dev/null
 #drop error &> /dev/null
-#for job in benchmarks:
-##DoubleMuon
+DYdata = ["sT","TT","DY"]
 torun_datasets = []
+def getdatasets(datatypes, adddata):
+    datasets = []
+    for ijob, job in enumerate(Slist.Nanodatasets):
+	index = Slist.Nanodatasets.index(job)
+	nsample = int(Slist.NumSample[index])
+	jobtype = Slist.sampleN_short[index]
+	if jobtype in datatypes or (nsample < 0 and adddata):
+		datasets.append(job)
+    return datasets
+    
+if doDYEstimation:
+    torun_datasets = getdatasets(DYdata, dodata)      
+else:
+    torun_datasets = Slist.Nanodatasets
+
 #torun_datasets.append("/DoubleEG/Run2016B-05Feb2018_ver1-v1/NANOAOD")
 #torun_datasets.append("/DoubleEG/Run2016B-05Feb2018_ver2-v1/NANOAOD")
 #torun_datasets.append("/DoubleEG/Run2016C-05Feb2018-v1/NANOAOD")
@@ -73,16 +93,21 @@ torun_datasets = []
 #torun_datasets.append('/WWToLNuQQ_aTGC_13TeV-madgraph-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM')
 #torun_datasets.append('/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM')
 #torun_datasets.append('/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM')
-torun_datasets = Slist.Nanodatasets
+#torun_datasets = ['/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM']
 #for mass in Slist.masspoints:
 #    torun_datasets.append("/GluGluToRadionToHHTo2B2VTo2L2Nu_M-%d_narrow_13TeV-madgraph_correctedcfg/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM"%mass)
-#print "=============================================================="
-#print "outputdir ",outdir
-#print "=============================================================="
+print "=============================================================="
+print "outputdir ",outdir
+print "torun_datasets ",torun_datasets
+print "=============================================================="
+
 
 hepxdir = "/fdata/hepx/"
+errorcolor1 = '\x1b[1;31m'
+errorcolor2 = '\x1b[0m'
 
-todonanoaod = open("tod0nanoaod2016.txt","w")
+
+#todonanoaod = open("tod0nanoaod2016.txt","w")
 def generateslrm(torun_datasets):
     submitscript = open("submitall_%s.sh"%(jobdir),"w")
     submitscript.write("""#!/bin/bash
@@ -98,23 +123,23 @@ cd $CMSSW_BASE/src/HhhAnalysis/python/NanoAOD/
 	if job.split('/')[1] != Nanodataset.split('/')[1]:
 	    print "dataset matching is wrong!! job is ",job," NanoAOD is ",Nanodataset
 	if nsample < 0:
-	    datadir = Slist.sampleN_short[index]
+	    process = Slist.sampleN_short[index]
 	    dataname = job
 	    if not dodata:
 	       continue
-	    print "real data nsample ",nsample, " datadir ",datadir
+	    print "real data nsample ",nsample, " process ",process
 	elif nsample>= 0:
-	    datadir = job.split('/')[1]
-	    print "MC nsample ",nsample, " datadir ",datadir, "dataset ",job.split('/')
+	    process = job.split('/')[1]
+	    print "MC nsample ",nsample, " process ",process, "dataset ",job.split('/')
 
-	localdir = os.path.join(Nanoaoddir_tao, datadir)
-        if os.path.isdir(localdir):
-	    print "localdir ",localdir
-	    todonanoaod.write(Nanodataset+"\n")
-	else:
-	    print "warning!! no localdir ",Nanodataset
+	localdir = os.path.join(Nanoaoddir_tao, process)
+        #if os.path.isdir(localdir):
+	#    print "localdir ",localdir
+	#    todonanoaod.write(Nanodataset+"\n")
+	#else:
+	#    print "warning!! no localdir ",Nanodataset
 
-	outputdir = os.path.join(outdir, datadir)
+	outputdir = os.path.join(outdir, process)
 	if not os.path.isdir(outputdir):
 	    os.system("mkdir "+outputdir)
 
@@ -130,21 +155,22 @@ cd $CMSSW_BASE/src/HhhAnalysis/python/NanoAOD/
 	ifile = 0
 	for line in flist:
 	    ifile += 1
-	    print "line ",line
+	    #print "line ",line
 	    if ".root" in line :#and "NANOAOD" in line:
 	    	infile = ""
 	    	file_das = line[:-1]
 		rfilename = file_das.split('/')[-1]
 		infile = os.path.join(hepxdir, file_das[1:])
-	    	#print "torunjob ",datadir, " ",ifile, " filename  ",line[:-1]," infile ",infile
+	    	#print "torunjob ",process, " ",ifile, " filename  ",line[:-1]," infile ",infile
               
 		if not os.path.isfile(infile):
 		    infile = os.path.join(localdir,  rfilename)
 		    if not os.path.isfile(infile):
-			print "Error, file is not found on /fdata/hepx! not transfered ? ",infile
-			print "datasetname ", Nanodataset
+			#print errorcolor1 + "Error, file is not found on /fdata/hepx! not transfered ? ",infile, errorcolor2
+		        sys.exit(errorcolor1 + "Error, file is not found on /fdata/hepx! not transfered ? "+Nanodataset +errorcolor2)
+			#print "datasetname ", Nanodataset
 
-    		print "final infile ",infile
+    		#print "final infile ",infile
 		#print "file on brazos ",infile
 		    #else:
 		 	#print "find file on brazos by transfer ",infile
@@ -152,19 +178,20 @@ cd $CMSSW_BASE/src/HhhAnalysis/python/NanoAOD/
 	#for ifile, infile in enumerate(inputfiles):
 	#	print "infile ",infile
 
-		jobscript = open("{0}/Send_producerbbWW_{1}_{2}.slrm".format(jobdir, datadir, ifile), "w")
+		jobscript = open("{0}/Send_producerbbWW_{1}_{2}.slrm".format(jobdir, process, ifile), "w")
 		jobscript.write("""#!/bin/bash
 #SBATCH -J {jobtype}
 #SBATCH -p {partition}
 #SBATCH -n1
 #SBATCH --mem-per-cpu=2000
-#SBATCH --time=12:00:00
-#SBATCH -o {jobdir}/batchjobs_{jobtype}-%A-%a.out
-#SBATCH -e {jobdir}/batchjobs_{jobtype}-%A-%a.err
+#SBATCH --time=72:00:00
+#SBATCH -o {jobdir}/batchjobs_{process}-{ifile}-%A-%a.out
+#SBATCH -e {jobdir}/batchjobs_{process}-{ifile}-%A-%a.err
 #SBATCH --ntasks-per-core=1
 
 echo "starting at `date` on `hostname`"
-echo "SLURM_JOBID=$SLURM_JOBID"
+echo "SLURM_JOBID=$SLURM_JOBID "
+echo "input {jobtype} file {ifile} : {inputdir} "
 jobid=$SLURM_JOBID
 source ~/.bashrc
 . /etc/profile.d/modules.sh
@@ -174,48 +201,50 @@ eval `scramv1 runtime -sh`
 #export X509_USER_PROXY=$HOME/x509up_u1468
 #voms-proxy-info -all
 #echo $X509_USER_PROXY
-python postproc_batch.py -i {inputdir} -o {outputdir} -j {jobtype}
+python {config} -i {inputdir} -o {outputdir} -j {jobtype}
 #python postproc_eventcounter.py -i {inputdir} -o {outputdir} -j {jobtype}
 #python postproc_DY_batch.py -i {inputdir} -o {outputdir} -j {jobtype}
 
 echo "job$jobid starts, `date`"
 echo "job$jobid is done, `date`"
-exit 0""".format( inputdir=infile, outputdir=outputdir, partition=queue, jobtype = jobtype, jobdir =jobdir))
+exit 0""".format( inputdir=infile, outputdir=outputdir, partition=queue, jobtype = jobtype, jobdir =jobdir, config = config, ifile = ifile, process = process))
 		jobscript.close()
 
 		submitscript.write("""
-sbatch {0}/Send_producerbbWW_{1}_{2}.slrm""".format(jobdir, datadir, ifile))
+sbatch {0}/Send_producerbbWW_{1}_{2}.slrm""".format(jobdir, process, ifile))
     submitscript.close()
-    #os.system("chmod +x submitall_%s.sh"%(jobdir))
+    os.system("chmod +x submitall_%s.sh"%(jobdir))
 
 
 def mergeoutputNtuples(torun_datasets):
     overwrite = True
     for ijob, job in enumerate(torun_datasets):
 	index = Slist.Nanodatasets.index(job)
-	nsample = int(NumSample[index])
-	jobtype = sampleN_short[index]
+	nsample = int(Slist.NumSample[index])
+	jobtype = Slist.sampleN_short[index]
 	print "nsample ",nsample, " jobtype ",jobtype
+        datasuffix = "_Run%d.root"%Runyear
 	if nsample < 0:
 	    if not dodata:
 	       continue
-	    datadir = sampleN_short[index]
+	    process = Slist.sampleN_short[index]
 	    dataname = job
-	    #print "real data nsample ",nsample, " datadir ",datadir
+	    datasuffix = "_Run%d_Friend.root"%Runyear
+	    #print "real data nsample ",nsample, " process ",process
 	elif nsample>= 0:
-	    datadir = job.split('/')[1]
-	    #print "MC nsample ",nsample, " datadir ",datadir, "MiniAOD dataset ",job.split('/')
+	    process = job.split('/')[1]
+	    #print "MC nsample ",nsample, " process ",process, "MiniAOD dataset ",job.split('/')
 	#faileddatasets = ["WWToLNuQQ_aTGC_13TeV-madgraph-pythia8", "ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1"]
 	#faileddatasets.append("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1")
-	#if datadir in faileddatasets:
+	#if process in faileddatasets:
 	#    continue
 
-	outputdir = os.path.join(outdir, datadir)
-    	finalfile = os.path.join(outdir, datadir+"_Run2016.root")
+	outputdir = os.path.join(outdir, process)
+    	finalfile = os.path.join(outdir, process+"_Run%d.root"%Runyear)
 	if os.path.isfile(finalfile) and not(overwrite):
 	    continue
-	xsec = MCxsections[index]
-	print "sample ",datadir, " cross section ",xsec
+	xsec = Slist.MCxsections[index]
+	print "sample ",process, " cross section ",xsec
 	haddfiles = True; write_xsec = True
 	if haddfiles:
 	    os.system("python haddnano.py "+finalfile+ " " +outputdir+"/*Friend.root ")
@@ -231,8 +260,8 @@ def mergeoutputNtuples(torun_datasets):
             tfile.Close()
     if dodata:
         for ch in ["DoubleMuon","DoubleEG","MuonEG"]:
-	    finalfile = os.path.join(outdir, ch+"_Run2016.root")
-	    alldatafiles = ch+"*_Friend.root"
+	    finalfile = os.path.join(outdir, ch+"_Run%d.root"%(Runyear))
+	    alldatafiles = ch+"Run%d*_Run%d.root"%(Runyear,Runyear)
 	    os.system("python haddnano.py "+finalfile +" "+outdir+alldatafiles)
 
 

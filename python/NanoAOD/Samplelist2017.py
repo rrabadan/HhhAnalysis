@@ -60,7 +60,8 @@ NumSample.append('-24'); sampleN_short.append('MuonEGRun2017F')
 MCxsections.append(-1.0)
 
 
-masspoints = [270, 280, 300, 320, 350, 400, 450, 500,  600, 650, 750, 800, 900]
+#masspoints = [270, 280, 300, 320, 350, 400, 450, 500,  600, 650, 750, 800, 900]
+masspoints = [270, 320, 350, 400, 450, 500,  600, 650, 900]
 for mass in masspoints:
     Nanodatasets.append("/GluGluToRadionToHHTo2B2VTo2L2Nu_M-%d_narrow_13TeV-madgraph_correctedcfg/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM"%mass)
     NumSample.append(masspoints.index(mass)); sampleN_short.append('RadionM%d'%mass)
@@ -85,7 +86,8 @@ MCxsections.append(4758.9)
 Nanodatasets.append('/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM')
 NumSample.append('16'); sampleN_short.append('DY')
 MCxsections.append(929.1)
-Nanodatasets.append('/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM') 
+Nanodatasets.append('/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
+#Nanodatasets.append('/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAODv4-PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/NANOAODSIM') 
 NumSample.append('17'); sampleN_short.append('DY')
 MCxsections.append(337.1)
 
@@ -108,21 +110,21 @@ NumSample.append('20'); sampleN_short.append('VV')
 MCxsections.append(1.256)
 #/WWToLNuQQ_NNPDF31_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/NANOAODSIM 
 #/WWTo2L2Nu_NNPDF31_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/NANOAODSIM 
-Nanodatasets.append('/WWToLNuQQ_NNPDF31_TuneCP5_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/NANOAODSIM')
-NumSample.append('21'); sampleN_short.append('VV')
-MCxsections.append(49.997)#
-Nanodatasets.append('/WWTo2L2Nu_NNPDF31_TuneCP5_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
-NumSample.append('22'); sampleN_short.append('VV') ### not available now
-MCxsections.append(12.178)
+#Nanodatasets.append('/WWToLNuQQ_NNPDF31_TuneCP5_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/NANOAODSIM')
+#NumSample.append('21'); sampleN_short.append('VV')
+#MCxsections.append(49.997)#
+#Nanodatasets.append('/WWTo2L2Nu_NNPDF31_TuneCP5_13TeV-powheg-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
+#NumSample.append('22'); sampleN_short.append('VV') ### not available now
+#MCxsections.append(12.178)
 Nanodatasets.append('/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
 NumSample.append('23'); sampleN_short.append('VV')
 MCxsections.append(5.595)
 Nanodatasets.append('/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8_v2/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
 NumSample.append('24'); sampleN_short.append('VV') ### not available now 
 MCxsections.append(3.033)
-Nanodatasets.append('/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/NANOAODSIM')
-NumSample.append('25'); sampleN_short.append('VV')
-MCxsections.append(10.71)
+#Nanodatasets.append('/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/NANOAODSIM')
+#NumSample.append('25'); sampleN_short.append('VV')
+#MCxsections.append(10.71)
 Nanodatasets.append('/WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
 NumSample.append('26'); sampleN_short.append('VV')
 MCxsections.append(4.42965)
@@ -155,9 +157,9 @@ MCxsections.append(19.5545)
 #Nanodatasets.append('/WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
 
 
-Nanodatasets.append('/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/NANOAODSIM')
-NumSample.append('32'); sampleN_short.append('Wjet')
-MCxsections.append(61526.7)
+#Nanodatasets.append('/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/NANOAODSIM')
+#NumSample.append('32'); sampleN_short.append('Wjet')
+#MCxsections.append(61526.7)
 Nanodatasets.append('/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17NanoAOD-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/NANOAODSIM')
 NumSample.append('33'); sampleN_short.append('Wjet')
 MCxsections.append(1627.45)
