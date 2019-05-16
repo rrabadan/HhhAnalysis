@@ -64,7 +64,7 @@ filesdata_MuMu = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_DoubleMuo
 filesdata_ElEl = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_DoubleEG_E8EE52A1-4D0C-E811-BFE1-90E2BACC5EEC.root"]
 filesdata_MuEl = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/Run2016B_MuonEG_E480DF59-890C-E811-995A-0242AC130002.root"]
 filesDY0j = ["/fdata/hepx/store/user/taohuang/NANOAOD/DYToLL_0J_13TeV-amcatnloFXFX-pythia8/84C5AEED-8E19-E811-9948-F04DA2757237.root"]
-filesDY2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/4A2E694C-80AD-E811-A871-0025905A612C.root"]
+filesDY2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/46ADA924-A2AC-E811-B855-003048C45C8A.root"]
 
 
 #selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
@@ -72,17 +72,12 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
-#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(), hhbbWW()],provenance=True)
-#p=PostProcessor(".",filesSignal,"1","keep_and_drop.txt",[puAutoWeight(), lepSF(), btagSF2016(), mht_hh(), hhbbWW()],provenance=True)
 ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
 outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD"
 #p=PostProcessor(outputdir, filesTTbar, cut = "1", branchsel = "keep_and_drop_pre.txt", modules = [ ], friend = False, provenance=True, outputbranchsel="keep_and_drop_out.txt")
-modules = [puWeight(), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, DYestimation = True, verbose = 1)]
+modules = [puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, DYestimation = True, verbose = 1)]
 p=PostProcessor(outputdir, filesDY2017,"1","keep_and_drop.txt", modules, friend = True, provenance=True)
 
-#p=PostProcessor(".",filesdata_MuMu,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleMuon")],provenance=True)
-#p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
-#p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
 
 p.run()
 

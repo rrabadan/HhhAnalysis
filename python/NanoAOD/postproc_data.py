@@ -64,6 +64,8 @@ filesdata_MuMu = ["/fdata/hepx/store/user/taohuang/NANOAOD/DoubleMuonRun2016Bver
 filesdata_ElEl2017 = ["/fdata/hepx/store/data/Run2017B/DoubleEG/NANOAOD/31Mar2018-v1/70000/8254B705-BB44-E811-A808-FA163E95DCD9.root"]
 filesdata_MuMu2017 = ["/fdata/hepx/store/data/Run2017B/DoubleMuon/NANOAOD/31Mar2018-v1/70000/A41543AB-C444-E811-9599-FA163E9592B6.root"]
 filesdata_MuEl2017 = ["/fdata/hepx/store/data/Run2017B/MuonEG/NANOAOD/31Mar2018-v1/70000/B2D34F84-0D45-E811-AAA3-FA163E8A6597.root"]
+filesdata_MuEl2017 = ["/fdata/hepx/store/data/Run2017C/DoubleEG/NANOAOD/31Mar2018-v1/70000/C210AEDC-D645-E811-B6F9-44A842B4B40B.root"]
+filesdata_MuEl2017 = ["/fdata/hepx/store/data/Run2017C/DoubleEG/NANOAOD/31Mar2018-v1/70000/52F89F65-D545-E811-8B07-0025905B85DE.root"]
 
 
 #selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
@@ -97,7 +99,7 @@ outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD/"
 #p=PostProcessor(outputdir, filesdata_MuMu,"1","keep_and_drop.txt",[muonScaleRes2016(),mht_hh(), HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=4)], friend =True, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(outputdir, filesdata_MuEl,"1","keep_and_drop.txt",[muonScaleRes2016(),mht_hh(), HHbbWWProducer(False, triggertype = "MuonEG", verbose=4)], friend = True, jsonInput = jsonfile, provenance=True)
 #p=PostProcessor(outputdir,filesdata_ElEl2017,"1","keep_and_drop.txt",[ muonScaleRes(Runyear),  HHbbWWProducer(False, triggertype = "DoubleEG", verbose=4)], friend = True, provenance=True)
-p=PostProcessor(outputdir,filesdata_MuMu2017,"1","keep_and_drop.txt",[ muonScaleRes(Runyear),  HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=0)], friend = True, provenance=True)
+p=PostProcessor(outputdir,filesdata_MuMu2017,"1","keep_and_drop.txt",[ muonScaleRes(Runyear),  HHbbWWProducer(False, triggertype = "DoubleMuon", verbose=1)], friend = True, provenance=True)
 #p=PostProcessor(outputdir,filesdata_MuEl2017,"1","keep_and_drop.txt",[ muonScaleRes(Runyear),  HHbbWWProducer(False, triggertype = "MuonEG", verbose=4)], friend = True, provenance=True)
 
 p.run()

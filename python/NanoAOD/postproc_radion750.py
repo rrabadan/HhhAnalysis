@@ -12,7 +12,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import Pos
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
 from countHistogramProducer import *
 from genParticleProducer import *
-from HHbbWWProducer import *
+from HHbbWWProducer_sync import *
 
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
@@ -59,14 +59,14 @@ filesSignal = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/GravitonToHHTo2B2VTo2
 filesTTbar2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/100000/2E9913D6-BAA9-E811-8ABE-0CC47A4DEF3E.root"]
 fileSignal2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/110000/70B64607-EEB2-E811-B1D7-A0369FD0B268.root"]
 filesDY1J2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAODv4/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/90000/62B5DB6B-F42C-D648-A6EF-5F26495985BF.root"]
-file2017Test = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD2017/5E621211-8B42-E811-9903-001E67F8FA2E.root"]
+filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11_sync.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_1.root"]
 
 
 modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
-#p=PostProcessor(outputdir, fileSignal2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
-p=PostProcessor(outputdir, file2017Test,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
 #p=PostProcessor(outputdir, filesTTbar2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
 #p=PostProcessor(outputdir, filesDY1J2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
+p=PostProcessor(outputdir, filesRadion750,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True, outtreeName="syncTree")
 print "run Postprocessor here "
 p.run()
 

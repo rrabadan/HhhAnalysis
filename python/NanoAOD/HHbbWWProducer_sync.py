@@ -36,7 +36,6 @@ class HHbbWWProducer(Module):
         self.isMC = isMC ## two mode: data or MC
         self.looseEvtSelection = True
         self.noBtaggingCut = True
-	self.useTallingTrgEff = True
 	print "kwargs ",kwargs
 	self.triggertype  = ''##"DoubleMuon, DoubleEG, MuonEG"
 	self.DYestimation = False
@@ -100,50 +99,134 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
 	
         self.out = wrappedOutputTree
-        self.out.branch("jet1_idx",  "I");
-        self.out.branch("jet1_pt",  "F");
-        self.out.branch("jet1_E",  "F");
-        self.out.branch("jet1_eta",  "F");
-        self.out.branch("jet1_phi",  "F");
-        self.out.branch("jet1_cMVAv2",  "F");
-        self.out.branch("jet1_DeepCSV",  "F");
-        self.out.branch("jet1_partonFlavour",  "I");
-        self.out.branch("jet1_hadronFlavour",  "I");
-        self.out.branch("jet2_idx",  "I");
-        self.out.branch("jet2_pt",  "F");
-        self.out.branch("jet2_E",  "F");
-        self.out.branch("jet2_eta",  "F");
-        self.out.branch("jet2_phi",  "F");
-        self.out.branch("jet2_cMVAv2",  "F");
-        self.out.branch("jet2_DeepCSV",  "F");
-        self.out.branch("jet2_partonFlavour",  "I");
-        self.out.branch("jet2_hadronFlavour",  "I");
-	self.out.branch("isElEl",  "I") # 0 or 1
-	self.out.branch("isElMu",  "I") # 0 or 1, mu_pt<el_pt
-	self.out.branch("isMuEl",  "I") # 0 or 1
-	self.out.branch("isMuMu",  "I") # 0 or 1
-	self.out.branch("isSF",  "F")
+        self.out.branch("ak4Jet1_idx",  "I");
+        self.out.branch("ak4Jet1_pt",  "F");
+        self.out.branch("ak4Jet1_E",  "F");
+        self.out.branch("ak4Jet1_eta",  "F");
+        self.out.branch("ak4Jet1_phi",  "F");
+        self.out.branch("ak4Jet1_cMVAv2",  "F");
+        self.out.branch("ak4Jet1_CSV",  "F");
+        self.out.branch("ak4Jet2_idx",  "I");
+        self.out.branch("ak4Jet2_pt",  "F");
+        self.out.branch("ak4Jet2_E",  "F");
+        self.out.branch("ak4Jet2_eta",  "F");
+        self.out.branch("ak4Jet2_phi",  "F");
+        self.out.branch("ak4Jet2_cMVAv2",  "F");
+        self.out.branch("ak4Jet2_CSV",  "F");
+
+        self.out.branch("ak8Jet1_pt",            "F");
+        self.out.branch("ak8Jet1_E",             "F");
+        self.out.branch("ak8Jet1_eta",           "F");
+        self.out.branch("ak8Jet1_phi",           "F");
+        self.out.branch("ak8Jet1_msoftdrop",     "F");
+        self.out.branch("ak8Jet1_tau1",          "F");
+        self.out.branch("ak8Jet1_tau2",          "F");
+        self.out.branch("ak8Jet1_btagHbb",       "F");
+	self.out.branch("ak8Jet1_subjet0_pt",    "F");
+	self.out.branch("ak8Jet1_subjet0_eta",   "F");
+	self.out.branch("ak8Jet1_subjet0_phi",   "F");
+	self.out.branch("ak8Jet1_subjet0_CSV",   "F");   
+	self.out.branch("ak8Jet1_subjet1_pt",    "F");
+	self.out.branch("ak8Jet1_subjet1_eta",   "F");
+	self.out.branch("ak8Jet1_subjet1_phi",   "F");
+	self.out.branch("ak8Jet1_subjet1_CSV",   "F");   
+        self.out.branch("ak8Jet2_pt",            "F");
+        self.out.branch("ak8Jet2_E",             "F");
+        self.out.branch("ak8Jet2_eta",           "F");
+        self.out.branch("ak8Jet2_phi",           "F");
+        self.out.branch("ak8Jet2_msoftdrop",     "F");
+        self.out.branch("ak8Jet2_btagHbb",       "F");
+        self.out.branch("ak8Jet2_tau1",          "F");
+        self.out.branch("ak8Jet2_tau2",          "F");
+	self.out.branch("ak8Jet2_subjet0_pt",    "F");
+	self.out.branch("ak8Jet2_subjet0_eta",   "F");
+	self.out.branch("ak8Jet2_subjet0_phi",   "F");
+	self.out.branch("ak8Jet2_subjet0_CSV",   "F");   
+	self.out.branch("ak8Jet2_subjet1_pt",    "F");
+	self.out.branch("ak8Jet2_subjet1_eta",   "F");
+	self.out.branch("ak8Jet2_subjet1_phi",   "F");
+	self.out.branch("ak8Jet2_subjet1_CSV",   "F");   
+
 	#self.out.branch("lepstype",  "F")
-        self.out.branch("lep1_pt",  "F");
-        self.out.branch("lep1_TrgObjfilterbits",  "I");
-        self.out.branch("lep1_E",  "F");
-        self.out.branch("lep1_eta",  "F");
-        self.out.branch("lep1_phi",  "F");
-        self.out.branch("lep1_pdgid",  "I");
-        self.out.branch("lep1_id",  "F");
-        self.out.branch("lep1_iso",  "F");
-        self.out.branch("lep2_pt",  "F");
-        self.out.branch("lep2_E",  "F");
-        self.out.branch("lep2_eta",  "F");
-        self.out.branch("lep2_phi",  "F");
-        self.out.branch("lep2_pdgid",  "I");
-        self.out.branch("lep2_id",  "F");
-        self.out.branch("lep2_iso",  "F");
-        self.out.branch("lep2_TrgObjfilterbits",  "I");
-	self.out.branch("passTrigger","B")
-	self.out.branch("hltpathprescale","F")
-	self.out.branch("met_pt",  "F")
-	self.out.branch("met_phi",  "F")
+        self.out.branch("mu1_pt",  "F");
+        self.out.branch("mu1_TrgObjfilterbits",  "I");
+        self.out.branch("mu1_E",  "F");
+        self.out.branch("mu1_eta",  "F");
+        self.out.branch("mu1_phi",  "F");
+        self.out.branch("mu1_pdgid",  "I");
+        self.out.branch("mu1_charge",  "F");
+        self.out.branch("mu1_sip3D",  "F");
+        self.out.branch("mu1_miniRelIso",  "F");
+        self.out.branch("mu1_dxy",  "F");
+        self.out.branch("mu1_dxyAbs",  "F");
+        self.out.branch("mu1_dz",  "F");
+        #self.out.branch("mu1_miniRelIso_chg",  "F");
+        self.out.branch("mu1_segmentCompatibility",  "F");
+        self.out.branch("mu1_leptonMVA",  "F");
+	self.out.branch("mu1_miniRelIsoCharged",        "F");
+	#self.out.branch("mu1_miniRelIsoNeutral",        "F");
+        self.out.branch("mu2_pt",  "F");
+        self.out.branch("mu2_E",  "F");
+        self.out.branch("mu2_eta",  "F");
+        self.out.branch("mu2_phi",  "F");
+        self.out.branch("mu2_pdgid",  "I");
+        self.out.branch("mu2_TrgObjfilterbits",  "I");
+        self.out.branch("mu2_charge",  "F");
+        self.out.branch("mu2_sip3D",  "F");
+        self.out.branch("mu2_miniRelIso",  "F");
+        self.out.branch("mu2_dxy",  "F");
+        self.out.branch("mu2_dxyAbs",  "F");
+        self.out.branch("mu2_dz",  "F");
+        #self.out.branch("mu2_miniRelIso_chg",  "F");
+        self.out.branch("mu2_segmentCompatibility",  "F");
+        self.out.branch("mu2_leptonMVA",  "F");
+	self.out.branch("mu2_miniRelIsoCharged",        "F");
+	#self.out.branch("mu2_miniRelIsoNeutral",        "F");
+
+        self.out.branch("ele1_pt",  "F");
+        self.out.branch("ele1_TrgObjfilterbits",  "I");
+        self.out.branch("ele1_E",  "F");
+        self.out.branch("ele1_eta",  "F");
+        self.out.branch("ele1_phi",  "F");
+        self.out.branch("ele1_pdgid",  "I");
+        self.out.branch("ele1_charge",  "F");
+        self.out.branch("ele1_sip3D",  "F");
+        self.out.branch("ele1_miniRelIso",  "F");
+        self.out.branch("ele1_dxy",  "F");
+        self.out.branch("ele1_dxyAbs",  "F");
+        self.out.branch("ele1_dz",  "F");
+        #self.out.branch("ele1_miniRelIso_chg",  "F");
+        self.out.branch("ele1_ntMVAeleID",  "F");
+        self.out.branch("ele1_leptonMVA",  "F");
+	self.out.branch("ele1_miniRelIsoCharged",        "F");
+	#self.out.branch("ele1_miniRelIsoNeutral",        "F");
+	self.out.branch("ele1_mvaIdFall17noIso",         "F");
+        self.out.branch("ele2_pt",  "F");
+        self.out.branch("ele2_E",  "F");
+        self.out.branch("ele2_eta",  "F");
+        self.out.branch("ele2_phi",  "F");
+        self.out.branch("ele2_pdgid",  "I");
+        self.out.branch("ele2_TrgObjfilterbits",  "I");
+        self.out.branch("ele2_charge",  "F");
+        self.out.branch("ele2_sip3D",  "F");
+        self.out.branch("ele2_miniRelIso",  "F");
+        self.out.branch("ele2_dxy",  "F");
+        self.out.branch("ele2_dxyAbs",  "F");
+        self.out.branch("ele2_dz",  "F");
+        #self.out.branch("ele2_miniRelIso_chg",  "F");
+        self.out.branch("ele2_leptonMVA",  "F");
+        self.out.branch("ele2_ntMVAeleID",  "F");
+	self.out.branch("ele2_miniRelIsoCharged",        "F");
+	self.out.branch("ele2_miniRelIsoNeutral",        "F");
+	self.out.branch("ele2_mvaIdFall17noIso",         "F");
+
+	self.out.branch("PFMET",  "F")
+	self.out.branch("PFMETphi",  "F")
+	self.out.branch("n_presel_mu", "I")
+	self.out.branch("n_presel_ele", "I")
+	self.out.branch("n_presel_ak4Jet", "I")
+	self.out.branch("n_presel_ak8Jet", "I")
+	"""
 	self.out.branch("nJetsL",  "F")
 	self.out.branch("jj_M",  "F")
 	self.out.branch("el_hltsafeid", "F")
@@ -177,13 +260,13 @@ class HHbbWWProducer(Module):
 	self.out.branch("event_btag_weight",  "F")
 	self.out.branch("jjbtag_heavy",  "F")
 	self.out.branch("jjbtag_light",  "F")
-        self.out.branch("genweight",  "F");
-        self.out.branch("sample_weight",  "F");
-	self.out.branch("event_reco_weight",  "F")
-	self.out.branch("total_weight",  "F")
+	"""
+        self.out.branch("PU_weight",  "F");
+        self.out.branch("MC_weight",  "F");
 	self.out.branch("pu",  "F")
-	self.out.branch("event_run",  "I")
-	self.out.branch("event_lumiblock",  "I")
+	self.out.branch("run",  "I")
+	self.out.branch("ls",  "I")##lumiblocks
+	self.out.branch("event",  "I")
 	#self.out.branch("event_weight",  "F")
 	#self.out.branch("DY_BDT_flat",  "F")
 	#self.out.branch("dy_nobtag_to_btagM_weight",  "F")
@@ -192,6 +275,7 @@ class HHbbWWProducer(Module):
 	#self.out.branch("mt2_ll",  "F")
 	#self.out.branch("event_number",  "I")
 
+	"""
 	if self.isMC and self.addSystematic:
 	    for name in self.ll_sys_branchname:
 		self.out.branch("lep1%s"%name,"F")
@@ -270,6 +354,7 @@ class HHbbWWProducer(Module):
 		#self.out.branch("alljets_partonFlavour", "I", n=self.maxnjets)
 		#self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
 		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
+	    """
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_eventcounter.Write()
@@ -509,7 +594,6 @@ class HHbbWWProducer(Module):
 
         matchTolep1 = lambda tobj : tobj.id == abs(leptons[0].pdgId) and deltaR(tobj.eta, tobj.phi, leptons[0].eta, leptons[0].phi) < self.deltaR_trigger_reco and abs(tobj.pt-leptons[0].pt)/leptons[0].pt < self.deltaPtRel_trigger_reco 
         matchTolep2 = lambda tobj : tobj.id == abs(leptons[1].pdgId) and deltaR(tobj.eta, tobj.phi, leptons[1].eta, leptons[1].phi) < self.deltaR_trigger_reco and abs(tobj.pt-leptons[1].pt)/leptons[1].pt < self.deltaPtRel_trigger_reco 
-	matched_firedHLTs = []
         for  path in allfiredHLTs:
 	    leg_trigobj_map = self.matchTriggerObjwithHLT(path, trigobjs)
             goodLeg1objs_lep1 = list(filter(matchTolep1, leg_trigobj_map['leg1']))
@@ -530,10 +614,9 @@ class HHbbWWProducer(Module):
 		if fired_option2:  matchedTrigobjs = [leg2list_opt2, leg1list_opt2]
 	        if self.verbose > 3:
 		    print "passing L1pt cuts, find fired HLT path finally! matched trig objs ",matchedTrigobjs
-    		#return True
-		matched_firedHLTs.append(path)
+    		return True
 	        
-	return matched_firedHLTs
+	return False
 
 
     def trigger_reco_matching(self, lepton, trigobjs):
@@ -662,297 +745,26 @@ class HHbbWWProducer(Module):
         ## di-leps selection
         #####################################
 
-        #muons.sort(key=lambda x:x.pt,reverse=True)	
-        #electrons.sort(key=lambda x:x.pt,reverse=True)	
 
 
 	###cutstep: dilepton pt, and eta
 	for mu in muons:
 	    if  self.verbose > 3:
 	        print "Muon id ",mu.pdgId, " pt ",mu.pt," eta ",mu.eta
-	lepton_muons = list(filter(lambda x : abs(x.eta)<self.muonEta, muons))
+	lepton_muons = list(filter(lambda x : POGRecipesRun2.muonPreselection(x), muons))
    
 	for el in electrons:
 	    if  self.verbose > 3:
 	        print "Electron id ", el.pdgId, " pt ", el.pt," eta ", el.eta
 	## check eta and whether it passes the conversion veto(not from photon conversion), convVeto = True: good electron
-	lepton_electrons = list(filter(lambda x :  abs(x.eta)<self.EGEta, electrons))
+	lepton_electrons = list(filter(lambda x :  POGRecipesRun2.electronPreselection(x), electrons))
 
-        leptonpairs = self.findingLeptonPairs(lepton_muons, lepton_electrons)
-	leptonpairs.sort(key=lambda x:x[0].pt+x[1].pt,reverse=True)	
-        #ptsumlist = [x[0].pt+x[1].pt for x in leptonpairs]
-	#print "ptsumlist after sorting ", ptsumlist
-
-        passdileptonPtEta = (len(leptonpairs) >= 1)
-	if not passdileptonPtEta:
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonPtEta"
-	    ##cutflow filled already at the beginning 
-	    return False
-        if self.isMC:
-	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	cutflow_bin += 1
-
-
-       
-	###cutstep: dilepton dz, dxy
-	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairImpactParameter(x)]
-	passdileptonIP = (len(leptonpairs) >= 1)
-	if not passdileptonIP:
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonIP "
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
-	    return False
-        if self.isMC: ##update event type, 
-	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	cutflow_bin += 1
-
-		
-	###cutstep: dilepton, ID
-	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairID(x)]
-        passdileptonID = (len(leptonpairs) >= 1)
-	if not passdileptonID:
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonID"
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
-	    return False
-	cutflow_bin += 1
-	llIDsf = 1.0; llIsosf = 1.0; lltrackingsf, lltrgsf, llHLTsafeIDsf  = 1.0, 1.0, 1.0
-	########
-	##for lep uncertainty
-	#######
-	l1Isosf       = [1.0, 1.0, 1.0]; l2Isosf       = [1.0, 1.0, 1.0]
-	l1IDsf        = [1.0, 1.0, 1.0]; l2IDsf        = [1.0, 1.0, 1.0] 
-	l1trgsf       = [1.0, 1.0, 1.0]; l2trgsf       = [1.0, 1.0, 1.0] 
-        l1trackingsf  = [1.0, 1.0, 1.0]; l2trackingsf  = [1.0, 1.0, 1.0] 
-	l1HLTsafeIDsf = [1.0, 1.0, 1.0]; l2HLTsafeIDsf = [1.0, 1.0, 1.0] 
-	if self.isMC: ##may need to update the SFs for trigging since leading lepton pair  may change
-	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-            #print "l1IDsf  ",l1IDsf, " l2IDsf ",l2IDsf
-	    llIDsf  = l1IDsf[0] * l2IDsf[0]
-	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-
-
-	###cutstep: dilepton, ISO
-	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairIso(x)]
-        passdileptonIso = (len(leptonpairs) >= 1)
-	if not passdileptonIso:
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonIso"
-	    if self.isMC:
-		event_reco_weight = event_reco_weight * llIDsf## already pass the ID cut, apply ID SF
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
-	    return False
-	cutflow_bin += 1
-	if self.isMC:
-	    self.triggertype = self.findTriggerType(leptonpairs[0]) ## temparory one  for MC
-	    l1Isosf, l2Isosf                       = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-            llIsosf = l1Isosf[0] * l2Isosf[0]
-	    llIDsf  = l1IDsf[0] * l2IDsf[0]
-	    #llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-
-	###cutstep: dilepton, HLTSafeID
-	leptonpairs = [x for x in leptonpairs if POGRecipesRun2.leptonpairHLTSafeID(x, RhoFastjetCentralCalo)]
-        passdileptonHLTSafeID = (len(leptonpairs) >= 1)
-	if not passdileptonHLTSafeID:
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonHLTSafeID "
-	    if self.isMC:
-		event_reco_weight = event_reco_weight * llIsosf * llIDsf  ## already pass the ID+Iso cut, apply ll ID+Iso SF
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
-	    return False
-	cutflow_bin += 1
-
-	
-        ### Trigger matching here: 
-	### 1. data only if MC is weighed by trigger efficiency
-	### 2. use trigger result both in data and MC and then apply scale factor to MC
-	### we apply trigger SFs to MC and do not cut on trigger matching 
-	matchedTrigobjs = []; trigObj_lep1 = None; trigObj_lep2 = None
-	lep1_TrgObjfilterbits = -1; lep2_TrgObjfilterbits = -1
-	hltpathprescale = 1.0
-	if not self.isMC or self.useTallingTrgEff:
-	    trigobjs = list(Collection(event, "TrigObj"))
-	    leptonpairs_postTrig = [ x for x in leptonpairs if  len(self.matchHLTPath(event, run, trigobjs, x))>0]
-	    passTrig = (len(leptonpairs_postTrig) > 0)
-	    if len(leptonpairs_postTrig) == 0 and not self.isMC: ## only apply trigger filter to data
-		if self.verbose > 3:
-		   print "cutflow_bin ",cutflow_bin," failed, HTL matching for real data only "
-		self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-		return False
-
-	    if passTrig:
-	        leptonpairs = leptonpairs_postTrig
-	    #print "matched trig objs for two leptons ",matchedTrigobjs
-	    #if len(matchedTrigobjs[0]) > 0: Trigobj_lep1 = matchedTrigobjs[0][0]
-	    #if len(matchedTrigobjs[1]) > 0: Trigobj_lep2 = matchedTrigobjs[1][0]
-	    if self.isMC and passTrig:
-		matched_firedHLTs = self.matchHLTPath(event, run, trigobjs, leptonpairs[0])
-                allprescales = []
-		for path in matched_firedHLTs:
-		    allprescales.append(Run2Trigger.DiLeptonTrigger_allHLTPaths_prescale["Run%d"%Runyear][path])
-		hltpathprescale = max(allprescales)
-                #print "MC, matched trigger ",matched_firedHLTs," all prescale ",allprescales," hltpathprescale ",hltpathprescale 
-	    trigObj_lep1 = self.trigger_reco_matching(leptonpairs[0][0], trigobjs)
-	    trigObj_lep2 = self.trigger_reco_matching(leptonpairs[0][1], trigobjs)
-	    if trigObj_lep1 != None: lep1_TrgObjfilterbits = trigObj_lep1.filterBits 
-	    if trigObj_lep2 != None: lep2_TrgObjfilterbits = trigObj_lep2.filterBits 
-	cutflow_bin += 1
-
-	### we should NOT see muon pairs in same CSC region with ETMF bug in real data, if we saw it, for safety, kill it 
-	### kill the muon pairs in same CSC region, either both in overlap or both in "non-overlap", for real datea, run < 278167
-	### efficiency correction applied for MC is in self.lepSFmanager.getleptonpairTrg
-	if Runyear == 2016 and not self.isMC and self.triggertype == "DoubleMuon" and run < 277166:
-	    leptonpairs = [ x for x in leptonpairs if not(POGRecipesRun2.isMuonPairSameCSCRegion(x[0], x[1])) ]
-	    if len(leptonpairs) == 0:
-		if self.verbose > 3:
-		   print "cutflow_bin ",cutflow_bin," failed , dimuon in same CSC region and due to EMTF bug , run ", run
-		self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-		return False
-	cutflow_bin += 1
-
-
-
-	def dileptonMass(leptons):
-	    lep1_p4 = ROOT.TLorentzVector()
-	    lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
-	    lep2_p4 = ROOT.TLorentzVector()
-	    lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
-	    ll_p4 = lep1_p4 + lep2_p4
-	    return ll_p4.M()
-
-	###cut: ll_M > 12
-	leptonpairs = [x for x in leptonpairs if dileptonMass(x) >12 ]
-	passdileptonLowMass = (len(leptonpairs) >= 1)
-	if not(passdileptonLowMass):
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," llM >12 "
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, leptonpairs)
-	    return False
-	cutflow_bin += 1
-
-
-	### not apply right now
-	### add lepton pair veto 
-	#if len(leptonpairs) > 1:
-	#    if self.verbose > 3:
-	#       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," dileptonpair>1 vetoed "
-	#    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	#    return False
-	#cutflow_bin += 1
-	    
-        ## select final two leptons, sort the pair by pt sum again 
-	leptonpairs.sort(key=lambda x:x[0].pt+x[1].pt, reverse=True)	
-	leptons = leptonpairs[0]##leading lepton first
-	event_lep_weight = 1.0
-	if self.isMC:
-	    #llIsosf, llIsosf_up, llIsosf_low = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    #llIDsf, llIDsf_up, llIDsf_low = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-	    #lltrgsf, lltrgsf_up, lltrgsf_low = self.lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
-	    #lltrackingsf, lltrackingsf_up, lltrackingsf_low = self.lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
-	    #llHLTsafeIDsf, llHLTsafeIDsf_up, llHLTsafeIDsf_low = self.lepSFmanager.getleptonpairHTLSafeIDSF(leptonpairs[0])
-	    l1Isosf, l2Isosf                       = self.lepSFmanager.getleptonpairIsoSF(leptonpairs[0])
-	    l1IDsf, l2IDsf                         = self.lepSFmanager.getleptonpairIDSF(leptonpairs[0])
-	    l1trackingsf, l2trackingsf             = self.lepSFmanager.getleptonpairTrackingSF(leptonpairs[0])
-	    l1HLTsafeIDsf, l2HLTsafeIDsf           = self.lepSFmanager.getleptonpairHTLSafeIDSF(leptonpairs[0])
-	    l1trgsf, l2trgsf                       = self.lepSFmanager.getleptonpairTrgSF(leptonpairs[0])
-            ## Tallin trigger eff
-	    lltrgsf_Tallin                         = self.lepSFmanager.getTallinTriggEff(leptonpairs[0][0].pt, self.triggertype)
-            llIsosf = l1Isosf[0] * l2Isosf[0]
-	    llIDsf  = l1IDsf[0] * l2IDsf[0]
-	    lltrgsf  = l1trgsf[0] * l2trgsf[0]
-	    #print "passed lepton selection, leading lep pt ",leptonpairs[0][0].pt," trigger type ",self.triggertype," lltrgsf ",lltrgsf," llIsosf ",llIsosf," llIDsf ",llIDsf
-	    
-	    lltrackingsf  = l1trackingsf[0] * l2trackingsf[0]
-	    llHLTsafeIDsf  = l1HLTsafeIDsf[0] * l2HLTsafeIDsf[0]
-    	    #event_lep_weight = llIsosf * llIDsf * lltrgsf * llHLTsafeIDsf * lltrackingsf
-	    if self.useTallingTrgEff:
-		event_lep_weight = llIsosf * llIDsf * lltrgsf_Tallin[0] * llHLTsafeIDsf * lltrackingsf
-	    else:
-		event_lep_weight = llIsosf * llIDsf * lltrgsf * llHLTsafeIDsf * lltrackingsf
-	        
-	    ##finished the lepton selection, add lep weight to event_reco_weight
-	    event_reco_weight = event_reco_weight * event_lep_weight
-	    #################
-	    self.lep1_branchname_sysvalue["Isosf"]        = l1Isosf
-	    self.lep1_branchname_sysvalue["IDsf"]         = l1IDsf
-	    self.lep1_branchname_sysvalue["HLTsafeIDsf"]  = l1HLTsafeIDsf
-	    self.lep1_branchname_sysvalue["trackingsf"]   = l1trackingsf
-	    self.lep2_branchname_sysvalue["Isosf"]        = l2Isosf
-	    self.lep2_branchname_sysvalue["IDsf"]         = l2IDsf
-	    self.lep2_branchname_sysvalue["HLTsafeIDsf"]  = l2HLTsafeIDsf
-	    self.lep2_branchname_sysvalue["trackingsf"]   = l2trackingsf
-	    self.lep1_branchname_sysvalue["trgsf"]        = l1trgsf
-	    self.lep2_branchname_sysvalue["trgsf"]        = l2trgsf
-	    self.out.fillBranch("ll_Tallintrgeff", lltrgsf_Tallin[0])
-	    self.out.fillBranch("ll_Tallintrgeff_up", lltrgsf_Tallin[1])
-	    self.out.fillBranch("ll_Tallintrgeff_down", lltrgsf_Tallin[2])
-	    
-
-
-        isMuMu = 0; isMuEl   = 0; isElMu = 0; isElEl = 0; isSF = 0;
-	if abs(leptons[0].pdgId) == 13 and abs(leptons[1].pdgId) == 13:
-	    isMuMu = 1
-	    isSF = 1
-	elif abs(leptons[0].pdgId) == 11 and  abs(leptons[1].pdgId) == 11:
-	    isElEl = 1
-	    isSF = 1
-	elif  abs(leptons[0].pdgId) == 13 and  abs(leptons[1].pdgId) == 11:
-	    isMuEl = 1
-	    isSF = 0
-	elif  abs(leptons[0].pdgId) == 11 and  abs(leptons[1].pdgId) == 13:
-	    isElMu = 1
-	    isSF = 0 
-
-
-	lep1_iso = 0.0; lep2_iso = 0.0
-	lep1_id = 0.0; lep2_id = 0.0
-	if abs(leptons[0].pdgId) == 13:
-	    lep1_iso = leptons[0].pfRelIso04_all
-	    lep1_id = 1 + leptons[0].softId + leptons[0].mediumId + leptons[0].tightId
-	else:
-	    lep1_iso = leptons[0].pfRelIso03_all
-	    lep1_id = leptons[0].cutBased
-
-	if abs(leptons[1].pdgId) == 13:
-	    lep2_iso = leptons[1].pfRelIso04_all
-	    lep2_id = 1 + leptons[1].softId + leptons[1].mediumId + leptons[1].tightId
-	else:
-	    lep2_iso = leptons[1].pfRelIso03_all
-	    lep2_id = leptons[1].cutBased
-
-        # SetPtEtaPhiE(pt,eta,phi,e); and SetPtEtaPhiM(pt,eta,phi,m);
-        lep1_p4 = ROOT.TLorentzVector()
-        lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
-        lep2_p4 = ROOT.TLorentzVector()
-        lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
-        ll_p4 = ROOT.TLorentzVector()
-        ll_p4 = lep1_p4 + lep2_p4
-	ll_pt = ll_p4.Pt(); ll_M = ll_p4.M(); ll_eta = ll_p4.Eta(); ll_phi = ll_p4.Phi()
-        ll_DR_l_l = lep1_p4.DeltaR(lep2_p4)
-	ll_DPhi_l_l = deltaPhi(lep1_p4.Phi(), lep2_p4.Phi())
-	ll_DEta_l_l = lep1_p4.Eta() - lep2_p4.Eta()
+        lepton_muons.sort(key=lambda x:x.pt,reverse=True)	
+        lepton_electrons.sort(key=lambda x:x.pt,reverse=True)	
         
         #####################################
         ## di-jets selection
         #####################################
-	if not (len(jets) >= 2):
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," njets ",len(jets)
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
-	    return False
-	cutflow_bin += 1
-
-	### jet recalibration
 	if hasattr(event, "Jet_pt_nom"):
 	    jet_pt_corrected = getattr(event, "Jet_pt_nom")
 	    for jet in jets:
@@ -961,150 +773,48 @@ class HHbbWWProducer(Module):
                 jets[ijet].pt = jet_pt_corrected[ijet]
 	
 	###cut: JetPt, JetEta
-        bjets = [x for x in jets if x.puId>0 and x.jetId == 6 and x.pt>self.jetPt and abs(x.eta)<self.jetEta]
-        #bjets = [x for x in jets if x.puId>0 and x.pt>self.jetPt and abs(x.eta)<self.jetEta] ## remove jetid > 0
-	if not(len(bjets) >= 2) :
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," jetPtEta "
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
-	    return False
-	cutflow_bin += 1
+        jets_pre = [x for x in jets if  POGRecipesRun2.ak4jetPreselection(x)]
+	def jet_lep_dR(jet):
+	    for mu in lepton_muons:
+	        if deltaR(jet.eta, jet.phi, mu.eta, mu.phi) < 0.4:
+	            return False
+	    for ele in lepton_electrons:
+	        if deltaR(jet.eta, jet.phi, ele.eta, ele.phi) < 0.4:
+	            return False
+	    return True
 
-	###cut: the seperation between jet and lepton
-        #bjets.sort(key=lambda x:x.pt,reverse=True)	
-    	deltaRl1j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[0].eta, leptons[0].phi) > self.deltaR_j_l
-    	deltaRl2j = lambda jet :  deltaR(jet.eta, jet.phi, leptons[1].eta, leptons[1].phi) > self.deltaR_j_l
-        bjets = [x for x in bjets if deltaRl1j(x) and deltaRl2j(x)]
-	nJetsL = len(bjets)
-        if not(len(bjets) >= 2): 
-	    if self.verbose > 3:
-	       print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight," bl seperation"
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
-	    return False
-	cutflow_bin += 1
+	jets_clean = [x for x in jets_pre if jet_lep_dR(x)]
+	        
 
 	#### select final two jets: jets with maximum pT , for DY estimation 
         ## Run2016: sort alljets with a cMVAv2 descreasing order 
 	## Run2017: use DeepCVS
-	if Runyear == 2016:
-	    bjets.sort(key=lambda x:x.btagCMVA, reverse=True)	
-        elif Runyear == 2017 or Runyear== 2018:
-	    bjets.sort(key=lambda x:x.btagDeepB, reverse=True)	
-        else:
-	    sys.exit(errorcolor1+"wrong run year value: %d"%Runyear+errorcolor2)
+	#if Runyear == 2016:
+	#    jets_clean.sort(key=lambda x:x.btagCMVA, reverse=True)	
+        #elif Runyear == 2017 or Runyear== 2018:
+	#    jets_clean.sort(key=lambda x:x.btagDeepB, reverse=True)	
+        #else:
+	#    sys.exit(errorcolor1+"wrong run year value: %d"%Runyear+errorcolor2)
 
-	ht_jets = sum([x.pt for x in bjets])
-	hJets = bjets[0:2]
-	hJets.sort(key=lambda x:x.pt, reverse=True)
-	hJidx = [jets.index(x) for x in hJets]
-	jet1 = hJets[0]; jet2 = hJets[1]
-
-	##include all jets before btagging for eff measurement 
-	##only select jets up to self.maxnjets
-	def resize_alljets(thislist):
-	    if len(thislist)> self.maxnjets:	 
-    		return thislist[0: self.maxnjets] 
-	    else: 
-	    	return thislist+[0]*(self.maxnjets-len(alljets))
-	alljets = bjets
-	alljets_pt = [jet.pt for jet in alljets]
-	alljets_eta = [jet.eta for jet in alljets]
-	alljets_cMVAv2 = [jet.btagCMVA for jet in alljets]
-	alljets_DeepCSV = [jet.btagDeepB for jet in alljets]
-	flavour = lambda x : abs(x)*(abs(x) == 4 or abs(x) == 5)
-        alljets_pt = resize_alljets(alljets_pt)
-        alljets_eta = resize_alljets(alljets_eta)
-        alljets_cMVAv2 = resize_alljets(alljets_cMVAv2)
-        alljets_DeepCSV = resize_alljets(alljets_DeepCSV)
+        ak8jets = list(Collection(event, "FatJet"))
+	ak8jets_pre = [x for x in ak8jets if  POGRecipesRun2.ak8jetPreselection(x)]
+	def jet_subjetcut(jet):
+	    subjet1_idx = jet.subJetIdx1
+	    subjet2_idx = jet.subJetIdx2
+	    #print "subjet1_idx ",subjet1_idx," subjet2_idx ",subjet2_idx," njet ",len(jets)
+	    if subjet1_idx < 0 or subjet2_idx < 0 or subjet1_idx >= len(jets)  or subjet2_idx >= len(jets):
+		return False
+	    subjet1 = jets[subjet1_idx]
+	    subjet2 = jets[subjet2_idx]
+	    return subjet1.pt > 20 and abs(subjet1.eta)<2.4 and subjet2.pt>20 and abs(subjet2.eta)<2.4
+	ak8jets_clean = [x for x in ak8jets_pre if jet_subjetcut(x)]
 	
-            		
-	###cut: jet btagging , normal selection, skip it for DY estimation
-	if not self.DYestimation:
-	    bjets_Mbtagcut = [x for x in bjets if POGRecipesRun2.jetMediumBtagging(x)]
-	    bjets_Lbtagcut = [x for x in bjets if POGRecipesRun2.jetLooseBtagging(x)]
-	    bjets_Tbtagcut = [x for x in bjets if POGRecipesRun2.jetLooseBtagging(x)]
-	    #if not(len(bjets_Mbtagcut) >= 2 or (self.looseEvtSelection and len(bjets_Mbtagcut) >= 1 and len(bjets_Lbtagcut) >= 2)): 
-	    if not(len(bjets_Mbtagcut) >= 2 or (self.looseEvtSelection and len(bjets_Mbtagcut) >= 1) or self.noBtaggingCut): 
-		if self.verbose > 3:
-		   print "cutflow_bin ",cutflow_bin," failed , weight ",event_reco_weight * sample_weight, " btagging "
-		self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-		#self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
-		return False
-	    cutflow_bin += 1
-
-	    #### select final two bjets: jets with maximum btagging  and then fill cutflow hist
-	    hJets = []
-	    if Runyear == 2016:
-		hJets = sorted(bjets, key = lambda jet : jet.btagCMVA, reverse=True)[0:2]
-	    elif Runyear == 2017 or Runyear == 2018:
-		hJets = sorted(bjets, key = lambda jet : jet.btagDeepB, reverse=True)[0:2]
-	    hJets.sort(key=lambda x:x.pt, reverse=True)
-	    hJidx = [jets.index(x) for x in hJets]
-	    jet1 = hJets[0]; jet2 = hJets[1]
-
-	### add btagging weight 
-	hJets_BtagSF      = [1.0, 1.0]
-	hJets_BtagSF_up   = [1.0, 1.0]
-	hJets_BtagSF_down = [1.0, 1.0]
-
-	if self.isMC:
-	    hJets_BtagSF       = [jet_btagSF[x] for x in hJidx]
-	    hJets_BtagSF_up    = [jet_btagSF_up[x] for x in hJidx]
-	    hJets_BtagSF_down  = [jet_btagSF_down[x] for x in hJidx]
-	    ## FIXME  https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods
-	    if not(self.noBtaggingCut):
-		event_reco_weight = event_reco_weight * hJets_BtagSF[0] * hJets_BtagSF[1]
-
-	if ll_M < 76 or (self.looseEvtSelection and ll_M < 250.0):# loose event selection, ll_M < 1000
-	    cutflow_bin += 1
-	else:
-	    self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	    #self.fillCutFlow_leptons(cutflow_bin, event_reco_weight * sample_weight, [leptons])
-	    if not (self.DYestimation and ll_M < 250.0):##only keep ll_M >76 for DY estimation
-                if self.verbose > 3:
-		    print "cutflow_bin ",cutflow_bin," failed due to ll_M(%.1f) < 76"%(ll_M)
-		return False
-	self.fillCutFlow(cutflow_bin, event_reco_weight * sample_weight)
-	if self.verbose > 3:
-	    print "cutflow_bin ",cutflow_bin," Fine , weight ",event_reco_weight * sample_weight
+        jets_clean.sort(key=lambda x:x.pt,reverse=True)	
+        ak8jets_clean.sort(key=lambda x:x.pt,reverse=True)	
+	
 
 
-        ## Save a few basic reco. H kinematics
-        hj1_p4 = ROOT.TLorentzVector()
-        hj2_p4 = ROOT.TLorentzVector()
-        hj1_p4.SetPtEtaPhiM(jets[hJidx[0]].pt,jets[hJidx[0]].eta,jets[hJidx[0]].phi,jets[hJidx[0]].mass)
-        hj2_p4.SetPtEtaPhiM(jets[hJidx[1]].pt,jets[hJidx[1]].eta,jets[hJidx[1]].phi,jets[hJidx[1]].mass)
-        hbb_p4 = hj1_p4 + hj2_p4
-	jj_pt = hbb_p4.Pt(); jj_M = hbb_p4.M(); jj_eta = hbb_p4.Eta(); jj_phi = hbb_p4.Phi()
-        jj_DR_j_j = hj1_p4.DeltaR(hj2_p4)
-	jj_DPhi_j_j = deltaPhi(hj1_p4.Phi(), hj2_p4.Phi())
-        jj_DEta_j_j = hj1_p4.Eta() - hj2_p4.Eta()
-
-        met_p4 = ROOT.TLorentzVector()## mass=0, eta=0
-        met_p4.SetPtEtaPhiM(metPt,0.,metPhi,0.) # only use met vector to derive transverse quantities
-	dR_b1l1 = hj1_p4.DeltaR(lep1_p4)
-	dR_b2l1 = hj2_p4.DeltaR(lep1_p4)
-	dR_b1l2 = hj1_p4.DeltaR(lep2_p4)
-	dR_b2l2 = hj2_p4.DeltaR(lep2_p4)
-        llmetjj_minDR_l_j = min([dR_b1l1, dR_b2l1, dR_b1l2, dR_b2l2])
-        llmetjj_DR_ll_jj = ll_p4.DeltaR(hbb_p4)
-        llmetjj_DPhi_ll_met =  deltaPhi(ll_p4.Phi(), met_p4.Phi())
-        llmetjj_DPhi_ll_jj =  deltaPhi(ll_p4.Phi(), hbb_p4.Phi())
-	llmetjj_MTformula = sqrt(2*ll_p4.Pt()*met_p4.Pt()*(1-cos(llmetjj_DPhi_ll_met)))
-        lljj_p4 = hbb_p4 + ll_p4
-	lljj_M = lljj_p4.M()
-        llmet_p4 = met_p4 + ll_p4
-	llmetjj_p4 = met_p4 + ll_p4 + hbb_p4
-	llmetjj_M = llmetjj_p4.M()
-        llmet_M = llmet_p4.M()
-        llmetjj_DPhi_llmet_jj =  deltaPhi(llmet_p4.Phi(), hbb_p4.Phi())
-    
-        cosThetaStar = cos(llmet_p4.Theta() - hbb_p4.Theta())
-    	ht = ht_jets + lep1_p4.Pt() + lep2_p4.Pt() 
-        ###
-
+	"""
         #jet selection, old
         #jetsForHiggs = [x for x in jets if x.lepFilter and x.puId>0 and x.jetId>0 and x.Pt>20 and abs(x.eta)<2.5]
         #if (len(jetsForHiggs) < 2): return False
@@ -1114,19 +824,19 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("jet1_eta",  hj1_p4.Eta());
         self.out.fillBranch("jet1_phi",  hj1_p4.Phi());
         self.out.fillBranch("jet1_cMVAv2",  jet1.btagCMVA);
-        self.out.fillBranch("jet1_DeepCSV",  jet1.btagDeepB);
+        self.out.fillBranch("jet1_CSV",  jet1.btagDeepB);
         self.out.fillBranch("jet2_idx",  hJidx[1]);
         self.out.fillBranch("jet2_pt", hj2_p4.Pt());
         self.out.fillBranch("jet2_E",  hj2_p4.E());
         self.out.fillBranch("jet2_eta", hj2_p4.Eta());
         self.out.fillBranch("jet2_phi",  hj2_p4.Phi());
         self.out.fillBranch("jet2_cMVAv2",  jet2.btagCMVA);
-        self.out.fillBranch("jet2_DeepCSV",  jet2.btagDeepB);
-	self.out.fillBranch("isElEl", isElEl) # 0 or 1
-	self.out.fillBranch("isElMu",  isElMu) # 0 or 1, mu_pt<el_pt
-	self.out.fillBranch("isMuEl",  isMuEl) # 0 or 1
-	self.out.fillBranch("isMuMu",  isMuMu) # 0 or 1
-	self.out.fillBranch("isSF",  isSF)
+        self.out.fillBranch("jet2_CSV",  jet2.btagDeepB);
+	#self.out.fillBranch("isElEl", isElEl) # 0 or 1
+	#self.out.fillBranch("isElMu",  isElMu) # 0 or 1, mu_pt<el_pt
+	#self.out.fillBranch("isMuEl",  isMuEl) # 0 or 1
+	#self.out.fillBranch("isMuMu",  isMuMu) # 0 or 1
+	#self.out.fillBranch("isSF",  isSF)
 	#self.out.fillBranch("lepstype", Lepstype)
         self.out.fillBranch("lep1_pt",  lep1_p4.Pt());
         self.out.fillBranch("lep1_E",  lep1_p4.E());
@@ -1145,10 +855,6 @@ class HHbbWWProducer(Module):
         self.out.fillBranch("lep2_id",  lep2_id);
         self.out.fillBranch("lep2_iso",  lep2_iso);
         self.out.fillBranch("lep2_TrgObjfilterbits",  lep2_TrgObjfilterbits);
-	self.out.fillBranch("passTrigger", passTrig);
-	self.out.fillBranch("hltpathprescale", hltpathprescale);
-	self.out.fillBranch("met_pt",  met_p4.Pt())
-	self.out.fillBranch("met_phi", met_p4.Phi())
 	self.out.fillBranch("ht",  ht)
 	self.out.fillBranch("ht_jets",  ht_jets)
 	self.out.fillBranch("nJetsL",  nJetsL)
@@ -1450,6 +1156,292 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("dR_genl2_lepFromW2",  dR_genl2_lepFromW2);
 
 
+	"""
+	def fillBranches_muon(leptons):
+	    if (len(leptons) >= 1):
+		lep1 = leptons[0]
+		lep1_p4 = ROOT.TLorentzVector()
+		lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
+		self.out.fillBranch("mu1_pt",                     lep1.pt);
+		self.out.fillBranch("mu1_E",                      lep1_p4.E());
+		self.out.fillBranch("mu1_eta",                    lep1.eta);
+		self.out.fillBranch("mu1_phi",                    lep1.phi);
+		self.out.fillBranch("mu1_pdgid",                  lep1.pdgId);
+		self.out.fillBranch("mu1_charge",                 lep1.charge);
+		self.out.fillBranch("mu1_sip3D",                  lep1.sip3d);
+		self.out.fillBranch("mu1_miniRelIso",             lep1.miniPFRelIso_all);
+		self.out.fillBranch("mu1_miniRelIsoCharged",      lep1.miniPFRelIso_chg);
+		self.out.fillBranch("mu1_dxy",                    lep1.dxy);
+		self.out.fillBranch("mu1_dz",                     lep1.dz);
+		self.out.fillBranch("mu1_segmentCompatibility",   lep1.segmentComp);
+		self.out.fillBranch("mu1_leptonMVA",              lep1.mvaTTH);
+		self.out.fillBranch("mu1_dxyAbs",                 abs(lep1.dxy));
+	    else:
+		self.out.fillBranch("mu1_pt",                     -10000.0);
+		self.out.fillBranch("mu1_E",                      -10000.0);
+		self.out.fillBranch("mu1_eta",                    -10000.0);
+		self.out.fillBranch("mu1_phi",                    -10000.0);
+		self.out.fillBranch("mu1_pdgid",                  -100000);
+		self.out.fillBranch("mu1_charge",                 -10000.0);
+		self.out.fillBranch("mu1_sip3D",                  -10000.0);
+		self.out.fillBranch("mu1_miniRelIso",             -10000.0);
+		self.out.fillBranch("mu1_miniRelIsoCharged",      -10000.0);
+		self.out.fillBranch("mu1_dxy",                    -10000.0);
+		self.out.fillBranch("mu1_dxyAbs",                 -10000.0);
+		self.out.fillBranch("mu1_dz",                     -10000.0);
+		self.out.fillBranch("mu1_segmentCompatibility",   -10000.0);
+		self.out.fillBranch("mu1_leptonMVA",              -10000.0);
+	    
+	    if (len(leptons) >= 2):
+		lep2 = leptons[1]
+		lep2_p4 = ROOT.TLorentzVector()
+		lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
+		self.out.fillBranch("mu2_pt",                     lep2.pt);
+		self.out.fillBranch("mu2_E",                      lep2_p4.E());
+		self.out.fillBranch("mu2_eta",                    lep2.eta);
+		self.out.fillBranch("mu2_phi",                    lep2.phi);
+		self.out.fillBranch("mu2_pdgid",                  lep2.pdgId);
+		self.out.fillBranch("mu2_charge",                 lep2.charge);
+		self.out.fillBranch("mu2_sip3D",                  lep2.sip3d);
+		self.out.fillBranch("mu2_miniRelIso",             lep2.miniPFRelIso_all);
+		self.out.fillBranch("mu2_miniRelIsoCharged",      lep2.miniPFRelIso_chg);
+		self.out.fillBranch("mu2_dxy",                    lep2.dxy);
+		self.out.fillBranch("mu2_dz",                     lep2.dz);
+		self.out.fillBranch("mu2_segmentCompatibility",   lep2.segmentComp);
+		self.out.fillBranch("mu2_leptonMVA",              lep2.mvaTTH);
+		self.out.fillBranch("mu2_dxyAbs",                 abs(lep2.dxy));
+	    else:
+		self.out.fillBranch("mu2_pt",                     -10000.0);
+		self.out.fillBranch("mu2_E",                      -10000.0);
+		self.out.fillBranch("mu2_eta",                    -10000.0);
+		self.out.fillBranch("mu2_phi",                    -10000.0);
+		self.out.fillBranch("mu2_pdgid",                  -100000);
+		self.out.fillBranch("mu2_charge",                 -10000.0);
+		self.out.fillBranch("mu2_sip3D",                  -10000.0);
+		self.out.fillBranch("mu2_miniRelIso",             -10000.0);
+		self.out.fillBranch("mu2_miniRelIsoCharged",      -10000.0);
+		self.out.fillBranch("mu2_dxy",                    -10000.0);
+		self.out.fillBranch("mu2_dxyAbs",                 -10000.0);
+		self.out.fillBranch("mu2_dz",                     -10000.0);
+		self.out.fillBranch("mu2_segmentCompatibility",   -10000.0);
+		self.out.fillBranch("mu2_leptonMVA",              -10000.0);
+
+	def fillBranches_electron(leptons):
+	    if (len(leptons) >= 1):
+		lep1 = leptons[0]
+		lep1_p4 = ROOT.TLorentzVector()
+		lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
+		self.out.fillBranch("ele1_pt",                    lep1.pt);
+		self.out.fillBranch("ele1_E",                     lep1_p4.E());
+		self.out.fillBranch("ele1_eta",                   lep1.eta);
+		self.out.fillBranch("ele1_phi",                   lep1.phi);
+		self.out.fillBranch("ele1_pdgid",                 lep1.pdgId);
+		self.out.fillBranch("ele1_charge",                lep1.charge);
+		self.out.fillBranch("ele1_sip3D",                 lep1.sip3d);
+		self.out.fillBranch("ele1_miniRelIso",            lep1.miniPFRelIso_all);
+		self.out.fillBranch("ele1_miniRelIsoCharged",     lep1.miniPFRelIso_chg);
+		self.out.fillBranch("ele1_dxy",                   lep1.dxy);
+		self.out.fillBranch("ele1_dz",                    lep1.dz);
+		self.out.fillBranch("ele1_leptonMVA",             lep1.mvaTTH);
+		self.out.fillBranch("ele1_dxyAbs",                abs(lep1.dxy));
+		self.out.fillBranch("ele1_ntMVAeleID",            0.0);##not available ?
+	    else:
+		self.out.fillBranch("ele1_pt",                    -10000.0);
+		self.out.fillBranch("ele1_E",                     -10000.0);
+		self.out.fillBranch("ele1_eta",                   -10000.0);
+		self.out.fillBranch("ele1_phi",                   -10000.0);
+		self.out.fillBranch("ele1_pdgid",                 -100000);
+		self.out.fillBranch("ele1_charge",                -10000.0);
+		self.out.fillBranch("ele1_sip3D",                 -10000.0);
+		self.out.fillBranch("ele1_miniRelIso",            -10000.0);
+		self.out.fillBranch("ele1_miniRelIsoCharged",     -10000.0);
+		self.out.fillBranch("ele1_dxy",                   -10000.0);
+		self.out.fillBranch("ele1_dxyAbs",                -10000.0);
+		self.out.fillBranch("ele1_dz",                    -10000.0);
+		self.out.fillBranch("ele1_ntMVAeleID",            -10000.0);
+		self.out.fillBranch("ele1_leptonMVA",             -10000.0);
+	    
+	    if (len(leptons) >= 2):
+		lep2 = leptons[1]
+		lep2_p4 = ROOT.TLorentzVector()
+		lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
+		self.out.fillBranch("ele2_pt",                    lep2.pt);
+		self.out.fillBranch("ele2_E",                     lep2_p4.E());
+		self.out.fillBranch("ele2_eta",                   lep2.eta);
+		self.out.fillBranch("ele2_phi",                   lep2.phi);
+		self.out.fillBranch("ele2_pdgid",                 lep2.pdgId);
+		self.out.fillBranch("ele2_charge",                lep2.charge);
+		self.out.fillBranch("ele2_sip3D",                 lep2.sip3d);
+		self.out.fillBranch("ele2_miniRelIso",            lep2.miniPFRelIso_all);
+		self.out.fillBranch("ele2_miniRelIsoCharged",     lep2.miniPFRelIso_chg);
+		self.out.fillBranch("ele2_dxy",                   lep2.dxy);
+		self.out.fillBranch("ele2_dz",                    lep2.dz);
+		self.out.fillBranch("ele2_leptonMVA",             lep2.mvaTTH);
+		self.out.fillBranch("ele2_dxyAbs",                abs(lep2.dxy));
+		self.out.fillBranch("ele2_ntMVAeleID",            0.0);##not available ?
+	    else:
+		self.out.fillBranch("ele2_pt",                    -10000.0);
+		self.out.fillBranch("ele2_E",                     -10000.0);
+		self.out.fillBranch("ele2_eta",                   -10000.0);
+		self.out.fillBranch("ele2_phi",                   -10000.0);
+		self.out.fillBranch("ele2_pdgid",                 -100000);
+		self.out.fillBranch("ele2_charge",                -10000.0);
+		self.out.fillBranch("ele2_sip3D",                 -10000.0);
+		self.out.fillBranch("ele2_miniRelIso",            -10000.0);
+		self.out.fillBranch("ele2_miniRelIsoCharged",     -10000.0);
+		self.out.fillBranch("ele2_dxy",                   -10000.0);
+		self.out.fillBranch("ele2_dxyAbs",                -10000.0);
+		self.out.fillBranch("ele2_dz",                    -10000.0);
+		self.out.fillBranch("ele2_ntMVAeleID",            -10000.0);
+		self.out.fillBranch("ele2_leptonMVA",             -10000.0);
+
+	def fillBranches_jet(jets):
+            if (len(jets) >= 1):
+		jet1 = jets[0]
+		jet1_p4 = ROOT.TLorentzVector()
+		jet1_p4.SetPtEtaPhiM(jets[0].pt, jets[0].eta, jets[0].phi, jets[0].mass)
+		self.out.fillBranch("ak4Jet1_pt",                 jet1.pt);
+		self.out.fillBranch("ak4Jet1_E",                  jet1_p4.E());
+		self.out.fillBranch("ak4Jet1_eta",                jet1.eta);
+		self.out.fillBranch("ak4Jet1_phi",                jet1.phi);
+		self.out.fillBranch("ak4Jet1_cMVAv2",             jet1.btagCMVA);
+		#self.out.fillBranch("ak4Jet1_CSV",                jet1.btagDeepB);
+		self.out.fillBranch("ak4Jet1_CSV",                jet1.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak4Jet1_pt",                 -10000.0);
+		self.out.fillBranch("ak4Jet1_E",                  -10000.0);
+		self.out.fillBranch("ak4Jet1_eta",                -10000.0);
+		self.out.fillBranch("ak4Jet1_phi",                -10000.0);
+		self.out.fillBranch("ak4Jet1_cMVAv2",             -10000.0);
+		self.out.fillBranch("ak4Jet1_CSV",                -10000.0);
+
+            if (len(jets) >= 2):
+		jet2 = jets[1]
+		jet2_p4 = ROOT.TLorentzVector()
+		jet2_p4.SetPtEtaPhiM(jets[1].pt, jets[1].eta, jets[1].phi, jets[1].mass)
+		self.out.fillBranch("ak4Jet2_pt",                 jet2.pt);
+		self.out.fillBranch("ak4Jet2_E",                  jet2_p4.E());
+		self.out.fillBranch("ak4Jet2_eta",                jet2.eta);
+		self.out.fillBranch("ak4Jet2_phi",                jet2.phi);
+		self.out.fillBranch("ak4Jet2_cMVAv2",             jet2.btagCMVA);
+		#self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepB);
+		self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak4Jet2_pt",                 -10000.0);
+		self.out.fillBranch("ak4Jet2_E",                  -10000.0);
+		self.out.fillBranch("ak4Jet2_eta",                -10000.0);
+		self.out.fillBranch("ak4Jet2_phi",                -10000.0);
+		self.out.fillBranch("ak4Jet2_cMVAv2",             -10000.0);
+		self.out.fillBranch("ak4Jet2_CSV",                -10000.0);
+
+	def fillBranches_ak8jet(ak8jets, ak4jets):
+            if (len(ak8jets) >= 1):
+		ak8jet1 = ak8jets[0]
+		ak8jet1_p4 = ROOT.TLorentzVector()
+		ak8jet1_p4.SetPtEtaPhiM(ak8jets[0].pt, ak8jets[0].eta, ak8jets[0].phi, ak8jets[0].mass)
+		subjet1 = ak4jets[ak8jet1.subJetIdx1]
+		subjet2 = ak4jets[ak8jet1.subJetIdx2]
+		self.out.fillBranch("ak8Jet1_pt",                 ak8jet1.pt);
+		self.out.fillBranch("ak8Jet1_E",                  ak8jet1_p4.E());
+		self.out.fillBranch("ak8Jet1_eta",                ak8jet1.eta);
+		self.out.fillBranch("ak8Jet1_phi",                ak8jet1.phi);
+		self.out.fillBranch("ak8Jet1_msoftdrop",          ak8jet1.msoftdrop);
+		self.out.fillBranch("ak8Jet1_btagHbb",            ak8jet1.btagHbb);
+		self.out.fillBranch("ak8Jet1_tau1",               ak8jet1.tau1);
+		self.out.fillBranch("ak8Jet1_tau2",               ak8jet1.tau2);
+		self.out.fillBranch("ak8Jet1_subjet0_pt",         subjet1.pt);
+		self.out.fillBranch("ak8Jet1_subjet0_eta",        subjet1.eta);
+		self.out.fillBranch("ak8Jet1_subjet0_phi",        subjet1.phi);
+		#self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
+		self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8Jet1_subjet1_pt",         subjet2.pt);
+		self.out.fillBranch("ak8Jet1_subjet1_eta",        subjet2.eta);
+		self.out.fillBranch("ak8Jet1_subjet1_phi",        subjet2.phi);
+		#self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
+		self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak8Jet1_pt",                 -10000.0);
+		self.out.fillBranch("ak8Jet1_E",                  -10000.0);
+		self.out.fillBranch("ak8Jet1_eta",                -10000.0);
+		self.out.fillBranch("ak8Jet1_phi",                -10000.0);
+		self.out.fillBranch("ak8Jet1_msoftdrop",          -10000.0);
+		self.out.fillBranch("ak8Jet1_btagHbb",            -10000.0);
+		self.out.fillBranch("ak8Jet1_tau1",               -10000.0);
+		self.out.fillBranch("ak8Jet1_tau2",               -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet0_pt",         -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet0_eta",        -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet0_phi",        -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet0_CSV",        -10000.0);   
+		self.out.fillBranch("ak8Jet1_subjet1_pt",         -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet1_eta",        -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet1_phi",        -10000.0);
+		self.out.fillBranch("ak8Jet1_subjet1_CSV",        -10000.0);   
+	    
+            if (len(ak8jets) >= 2):
+		ak8jet2 = ak8jets[1]
+		ak8jet2_p4 = ROOT.TLorentzVector()
+		ak8jet2_p4.SetPtEtaPhiM(ak8jets[1].pt, ak8jets[1].eta, ak8jets[1].phi, ak8jets[1].mass)
+		subjet1 = ak4jets[ak8jet2.subJetIdx1]
+		subjet2 = ak4jets[ak8jet2.subJetIdx2]
+		self.out.fillBranch("ak8Jet2_pt",                 ak8jet2.pt);
+		self.out.fillBranch("ak8Jet2_E",                  ak8jet2_p4.E());
+		self.out.fillBranch("ak8Jet2_eta",                ak8jet2.eta);
+		self.out.fillBranch("ak8Jet2_phi",                ak8jet2.phi);
+		self.out.fillBranch("ak8Jet2_msoftdrop",          ak8jet2.msoftdrop);
+		self.out.fillBranch("ak8Jet2_btagHbb",            ak8jet2.btagHbb);
+		self.out.fillBranch("ak8Jet2_tau1",               ak8jet2.tau1);
+		self.out.fillBranch("ak8Jet2_tau2",               ak8jet2.tau2);
+		self.out.fillBranch("ak8Jet2_subjet0_pt",         subjet1.pt);
+		self.out.fillBranch("ak8Jet2_subjet0_eta",        subjet1.eta);
+		self.out.fillBranch("ak8Jet2_subjet0_phi",        subjet1.phi);
+		#self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepB);   
+		self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8Jet2_subjet1_pt",         subjet2.pt);
+		self.out.fillBranch("ak8Jet2_subjet1_eta",        subjet2.eta);
+		self.out.fillBranch("ak8Jet2_subjet1_phi",        subjet2.phi);
+		#self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepB);
+		self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak8Jet2_pt",                 -10000.0);
+		self.out.fillBranch("ak8Jet2_E",                  -10000.0);
+		self.out.fillBranch("ak8Jet2_eta",                -10000.0);
+		self.out.fillBranch("ak8Jet2_phi",                -10000.0);
+		self.out.fillBranch("ak8Jet2_msoftdrop",          -10000.0);
+		self.out.fillBranch("ak8Jet2_tau1",               -10000.0);
+		self.out.fillBranch("ak8Jet2_tau2",               -10000.0);
+		self.out.fillBranch("ak8Jet2_btagHbb",            -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet0_pt",         -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet0_eta",        -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet0_phi",        -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet0_CSV",        -10000.0);   
+		self.out.fillBranch("ak8Jet2_subjet1_pt",         -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet1_eta",        -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet1_phi",        -10000.0);
+		self.out.fillBranch("ak8Jet2_subjet1_CSV",        -10000.0);   
+	    
+	        
+	        
+
+        met_p4 = ROOT.TLorentzVector()## mass=0, eta=0
+        met_p4.SetPtEtaPhiM(metPt,0.,metPhi,0.) # only use met vector to derive transverse quantities
+	self.out.fillBranch("n_presel_mu", len(lepton_muons))
+	self.out.fillBranch("n_presel_ele", len(lepton_electrons))
+	self.out.fillBranch("n_presel_ak4Jet", len(jets_clean))
+	self.out.fillBranch("n_presel_ak8Jet", len(ak8jets_clean))
+	self.out.fillBranch("PFMET",  met_p4.Pt())
+	self.out.fillBranch("PFMETphi", met_p4.Phi())
+	self.out.fillBranch("pu",  pu)
+	self.out.fillBranch("PU_weight",  event_pu_weight)
+        self.out.fillBranch("MC_weight",  genweight)
+	self.out.fillBranch("run",  run)
+	self.out.fillBranch("event",  ievent)
+	self.out.fillBranch("ls",  luminosityBlock)
+
+	fillBranches_muon(lepton_muons)
+	fillBranches_electron(lepton_electrons)
+	fillBranches_jet(jets_clean)
+	fillBranches_ak8jet(ak8jets_clean, jets)
+	
 
         return True
                 

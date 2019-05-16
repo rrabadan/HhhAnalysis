@@ -7,15 +7,16 @@ from RunConfiguration  import *
 import ROOT
 
 
-dodata = True
-doDYEstimation = True
+dodata = False
+doMC = True
+doDYEstimation = False
 jobdir = "producerbbWW%d"%Runyear
 #jobdir = "producerbbWWcounter"
 #jobdir = "producerbbWWDYestimation%d"%Runyear
-outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20190309_addSys/"%(Runyear)
+outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20190508_nobtagcut_TallinEff_passTrigHLTprescale/"%(Runyear)
 if doDYEstimation:
     jobdir = jobdir+'DYestimation'
-    outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20180309_DYEstimation/"%(Runyear)
+    outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run%d_20180326_DYEstimation/"%(Runyear)
 #outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180620_MC_eventcounter/"
 Nanoaoddir_tao = "/fdata/hepx/store/user/taohuang/NANOAOD/"
 os.system("mkdir -p %s" % jobdir)
@@ -47,6 +48,7 @@ if doDYEstimation:
     torun_datasets = getdatasets(DYdata, dodata)      
 else:
     torun_datasets = Slist.Nanodatasets
+    #torun_datasets = getdatasets(["DY"], dodata) 
 
 #torun_datasets.append("/DoubleEG/Run2016B-05Feb2018_ver1-v1/NANOAOD")
 #torun_datasets.append("/DoubleEG/Run2016B-05Feb2018_ver2-v1/NANOAOD")
@@ -131,6 +133,8 @@ cd $CMSSW_BASE/src/HhhAnalysis/python/NanoAOD/
 	elif nsample>= 0:
 	    process = job.split('/')[1]
 	    print "MC nsample ",nsample, " process ",process, "dataset ",job.split('/')
+	    if not doMC:
+	        continue
 
 	localdir = os.path.join(Nanoaoddir_tao, process)
         #if os.path.isdir(localdir):
@@ -145,17 +149,18 @@ cd $CMSSW_BASE/src/HhhAnalysis/python/NanoAOD/
 
 
 	query = "file dataset="+Nanodataset
-	#print "query ",query
+	print "query ",query
 	#os.system("dasgoclient -limit=0 -query='{query}' >> {outfilename}".format(query = query, outfilename = outfile))
 	#flist = os.peopn("dasgoclient -limit=0 -query='{query}' >> {outfilename}".format(query = query, outfilename = outfile))
 	flist = os.popen("dasgoclient -limit=0 -query='{query}'".format(query = query), 'r')
+	#print "query results ",flist
 	#if jobtype == "TT":
 	#    print "inputdir ",inputdir
 	#    flist = os.popen("ls "+inputdir)
 	ifile = 0
 	for line in flist:
 	    ifile += 1
-	    #print "line ",line
+	    print "query result line ",line
 	    if ".root" in line :#and "NANOAOD" in line:
 	    	infile = ""
 	    	file_das = line[:-1]
@@ -217,7 +222,7 @@ sbatch {0}/Send_producerbbWW_{1}_{2}.slrm""".format(jobdir, process, ifile))
 
 
 def mergeoutputNtuples(torun_datasets):
-    overwrite = True
+    overwrite = False
     for ijob, job in enumerate(torun_datasets):
 	index = Slist.Nanodatasets.index(job)
 	nsample = int(Slist.NumSample[index])
@@ -233,6 +238,8 @@ def mergeoutputNtuples(torun_datasets):
 	    #print "real data nsample ",nsample, " process ",process
 	elif nsample>= 0:
 	    process = job.split('/')[1]
+	    if not doMC:
+	        continue
 	    #print "MC nsample ",nsample, " process ",process, "MiniAOD dataset ",job.split('/')
 	#faileddatasets = ["WWToLNuQQ_aTGC_13TeV-madgraph-pythia8", "ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1"]
 	#faileddatasets.append("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1")

@@ -101,11 +101,10 @@ elif jobtype != "":
     print "MC samples "
     jsonfile = None
     #modules = [genHHAndTTbar(), puWeight(), countHistogramAll_2016(), jetmetUncertainties2016(), btagSF2016_cMVA(),  muonScaleRes2016(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
-    modules = [ puWeight(), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 
 else:
-    print "jobtype to run is not found, exit "
-    exit()
+    sys.exit("Error:jobtype to run is not found, exit ")
 print "=============================================================="
 print "inputfiles ", inputfiles
 print "=============================================================="

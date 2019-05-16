@@ -3,51 +3,23 @@ import os, sys
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import warnings
-
-from RunConfiguration import *
-
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+from HHbbWWProducer import *
 from countHistogramProducer import *
 from genParticleProducer import *
-from HHbbWWProducer import *
+from dummy import *
 
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
-btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')## file is under NanoAODTools
-btagSF2017_deepCSV = lambda : btagSFProducer("2017", algo = 'deepcsv', sfFileName='DeepCSV_94XSF_V3_B_F.csv')
-def btagSFyear(year):
-    return{
-	2016: btagSF2016_cMVA(),
-	2017: btagSF2017_deepCSV()
-    }[year]
-
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jecUncertainties import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import *
-def jetmetUncertaintiesyear(year):
-    """jet uncertainties and recalibration for MC"""
-    return{
-	2016: jetmetUncertainties2016(),
-	2017: jetmetUncertainties2017()
-    }[year]
-
-from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetRecalib import *
-
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.lepSFProducer import *
-from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProducerTao import *
-muonScaleRes =  lambda year : muonScaleResProducer('roccor.Run2.v3', 'RoccoR%d.txt'%year) 
-
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.mht import *
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import *
+#from PhysicsTools.NanoAODTools.postprocessing.modules.common.countHistogramsModule import *
 #from  PhysicsTools.NanoAODTools.postprocessing.examples.puWeightProducer import *
-def puWeightyear(year):
-    return {
-      2016: puWeight(),
-      2017: puAutoWeight()
-    }[year]
-
 
 import argparse
 
@@ -79,38 +51,49 @@ if not os.path.isdir(outputdir):
     os.system("mkdir "+outputdir)
 
 modules = []
+#selection='''(Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) >= 2  ||
+# Sum$(Muon_pt > 20) >= 2 ||
+# Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP80) >= 1   ||
+# Sum$(Muon_pt > 20 && Muon_tightId) >= 1 ||
+# (Sum$(Muon_pt > 20) == 0 && Sum$(Electron_pt > 20 && Electron_mvaSpring16GP_WP90) == 0 && MET_pt > 150 ) ) 
+# &&  Sum$((abs(Jet_eta)<2.5 && Jet_pt > 20 && Jet_jetId)) >= 2 && Entry$ < 1000 
+###mhtProducer(jetSelection, muonSelection, electronSelection), adding the selected obj and filling MHT_pt and MHT_phi
 mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda mu : mu.pt > 10 and abs(mu.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
 print "=============================================================="
 if "DoubleMuon" in jobtype:
-    Runperiod = jobtype.replace("DoubleMuonRun","")[:5]
-    print "Dataset DoubleMuon ",Runperiod
-    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False,  DYestimation = True, triggertype = "DoubleMuon", verbose=1)]
+    print "Dataset DoubleMuon "
+    modules = [countHistogramsModule(), DummyAnalysis()]
 elif "DoubleEG" in jobtype:
-    Runperiod = jobtype.replace("DoubleEGRun","")[:5]
-    print "Dataset DoubleEG ",Runperiod
-    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False,  DYestimation = True, triggertype = "DoubleEG", verbose=1)]
+    print "Dataset DoubleEG "
+    modules = [countHistogramsModule(),DummyAnalysis()]
 elif "MuonEG" in jobtype:
-    Runperiod = jobtype.replace("MuonEGRun","")[:5]
-    print "Dataset MuonEG ",Runperiod
-    modules = [mht_hh(),  muonScaleRes(Runyear), jetRecalibData(Runperiod), HHbbWWProducer(False,  DYestimation = True, triggertype = "MuonEG", verbose=1)]
+    print "Dataset MuonEG "
+    modules = [countHistogramsModule(), DummyAnalysis()]
 elif jobtype != "":
     print "MC samples "
     jsonfile = None
-    modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  muonScaleRes(Runyear), mht_hh(), HHbbWWProducer(True,  DYestimation = True, verbose = 1) ]
-    #modules = [puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  HHbbWWProducer(True, verbose = 1)]
+    ##cp leptonSF/cMVAv2_Moriond17_B_H.csv   ../../../PhysicsTools/NanoAODTools/data/btagSF/
+    #btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')
+    #modules = [puWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+    modules = [puWeight(), countHistogramAll_2016(), DummyAnalysis() ]
 
+    ##for 2017, no cMVAv2 available for 2017 ??
+    #btagSF2017_cMVA = lambda : btagSFProducer("2017",  algo = 'cmva')## for 2017Data?
+    #modules = [puAutoWeight(), btagSF2016_cMVA(), mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 else:
-    sys.exit( "Error: jobtype to run is not found, exit ")
+    print "jobtype to run is not found, exit "
+    exit()
 print "=============================================================="
 print "inputfiles ", inputfiles
 print "=============================================================="
 print "outputdir ", outputdir
 print "=============================================================="
-#p=PostProcessor(".",files,selection.replace('\n',' '),"keep_and_drop.txt",[puAutoWeight(),jetmetUncertainties2016All(), btagSF2016(), hhbbWW()],provenance=True)
 p=PostProcessor(outputdir, inputfiles,"1","keep_and_drop.txt", modules, friend = True, jsonInput = jsonfile, provenance=True)
+#p=PostProcessor(".",filesdata_MuEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("MuonEG")],provenance=True)
+#p=PostProcessor(".",filesdata_ElEl,"1","keep_and_drop.txt",[mht_hh(), hhbbWW_data("DoubleEG")],provenance=True)
 
 p.run()
 

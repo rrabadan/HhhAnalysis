@@ -12,7 +12,7 @@ MCNanoAODGTlib = {
 }
 #DateGlobalTag = "05Feb2018"
 #MCGlobalTag = "RunIISummer16NanoAOD"
-newRunyear = 2016
+newRunyear = 2018
 newDateGT = "Nano14Dec2018"
 newMCNanoAODGT = MCNanoAODGTlib[newRunyear]
 oldDateGT = Slist.DateGlobalTag
@@ -63,6 +63,7 @@ def updateSamplelist(torun_datasets):
 	    #print "real data nsample ",nsample, " datadir ",datadir
 	elif nsample>= 0:
 	    datadir = job.split('/')[1]
+	    datadir = datadir.replace('_correctedcfg','*')
 	    sampletype = "NANOAODSIM"
 	    sampletag = "%s*%s*"%(newMCNanoAODGT, newDateGT)
 	    #print "MC nsample ",nsample, " datadir ",datadir," sampletag ",sampletag
@@ -73,8 +74,10 @@ def updateSamplelist(torun_datasets):
 	if nsample < 0 and oldDateGT in Nanodataset:
 	    query = Nanodataset.replace(oldDateGT, newDateGT)
     	    if newRunyear != Runyear and 'Run%d'%Runyear in query:
-	          querylist = query.split('/')
-		  query = '/'+querylist[1]+'/'+'Run%d'%newRunyear+querylist[2][7]+"*"+newDateGT+"*"+'/NANOAOD'
+	        querylist = query.split('/')
+		query = '/'+querylist[1]+'/'+'Run%d'%newRunyear+querylist[2][7]+"*"+newDateGT+"*"+'/NANOAOD'
+		if newRunyear == 2018 :
+		    query = '/EGamma/'+'Run%d'%newRunyear+querylist[2][7]+"*"+newDateGT+"*"+'/NANOAOD'
         elif  nsample < 0:
             print "warning!!! no good query for data ", query
 	
