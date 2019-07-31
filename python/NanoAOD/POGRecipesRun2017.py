@@ -10,16 +10,16 @@ def printObject(obj):
     print " Id ",obj.pdgId, " pt ",obj.pt, " eta ", obj.eta," phi ",obj.phi
 
 
-def jetLooseID(jet):
-    """https://twiki.cern.ch/twiki/bin/view/CMS/JetID#Recommendations_for_13_TeV_data"""
-    ##only for abs(jet.eta)<2.7 , does not care about jet.eta > 2.7     
-    #CHM = jet.nElectrons + jet.nMuons
-    CHM = 1 ## this cut not available in NANoAOD?
-    if abs(jet.eta)<2.7:
-       ##looseJetID = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((abs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || abs(eta)>2.4) && abs(eta)<=2.7
-       return  (jet.neHEF < 0.99 and jet.neEmEF<0.99 and jet.nConstituents>1 and ((abs(jet.eta)<= 2.4 and jet.chHEF>0 and CHM>0 and jet.chEmEF<0.99) or (abs(jet.eta)>2.4)))
-    else:
-      return False
+#def jetLooseID(jet):
+#    """https://twiki.cern.ch/twiki/bin/view/CMS/JetID#Recommendations_for_13_TeV_data"""
+#    ##only for abs(jet.eta)<2.7 , does not care about jet.eta > 2.7     
+#    #CHM = jet.nElectrons + jet.nMuons
+#    CHM = 1 ## this cut not available in NANoAOD?
+#    if abs(jet.eta)<2.6:
+#       ##looseJetID = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((abs(eta)<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || abs(eta)>2.4) && abs(eta)<=2.7
+#       return  (jet.neHEF < 0.90 and jet.neEmEF<0.90 and jet.nConstituents>1 and jet.muEF<0.8 and jet.chHEF>0  and jet.chEmEF<0.8)
+#    else:
+#      return False
 def electronImpactParameterCut( electron):
     """ check electron impact parameter, https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2 """
     dxy_endcap = 0.1 #cm
@@ -133,20 +133,29 @@ def leptonHLTSafeID(lepton, jetRhoCalo):
 def leptonpairHLTSafeID(leptonpair, jetRhoCalo):
     return (leptonHLTSafeID(leptonpair[0], jetRhoCalo) and leptonHLTSafeID(leptonpair[1], jetRhoCalo))
 
-def jetLooseBtagging(jet):
+def Ak4jetLooseBtagging(jet):
+    return jet.btagDeepFlavB > 0.0521
+
+def Ak4jetMediumBtagging(jet):
+    return jet.btagDeepFlavB > 0.3033
+
+def Ak4jetTightBtagging(jet):
+    return jet.btagDeepFlavB > 0.7489
+
+def Ak8subjetLooseBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
     ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
     return (jet.btagDeepB > 0.1522)
 
-def jetMediumBtagging(jet):
+def Ak8subjetMediumBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
     ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
     ### Jet_btagDeepB
     return (jet.btagDeepB > 0.4941)
 
-def jetTightBtagging(jet):
+def Ak8subjetTightBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
     ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
@@ -259,7 +268,8 @@ class LeptonSFManager():
 
 	self.useJsonSFs = useJsonSFs
 	##self.Lumi_BCDEF = 5.750+2.573+4.242+4.025+3.105 ## recorded,23Sep2016ReReco
-	HhhPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD/"
+	##HhhPath = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD/"
+	HhhPath = os.environ['CMSSW_BASE']+'/src/HhhAnalysis/python/NanoAOD/'
 	leptonSFfolder = "leptonSF2017/"
 	#self.EGSF_filename  = "leptonSF/EGM2D_eleGSF.root" ## for electron ID
 	self.EGIDSF_filename  =             os.path.join(HhhPath ,   leptonSFfolder+"2017_ElectronMedium.root" )## for electron ID

@@ -92,14 +92,13 @@ def muonIso(muon):
     ###check Muon iso , tight isolation: 0.15; loose iso: 0.25 
     return muon.pfRelIso04_all < 0.15
 
-
 def muonPreselection(muon):
-    looseMuon = muon.isPFcand and muon.isGlobal
+    looseMuon = muon.looseId
     looseminiIso = muon.miniPFRelIso_all < 0.4
     return abs(muon.eta)<2.4 and muon.pt>5 and abs(muon.dxy) <= 0.05 and abs(muon.dz) <= 0.1 and looseminiIso and looseMuon and muon.sip3d < 8
 
 def electronPreselection(ele):
-    looseEle = 1
+    looseEle = ele.mvaFall17V2noIso_WPL
     looseminiIso = ele.miniPFRelIso_all < 0.4
     return abs(ele.eta)<2.5 and ele.pt>7 and abs(ele.dxy) <= 0.05 and abs(ele.dz) <= 0.1 and looseminiIso and ele.lostHits <=1 and looseEle and ele.sip3d < 8    
 
@@ -108,8 +107,10 @@ def ak4jetPreselection(jet):
     return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId>0
 
 def ak8jetPreselection(jet):
-    return abs(jet.eta)<2.4 and jet.pt>200 and jet.jetId >=2 and jet.tau2/jet.tau1 < 0.75 and jet.msoftdrop <= 210 and jet.msoftdrop>=30
+    return abs(jet.eta)<2.4 and jet.pt>200 and jet.jetId > 0 and jet.tau2/jet.tau1 < 0.75 and jet.msoftdrop <= 210 and jet.msoftdrop>=30
 
+def ak8lsjetPreselection(jet):
+    return abs(jet.eta)<2.4 and jet.pt>100 and jet.jetId > 0 and jet.tau2/jet.tau1 < 0.75 
 
 def leptonImpactParameter(lepton):
     return ((abs(lepton.pdgId) == 11 and electronImpactParameterCut(lepton)) or abs(lepton.pdgId) == 13 )
@@ -132,23 +133,39 @@ def leptonHLTSafeID(lepton, jetRhoCalo):
 def leptonpairHLTSafeID(leptonpair, jetRhoCalo):
     return (leptonHLTSafeID(leptonpair[0], jetRhoCalo) and leptonHLTSafeID(leptonpair[1], jetRhoCalo))
 
-def jetLooseBtagging(jet):
-    """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
-    ### use medium btagging 
-    ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
-    return (jet.btagCMVA > -0.5884)
 
-def jetMediumBtagging(jet):
-    """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
-    ### use medium btagging 
-    ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
-    return (jet.btagCMVA > 0.4432)
+def Ak4jetLooseBtagging(jet):
+    return jet.btagDeepFlavB >0.0614
 
-def jetTightBtagging(jet):
+def Ak4jetMediumBtagging(jet):
+    return jet.btagDeepFlavB > 0.3093
+
+def Ak4jetTightBtagging(jet):
+    return jet.btagDeepFlavB > 0.7221
+
+
+def Ak8subjetLooseBtagging(jet):
     """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
     ### use medium btagging 
     ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
-    return (jet.btagCMVA > 0.9432)
+    ##return (jet.btagCMVA > -0.5884)
+    return (jet.btagDeepB > 0.2217)
+
+def Ak8subjetMediumBtagging(jet):
+    """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
+    ### use medium btagging 
+    ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
+    ##return (jet.btagCMVA > 0.4432)
+    return (jet.btagDeepB > 0.6321)
+
+def Ak8subjetTightBtagging(jet):
+    """https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco"""
+    ### use medium btagging 
+    ### SF should be from  leptonSF/cMVAv2_Moriond17_B_H.csv 
+    ##return (jet.btagCMVA > 0.9432)
+    return (jet.btagDeepB > 0.8953)
+
+
 
 
 def combinedError(err1, err2, weight1):

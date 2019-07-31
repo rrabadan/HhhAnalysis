@@ -16,6 +16,8 @@ if Runyear == 2016:
     import POGRecipesRun2016 as POGRecipesRun2
 elif Runyear == 2017:
     import POGRecipesRun2017 as POGRecipesRun2
+elif Runyear == 2018:
+    import POGRecipesRun2018 as POGRecipesRun2
 else:
     sys.exit("wrong run year value: %d"%Runyear)
 
@@ -57,7 +59,7 @@ class HHbbWWProducer(Module):
         print "self.run_lumi  ",self.run_lumi," trigger type ",self.triggertype," verbose ",self.verbose, " DYestimation ",self.DYestimation
 
 	self.addGenToTree = False
-	self.addSystematic = True
+	self.addSystematic = False
 
 	self.ll_sys_branchname = ["Isosf","IDsf","trgsf","trackingsf","HLTsafeIDsf"]
 	self.jjbtag_sys_branchname = ["jjbtag_light","jjbtag_heavy"]
@@ -70,7 +72,7 @@ class HHbbWWProducer(Module):
 	self.nEv_DoubleEG = 0
 	self.nEv_DoubleMuon = 0
 	self.nEv_MuonEG = 0
-	self.lepSFmanager = POGRecipesRun2.LeptonSFManager(True)
+	#self.lepSFmanager = POGRecipesRun2.LeptonSFManager(True)
 
     def beginJob(self, histFile=None,histDirName=None):
 	print "BeginJob "
@@ -783,12 +785,12 @@ class HHbbWWProducer(Module):
 	
         jets = list(Collection(event, "Jet"))
 	mht = Object(event, "MHT")
-	jet_btagSF = None; jet_btagSF_up = None; jet_btagSF_down = None
-	if self.isMC:
-	    jet_btagSF      = event.Jet_btagSF
-	    jet_btagSF_up   = event.Jet_btagSF_up
-	    jet_btagSF_down = event.Jet_btagSF_down
-	
+	#jet_btagSF = None; jet_btagSF_up = None; jet_btagSF_down = None
+	#if self.isMC:
+	#    jet_btagSF      = event.Jet_btagSF
+	#    jet_btagSF_up   = event.Jet_btagSF_up
+	#    jet_btagSF_down = event.Jet_btagSF_down
+	#
 
         #####################################
         ## di-leps selection
@@ -872,9 +874,9 @@ class HHbbWWProducer(Module):
 	    #subjet_pt = subjet1.pt if subjet1.btagDeepB > subjet2.btagDeepB else subjet2.pt
 	    #subjet_pt_btagging_pass = (subjet1.btagDeepB > 0.4941 or subjet2.btagDeepB > 0.4941) and subjet_pt > 30
 	    #if subjet1.btagDeepFlavB < subjet2.btagDeepFlavB:
-	    if subjet1.btagDeepB > 0.4941 and subjet1.pt > 30:
+	    if POGRecipesRun2.Ak8subjetMediumBtagging(subjet1) and subjet1.pt > 30:
 	        subjet_pt_btagging_pass = True
-	    if subjet2.btagDeepB > 0.4941 and subjet2.pt > 30:
+	    if POGRecipesRun2.Ak8subjetMediumBtagging(subjet2) and subjet2.pt > 30:
 	        subjet_pt_btagging_pass = True
 	    return subjet1.pt > 20 and abs(subjet1.eta)<2.4 and subjet2.pt>20 and abs(subjet2.eta)<2.4 and subjet_pt_btagging_pass
 
@@ -902,7 +904,7 @@ class HHbbWWProducer(Module):
         ak8jets_CSVsum_clean = ak8jets_clean
 	ak8jets_CSVsum_clean.sort(key=lambda x: fajet_subjetCSVsum(x), reverse=True)
 	
-        mismatchEvents = [8015,164303, 192302, 193973, 65925, 150734, 79894, 165169, 167268, 167333, 191551]
+        mismatchEvents = []## for debugging
         ak8lsjets = list(Collection(event, "FatJetAK8LSLoose"))
 	ak8lssubjets = list(Collection(event, "SubJetAK8LSLoose"))
 	def fatjetak8ls_subjetcut(jet):
