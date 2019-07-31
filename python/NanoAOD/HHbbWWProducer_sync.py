@@ -113,6 +113,20 @@ class HHbbWWProducer(Module):
         self.out.branch("ak4Jet2_phi",  "F");
         self.out.branch("ak4Jet2_cMVAv2",  "F");
         self.out.branch("ak4Jet2_CSV",  "F");
+        self.out.branch("ak4Jet3_idx",  "I");
+        self.out.branch("ak4Jet3_pt",  "F");
+        self.out.branch("ak4Jet3_E",  "F");
+        self.out.branch("ak4Jet3_eta",  "F");
+        self.out.branch("ak4Jet3_phi",  "F");
+        self.out.branch("ak4Jet3_cMVAv2",  "F");
+        self.out.branch("ak4Jet3_CSV",  "F");
+        self.out.branch("ak4Jet4_idx",  "I");
+        self.out.branch("ak4Jet4_pt",  "F");
+        self.out.branch("ak4Jet4_E",  "F");
+        self.out.branch("ak4Jet4_eta",  "F");
+        self.out.branch("ak4Jet4_phi",  "F");
+        self.out.branch("ak4Jet4_cMVAv2",  "F");
+        self.out.branch("ak4Jet4_CSV",  "F");
 
         self.out.branch("ak8Jet1_pt",            "F");
         self.out.branch("ak8Jet1_E",             "F");
@@ -146,6 +160,40 @@ class HHbbWWProducer(Module):
 	self.out.branch("ak8Jet2_subjet1_eta",   "F");
 	self.out.branch("ak8Jet2_subjet1_phi",   "F");
 	self.out.branch("ak8Jet2_subjet1_CSV",   "F");   
+
+        self.out.branch("ak8lsJet1_pt",            "F");
+        self.out.branch("ak8lsJet1_E",             "F");
+        self.out.branch("ak8lsJet1_eta",           "F");
+        self.out.branch("ak8lsJet1_phi",           "F");
+        self.out.branch("ak8lsJet1_msoftdrop",     "F");
+        self.out.branch("ak8lsJet1_tau1",          "F");
+        self.out.branch("ak8lsJet1_tau2",          "F");
+        self.out.branch("ak8lsJet1_btagHbb",       "F");
+	self.out.branch("ak8lsJet1_subjet0_pt",    "F");
+	self.out.branch("ak8lsJet1_subjet0_eta",   "F");
+	self.out.branch("ak8lsJet1_subjet0_phi",   "F");
+	self.out.branch("ak8lsJet1_subjet0_CSV",   "F");   
+	self.out.branch("ak8lsJet1_subjet1_pt",    "F");
+	self.out.branch("ak8lsJet1_subjet1_eta",   "F");
+	self.out.branch("ak8lsJet1_subjet1_phi",   "F");
+	self.out.branch("ak8lsJet1_subjet1_CSV",   "F");   
+        self.out.branch("ak8lsJet2_pt",            "F");
+        self.out.branch("ak8lsJet2_E",             "F");
+        self.out.branch("ak8lsJet2_eta",           "F");
+        self.out.branch("ak8lsJet2_phi",           "F");
+        self.out.branch("ak8lsJet2_msoftdrop",     "F");
+        self.out.branch("ak8lsJet2_btagHbb",       "F");
+        self.out.branch("ak8lsJet2_tau1",          "F");
+        self.out.branch("ak8lsJet2_tau2",          "F");
+	self.out.branch("ak8lsJet2_subjet0_pt",    "F");
+	self.out.branch("ak8lsJet2_subjet0_eta",   "F");
+	self.out.branch("ak8lsJet2_subjet0_phi",   "F");
+	self.out.branch("ak8lsJet2_subjet0_CSV",   "F");   
+	self.out.branch("ak8lsJet2_subjet1_pt",    "F");
+	self.out.branch("ak8lsJet2_subjet1_eta",   "F");
+	self.out.branch("ak8lsJet2_subjet1_phi",   "F");
+	self.out.branch("ak8lsJet2_subjet1_CSV",   "F");   
+
 
 	#self.out.branch("lepstype",  "F")
         self.out.branch("mu1_pt",  "F");
@@ -226,6 +274,7 @@ class HHbbWWProducer(Module):
 	self.out.branch("n_presel_ele", "I")
 	self.out.branch("n_presel_ak4Jet", "I")
 	self.out.branch("n_presel_ak8Jet", "I")
+	self.out.branch("n_presel_ak8lsJet", "I")
 	"""
 	self.out.branch("nJetsL",  "F")
 	self.out.branch("jj_M",  "F")
@@ -757,23 +806,36 @@ class HHbbWWProducer(Module):
 	    if  self.verbose > 3:
 	        print "Electron id ", el.pdgId, " pt ", el.pt," eta ", el.eta
 	## check eta and whether it passes the conversion veto(not from photon conversion), convVeto = True: good electron
-	lepton_electrons = list(filter(lambda x :  POGRecipesRun2.electronPreselection(x), electrons))
+	lepton_electrons_pre = list(filter(lambda x :  POGRecipesRun2.electronPreselection(x), electrons))
+
+	def ele_muon_dR(ele):
+	    for mu in lepton_muons:
+	        if deltaR(ele.eta, ele.phi, mu.eta, mu.phi) < 0.3:
+	            return False
+	    return True
 
         lepton_muons.sort(key=lambda x:x.pt,reverse=True)	
+	lepton_electrons = [x for x in lepton_electrons_pre if ele_muon_dR(x)]
         lepton_electrons.sort(key=lambda x:x.pt,reverse=True)	
+        #for el in lepton_electrons:
+	#    print "Electron id ", el.pdgId, " pt ", el.pt," eta ", el.eta
+        
         
         #####################################
         ## di-jets selection
         #####################################
-	if hasattr(event, "Jet_pt_nom"):
-	    jet_pt_corrected = getattr(event, "Jet_pt_nom")
-	    for jet in jets:
-                ijet = jets.index(jet)
-                #print "Jet pt from reCalibration : ",jet_pt_corrected[ijet]," old pt ",jet.pt
-                jets[ijet].pt = jet_pt_corrected[ijet]
-	
+        # no recalibration-2019/06/13
+	#if hasattr(event, "Jet_pt_nom"):
+	#    jet_pt_corrected = getattr(event, "Jet_pt_nom")
+	#    for jet in jets:
+        #        ijet = jets.index(jet)
+        #        #print "Jet pt from reCalibration : ",jet_pt_corrected[ijet]," old pt ",jet.pt
+        #        jets[ijet].pt = jet_pt_corrected[ijet]
+	#
 	###cut: JetPt, JetEta
+        
         jets_pre = [x for x in jets if  POGRecipesRun2.ak4jetPreselection(x)]
+	#print "#jets ",len(jets)," #jets_pre ",len(jets_pre)
 	def jet_lep_dR(jet):
 	    for mu in lepton_muons:
 	        if deltaR(jet.eta, jet.phi, mu.eta, mu.phi) < 0.4:
@@ -788,7 +850,7 @@ class HHbbWWProducer(Module):
 
 	#### select final two jets: jets with maximum pT , for DY estimation 
         ## Run2016: sort alljets with a cMVAv2 descreasing order 
-	## Run2017: use DeepCVS
+	## Run2017: use DeepCSV
 	#if Runyear == 2016:
 	#    jets_clean.sort(key=lambda x:x.btagCMVA, reverse=True)	
         #elif Runyear == 2017 or Runyear== 2018:
@@ -797,21 +859,171 @@ class HHbbWWProducer(Module):
 	#    sys.exit(errorcolor1+"wrong run year value: %d"%Runyear+errorcolor2)
 
         ak8jets = list(Collection(event, "FatJet"))
-	ak8jets_pre = [x for x in ak8jets if  POGRecipesRun2.ak8jetPreselection(x)]
-	def jet_subjetcut(jet):
+	ak8subjets = list(Collection(event, "SubJet"))
+	def fatjet_subjetcut(jet):
+	    subjet1_idx = jet.subJetIdx1
+	    subjet2_idx = jet.subJetIdx2
+	    #print "subjet1_idx ",subjet1_idx," subjet2_idx ",subjet2_idx," njet ",len(ak8subjets)
+	    if subjet1_idx < 0 or subjet2_idx < 0 or subjet1_idx >= len(ak8subjets)  or subjet2_idx >= len(ak8subjets):
+		return False
+	    subjet1 = ak8subjets[subjet1_idx]
+	    subjet2 = ak8subjets[subjet2_idx]
+	    subjet_pt_btagging_pass = False
+	    #subjet_pt = subjet1.pt if subjet1.btagDeepB > subjet2.btagDeepB else subjet2.pt
+	    #subjet_pt_btagging_pass = (subjet1.btagDeepB > 0.4941 or subjet2.btagDeepB > 0.4941) and subjet_pt > 30
+	    #if subjet1.btagDeepFlavB < subjet2.btagDeepFlavB:
+	    if subjet1.btagDeepB > 0.4941 and subjet1.pt > 30:
+	        subjet_pt_btagging_pass = True
+	    if subjet2.btagDeepB > 0.4941 and subjet2.pt > 30:
+	        subjet_pt_btagging_pass = True
+	    return subjet1.pt > 20 and abs(subjet1.eta)<2.4 and subjet2.pt>20 and abs(subjet2.eta)<2.4 and subjet_pt_btagging_pass
+
+	def fajet_subjetCSVsum(jet):  
+	    subjet1_idx = jet.subJetIdx1
+	    subjet2_idx = jet.subJetIdx2
+	    subjet1 = ak8subjets[subjet1_idx]
+	    subjet2 = ak8subjets[subjet2_idx]
+	    return subjet1.btagDeepB+subjet2.btagDeepB
+	
+
+	def fatjet_lep_dR(jet):
+	    for mu in lepton_muons:
+	        if deltaR(jet.eta, jet.phi, mu.eta, mu.phi) < 0.8:
+	            return False
+	    for ele in lepton_electrons:
+	        if deltaR(jet.eta, jet.phi, ele.eta, ele.phi) < 0.8:
+	            return False
+	    return True
+
+
+	ak8jets_pre = [x for x in ak8jets if POGRecipesRun2.ak8jetPreselection(x)]
+	ak8jets_clean = [x for x in ak8jets_pre if fatjet_lep_dR(x) and fatjet_subjetcut(x)] 
+	
+        ak8jets_CSVsum_clean = ak8jets_clean
+	ak8jets_CSVsum_clean.sort(key=lambda x: fajet_subjetCSVsum(x), reverse=True)
+	
+        mismatchEvents = [8015,164303, 192302, 193973, 65925, 150734, 79894, 165169, 167268, 167333, 191551]
+        ak8lsjets = list(Collection(event, "FatJetAK8LSLoose"))
+	ak8lssubjets = list(Collection(event, "SubJetAK8LSLoose"))
+	def fatjetak8ls_subjetcut(jet):
+	    subjet1_idx = jet.subJetIdx1
+	    subjet2_idx = jet.subJetIdx2
+	    if ievent in mismatchEvents:
+		print luminosityBlock," ",ievent,"\t AK8jet pt ",jet.pt," eta ",jet.eta ," phi ",jet.phi," subjet1_idx ",subjet1_idx," subjet2_idx ",subjet2_idx," njet ",len(ak8lssubjets)
+	    if subjet1_idx < 0 or subjet2_idx < 0 or subjet1_idx >= len(ak8lssubjets)  or subjet2_idx >= len(ak8lssubjets):
+		return False
+	    subjet1 = ak8lssubjets[subjet1_idx]
+	    subjet2 = ak8lssubjets[subjet2_idx]
+	    if ievent in mismatchEvents:
+	        print ievent," subjet1 pt ",subjet1.pt," eta ",subjet1.eta," subjet2 pt ",subjet2.pt," eta ",subjet2.eta
+	  
+	    return subjet1.pt > 20 and abs(subjet1.eta)<2.4 and subjet2.pt>20 and abs(subjet2.eta)<2.4
+
+	def fatjetak8ls_lep_dR(jet):
+	    ##dR_lep_fajet > 0.1
+	    #for mu in lepton_muons:
+	    #    if deltaR(jet.eta, jet.phi, mu.eta, mu.phi) < 0.1:
+	    #        return False
+	    #for ele in lepton_electrons:
+	    #    if deltaR(jet.eta, jet.phi, ele.eta, ele.phi) < 0.1:
+	    #        return False
+
+	    ##min(dR_lep_fajet) < 1.2
+	    #for mu in lepton_muons:
+	    #    if deltaR(jet.eta, jet.phi, mu.eta, mu.phi) < 1.2:
+	    #        return True
+	    #for ele in lepton_electrons:
+	    #    if deltaR(jet.eta, jet.phi, ele.eta, ele.phi) < 1.2:
+	    #        return True
+	    #return False
+	    dR_lep_jet = []
+	    #dR_lep_subjet = []
+	    mindR_lep_jet = 999.0
+	    mindR_lep_subjet = 999.0
 	    subjet1_idx = jet.subJetIdx1
 	    subjet2_idx = jet.subJetIdx2
 	    #print "subjet1_idx ",subjet1_idx," subjet2_idx ",subjet2_idx," njet ",len(jets)
-	    if subjet1_idx < 0 or subjet2_idx < 0 or subjet1_idx >= len(jets)  or subjet2_idx >= len(jets):
+	    if subjet1_idx < 0 or subjet2_idx < 0 or subjet1_idx >= len(ak8lssubjets)  or subjet2_idx >= len(ak8lssubjets):
 		return False
-	    subjet1 = jets[subjet1_idx]
-	    subjet2 = jets[subjet2_idx]
-	    return subjet1.pt > 20 and abs(subjet1.eta)<2.4 and subjet2.pt>20 and abs(subjet2.eta)<2.4
-	ak8jets_clean = [x for x in ak8jets_pre if jet_subjetcut(x)]
-	
+	    subjet1 = ak8lssubjets[subjet1_idx]
+	    subjet2 = ak8lssubjets[subjet2_idx]
+	    for mu in lepton_muons:
+	        thisdR_lep_jet = deltaR(jet.eta, jet.phi, mu.eta, mu.phi)
+		if ievent in mismatchEvents:
+		    print "\t\t muon pt ",mu.pt, " eta ",mu.eta," phi ",mu.phi, " dR ",thisdR_lep_jet
+	        dR_lep_jet.append(thisdR_lep_jet)
+	        if thisdR_lep_jet < mindR_lep_jet:
+	            mindR_lep_jet = thisdR_lep_jet
+	            if thisdR_lep_jet < 1.2: 
+	                mindR_lep_subjet = min(deltaR(subjet1.eta, subjet1.phi, mu.eta, mu.phi), deltaR(subjet2.eta, subjet2.phi, mu.eta, mu.phi))
+	    for ele in lepton_electrons:
+	        thisdR_lep_jet = deltaR(jet.eta, jet.phi, ele.eta, ele.phi)
+		if ievent in mismatchEvents:
+		    print "\t\t electron pt ", ele.pt, " eta ", ele.eta," phi ", ele.phi," dR ",thisdR_lep_jet
+	        dR_lep_jet.append(thisdR_lep_jet)
+	        if thisdR_lep_jet < mindR_lep_jet :
+	            mindR_lep_jet = thisdR_lep_jet
+	            if thisdR_lep_jet < 1.2: 
+	                mindR_lep_subjet = min (deltaR(subjet1.eta, subjet1.phi, ele.eta, ele.phi), deltaR(subjet2.eta, subjet2.phi, ele.eta, ele.phi))
+
+	    if ievent in mismatchEvents:
+		print ievent," dR_lep_jet ",dR_lep_jet," mindR_lep_jet ",mindR_lep_jet," mindR_lep_subjet ",mindR_lep_subjet
+	    return mindR_lep_jet < 1.2 and  mindR_lep_subjet > 0.1
+            
+
+	def fatjetak8ls_bjetclean(jet):
+	    #Hbbfatjet = False
+	    #for fatjet in ak8jets_clean:
+	    #    ##require fatjet passing the loose Hbb btagging cut 
+	    #    if fatjet.btagHbb>0.5803:
+	    #        Hbbfatjet = True
+	    #    if deltaR(jet.eta, jet.phi, fatjet.eta, fatjet.phi) < 1.6 and fatjet.btagHbb>0.5803:
+	    #        return False
+            #if Hbbfatjet:
+	    #    return True 
+	    if ievent in mismatchEvents:
+	        print "#ak8jets ",len(ak8jets_CSVsum_clean)," #ak4jets ",len(jets_clean)," Ak8lsjet pt ",jet.pt," eta ",jet.eta," phi ",jet.phi
+	    if len(ak8jets_CSVsum_clean) >= 1:
+	        fatjet = ak8jets_CSVsum_clean[0]
+	        if deltaR(jet.eta, jet.phi, fatjet.eta, fatjet.phi) < 1.6:
+		    return False
+		else:
+		    return True
+	    jets_btagging = jets_clean
+	    ## which b-tagging method we should use
+	    jets_btagging.sort(key=lambda x:x.btagDeepFlavB,reverse=True)
+            
+	    if ievent in mismatchEvents:
+		for j in jets_btagging:
+		    dR =  deltaR(jet.eta, jet.phi, j.eta, j.phi)
+		    print ievent," ak4jet index ",jets_btagging.index(j), " pt ",j.pt," eta ",j.eta," phi ",j.phi," CVS ",j.btagDeepB," dR(ak4j,ak8lsj) ",dR
+	    if len(jets_btagging) >= 2:
+	        if deltaR(jet.eta, jet.phi, jets_btagging[0].eta, jets_btagging[0].phi) < 1.2 or deltaR(jet.eta, jet.phi, jets_btagging[1].eta, jets_btagging[1].phi) < 1.2:
+	            return False
+		else: 
+		    return True
+	        
+	    return True
+
+
+
+	if ievent in mismatchEvents:
+	    print "event ",ievent," ls ",luminosityBlock," all AK8jet "
+	    for jet in ak8lsjets:
+		print "\t AK8jet pt ",jet.pt," eta ",jet.eta ," phi ",jet.phi," jetid ",jet.jetId, " tau1 ",jet.tau1," tau2 ",jet.tau2," tau2/tau1 ",jet.tau2/jet.tau1 
+	ak8lsjets_pre = [x for x in ak8lsjets if  POGRecipesRun2.ak8lsjetPreselection(x)]
+	ak8lsjets_prev2 = [x for x in ak8lsjets_pre if fatjetak8ls_subjetcut(x) and fatjetak8ls_lep_dR(x)] 
+	ak8lsjets_clean = [x for x in ak8lsjets_prev2 if fatjetak8ls_bjetclean(x)]
+	if ievent in mismatchEvents:
+	    print ievent," #ak8lsjets ",len(ak8lsjets)," # ak8lsjets_pre ",len(ak8lsjets_pre)," # ak8lsjets_prev2 ",len(ak8lsjets_prev2)," # ak8lsjets_clean ",len(ak8lsjets_clean)
+
+
+
         jets_clean.sort(key=lambda x:x.pt,reverse=True)	
         ak8jets_clean.sort(key=lambda x:x.pt,reverse=True)	
-	
+        ak8lsjets_clean.sort(key=lambda x:x.pt,reverse=True)	
+
+
 
 
 	"""
@@ -1324,7 +1536,7 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak4Jet2_eta",                jet2.eta);
 		self.out.fillBranch("ak4Jet2_phi",                jet2.phi);
 		self.out.fillBranch("ak4Jet2_cMVAv2",             jet2.btagCMVA);
-		#self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepB);
+	       #self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepB);
 		self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepFlavB);
 	    else:
 		self.out.fillBranch("ak4Jet2_pt",                 -10000.0);
@@ -1334,13 +1546,52 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak4Jet2_cMVAv2",             -10000.0);
 		self.out.fillBranch("ak4Jet2_CSV",                -10000.0);
 
-	def fillBranches_ak8jet(ak8jets, ak4jets):
+            if (len(jets) >= 3):
+		jet3 = jets[2]
+		jet3_p4 = ROOT.TLorentzVector()
+		jet3_p4.SetPtEtaPhiM(jets[2].pt, jets[2].eta, jets[2].phi, jets[2].mass)
+		self.out.fillBranch("ak4Jet3_pt",                 jet3.pt);
+		self.out.fillBranch("ak4Jet3_E",                  jet3_p4.E());
+		self.out.fillBranch("ak4Jet3_eta",                jet3.eta);
+		self.out.fillBranch("ak4Jet3_phi",                jet3.phi);
+		self.out.fillBranch("ak4Jet3_cMVAv2",             jet3.btagCMVA);
+	       #self.out.fillBranch("ak4Jet3_CSV",                jet3.btagDeepB);
+		self.out.fillBranch("ak4Jet3_CSV",                jet3.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak4Jet3_pt",                 -10000.0);
+		self.out.fillBranch("ak4Jet3_E",                  -10000.0);
+		self.out.fillBranch("ak4Jet3_eta",                -10000.0);
+		self.out.fillBranch("ak4Jet3_phi",                -10000.0);
+		self.out.fillBranch("ak4Jet3_cMVAv2",             -10000.0);
+		self.out.fillBranch("ak4Jet3_CSV",                -10000.0);
+            if (len(jets) >= 4):
+		jet4 = jets[3]
+		jet4_p4 = ROOT.TLorentzVector()
+		jet4_p4.SetPtEtaPhiM(jets[3].pt, jets[3].eta, jets[3].phi, jets[3].mass)
+		self.out.fillBranch("ak4Jet4_pt",                 jet4.pt);
+		self.out.fillBranch("ak4Jet4_E",                  jet4_p4.E());
+		self.out.fillBranch("ak4Jet4_eta",                jet4.eta);
+		self.out.fillBranch("ak4Jet4_phi",                jet4.phi);
+		self.out.fillBranch("ak4Jet4_cMVAv2",             jet4.btagCMVA);
+	       #self.out.fillBranch("ak4Jet4_CSV",                jet4.btagDeepB);
+		self.out.fillBranch("ak4Jet4_CSV",                jet4.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak4Jet4_pt",                 -10000.0);
+		self.out.fillBranch("ak4Jet4_E",                  -10000.0);
+		self.out.fillBranch("ak4Jet4_eta",                -10000.0);
+		self.out.fillBranch("ak4Jet4_phi",                -10000.0);
+		self.out.fillBranch("ak4Jet4_cMVAv2",             -10000.0);
+		self.out.fillBranch("ak4Jet4_CSV",                -10000.0);
+
+
+
+	def fillBranches_ak8jet(ak8jets, ak8subjets):
             if (len(ak8jets) >= 1):
 		ak8jet1 = ak8jets[0]
 		ak8jet1_p4 = ROOT.TLorentzVector()
 		ak8jet1_p4.SetPtEtaPhiM(ak8jets[0].pt, ak8jets[0].eta, ak8jets[0].phi, ak8jets[0].mass)
-		subjet1 = ak4jets[ak8jet1.subJetIdx1]
-		subjet2 = ak4jets[ak8jet1.subJetIdx2]
+		subjet1 = ak8subjets[ak8jet1.subJetIdx1]
+		subjet2 = ak8subjets[ak8jet1.subJetIdx2]
 		self.out.fillBranch("ak8Jet1_pt",                 ak8jet1.pt);
 		self.out.fillBranch("ak8Jet1_E",                  ak8jet1_p4.E());
 		self.out.fillBranch("ak8Jet1_eta",                ak8jet1.eta);
@@ -1352,13 +1603,13 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8Jet1_subjet0_pt",         subjet1.pt);
 		self.out.fillBranch("ak8Jet1_subjet0_eta",        subjet1.eta);
 		self.out.fillBranch("ak8Jet1_subjet0_phi",        subjet1.phi);
-		#self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
-		self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
+		#self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
 		self.out.fillBranch("ak8Jet1_subjet1_pt",         subjet2.pt);
 		self.out.fillBranch("ak8Jet1_subjet1_eta",        subjet2.eta);
 		self.out.fillBranch("ak8Jet1_subjet1_phi",        subjet2.phi);
-		#self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
-		self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepFlavB);
+		self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
+		#self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepFlavB);
 	    else:
 		self.out.fillBranch("ak8Jet1_pt",                 -10000.0);
 		self.out.fillBranch("ak8Jet1_E",                  -10000.0);
@@ -1381,8 +1632,8 @@ class HHbbWWProducer(Module):
 		ak8jet2 = ak8jets[1]
 		ak8jet2_p4 = ROOT.TLorentzVector()
 		ak8jet2_p4.SetPtEtaPhiM(ak8jets[1].pt, ak8jets[1].eta, ak8jets[1].phi, ak8jets[1].mass)
-		subjet1 = ak4jets[ak8jet2.subJetIdx1]
-		subjet2 = ak4jets[ak8jet2.subJetIdx2]
+		subjet1 = ak8subjets[ak8jet2.subJetIdx1]
+		subjet2 = ak8subjets[ak8jet2.subJetIdx2]
 		self.out.fillBranch("ak8Jet2_pt",                 ak8jet2.pt);
 		self.out.fillBranch("ak8Jet2_E",                  ak8jet2_p4.E());
 		self.out.fillBranch("ak8Jet2_eta",                ak8jet2.eta);
@@ -1394,13 +1645,13 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8Jet2_subjet0_pt",         subjet1.pt);
 		self.out.fillBranch("ak8Jet2_subjet0_eta",        subjet1.eta);
 		self.out.fillBranch("ak8Jet2_subjet0_phi",        subjet1.phi);
-		#self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepB);   
-		self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepB);   
+		#self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
 		self.out.fillBranch("ak8Jet2_subjet1_pt",         subjet2.pt);
 		self.out.fillBranch("ak8Jet2_subjet1_eta",        subjet2.eta);
 		self.out.fillBranch("ak8Jet2_subjet1_phi",        subjet2.phi);
-		#self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepB);
-		self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepFlavB);
+		self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepB);
+		#self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepFlavB);
 	    else:
 		self.out.fillBranch("ak8Jet2_pt",                 -10000.0);
 		self.out.fillBranch("ak8Jet2_E",                  -10000.0);
@@ -1419,6 +1670,91 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8Jet2_subjet1_phi",        -10000.0);
 		self.out.fillBranch("ak8Jet2_subjet1_CSV",        -10000.0);   
 	    
+	def fillBranches_ak8lsjet(ak8lsjets, ak8lssubjets):
+            if (len(ak8lsjets) >= 1):
+		ak8lsjet1 = ak8lsjets[0]
+		ak8lsjet1_p4 = ROOT.TLorentzVector()
+		ak8lsjet1_p4.SetPtEtaPhiM(ak8lsjets[0].pt, ak8lsjets[0].eta, ak8lsjets[0].phi, ak8lsjets[0].mass)
+		subjet1 = ak8lssubjets[ak8lsjet1.subJetIdx1]
+		subjet2 = ak8lssubjets[ak8lsjet1.subJetIdx2]
+		self.out.fillBranch("ak8lsJet1_pt",                 ak8lsjet1.pt);
+		self.out.fillBranch("ak8lsJet1_E",                  ak8lsjet1_p4.E());
+		self.out.fillBranch("ak8lsJet1_eta",                ak8lsjet1.eta);
+		self.out.fillBranch("ak8lsJet1_phi",                ak8lsjet1.phi);
+		self.out.fillBranch("ak8lsJet1_msoftdrop",          ak8lsjet1.msoftdrop);
+		self.out.fillBranch("ak8lsJet1_btagHbb",            ak8lsjet1.btagHbb);
+		self.out.fillBranch("ak8lsJet1_tau1",               ak8lsjet1.tau1);
+		self.out.fillBranch("ak8lsJet1_tau2",               ak8lsjet1.tau2);
+		self.out.fillBranch("ak8lsJet1_subjet0_pt",         subjet1.pt);
+		self.out.fillBranch("ak8lsJet1_subjet0_eta",        subjet1.eta);
+		self.out.fillBranch("ak8lsJet1_subjet0_phi",        subjet1.phi);
+ 	        self.out.fillBranch("ak8lsJet1_subjet0_CSV",        subjet1.btagDeepB);   
+		#self.out.fillBranch("ak8lsJet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8lsJet1_subjet1_pt",         subjet2.pt);
+		self.out.fillBranch("ak8lsJet1_subjet1_eta",        subjet2.eta);
+		self.out.fillBranch("ak8lsJet1_subjet1_phi",        subjet2.phi);
+	        self.out.fillBranch("ak8lsJet1_subjet1_CSV",        subjet2.btagDeepB);
+		#self.out.fillBranch("ak8lsJet1_subjet1_CSV",        subjet2.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak8lsJet1_pt",                 -10000.0);
+		self.out.fillBranch("ak8lsJet1_E",                  -10000.0);
+		self.out.fillBranch("ak8lsJet1_eta",                -10000.0);
+		self.out.fillBranch("ak8lsJet1_phi",                -10000.0);
+		self.out.fillBranch("ak8lsJet1_msoftdrop",          -10000.0);
+		self.out.fillBranch("ak8lsJet1_btagHbb",            -10000.0);
+		self.out.fillBranch("ak8lsJet1_tau1",               -10000.0);
+		self.out.fillBranch("ak8lsJet1_tau2",               -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet0_pt",         -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet0_eta",        -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet0_phi",        -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet0_CSV",        -10000.0);   
+		self.out.fillBranch("ak8lsJet1_subjet1_pt",         -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet1_eta",        -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet1_phi",        -10000.0);
+		self.out.fillBranch("ak8lsJet1_subjet1_CSV",        -10000.0);   
+	    
+            if (len(ak8lsjets) >= 2):
+		ak8lsjet2 = ak8lsjets[1]
+		ak8lsjet2_p4 = ROOT.TLorentzVector()
+		ak8lsjet2_p4.SetPtEtaPhiM(ak8lsjets[1].pt, ak8lsjets[1].eta, ak8lsjets[1].phi, ak8lsjets[1].mass)
+		subjet1 = ak8lssubjets[ak8lsjet2.subJetIdx1]
+		subjet2 = ak8lssubjets[ak8lsjet2.subJetIdx2]
+		self.out.fillBranch("ak8lsJet2_pt",                 ak8lsjet2.pt);
+		self.out.fillBranch("ak8lsJet2_E",                  ak8lsjet2_p4.E());
+		self.out.fillBranch("ak8lsJet2_eta",                ak8lsjet2.eta);
+		self.out.fillBranch("ak8lsJet2_phi",                ak8lsjet2.phi);
+		self.out.fillBranch("ak8lsJet2_msoftdrop",          ak8lsjet2.msoftdrop);
+		self.out.fillBranch("ak8lsJet2_btagHbb",            ak8lsjet2.btagHbb);
+		self.out.fillBranch("ak8lsJet2_tau1",               ak8lsjet2.tau1);
+		self.out.fillBranch("ak8lsJet2_tau2",               ak8lsjet2.tau2);
+		self.out.fillBranch("ak8lsJet2_subjet0_pt",         subjet1.pt);
+		self.out.fillBranch("ak8lsJet2_subjet0_eta",        subjet1.eta);
+		self.out.fillBranch("ak8lsJet2_subjet0_phi",        subjet1.phi);
+	        self.out.fillBranch("ak8lsJet2_subjet0_CSV",        subjet1.btagDeepB);   
+		#self.out.fillBranch("ak8lsJet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
+		self.out.fillBranch("ak8lsJet2_subjet1_pt",         subjet2.pt);
+		self.out.fillBranch("ak8lsJet2_subjet1_eta",        subjet2.eta);
+		self.out.fillBranch("ak8lsJet2_subjet1_phi",        subjet2.phi);
+	        self.out.fillBranch("ak8lsJet2_subjet1_CSV",        subjet2.btagDeepB);
+		#self.out.fillBranch("ak8lsJet2_subjet1_CSV",        subjet2.btagDeepFlavB);
+	    else:
+		self.out.fillBranch("ak8lsJet2_pt",                 -10000.0);
+		self.out.fillBranch("ak8lsJet2_E",                  -10000.0);
+		self.out.fillBranch("ak8lsJet2_eta",                -10000.0);
+		self.out.fillBranch("ak8lsJet2_phi",                -10000.0);
+		self.out.fillBranch("ak8lsJet2_msoftdrop",          -10000.0);
+		self.out.fillBranch("ak8lsJet2_tau1",               -10000.0);
+		self.out.fillBranch("ak8lsJet2_tau2",               -10000.0);
+		self.out.fillBranch("ak8lsJet2_btagHbb",            -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet0_pt",         -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet0_eta",        -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet0_phi",        -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet0_CSV",        -10000.0);   
+		self.out.fillBranch("ak8lsJet2_subjet1_pt",         -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet1_eta",        -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet1_phi",        -10000.0);
+		self.out.fillBranch("ak8lsJet2_subjet1_CSV",        -10000.0);   
+	    
 	        
 	        
 
@@ -1428,6 +1764,7 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("n_presel_ele", len(lepton_electrons))
 	self.out.fillBranch("n_presel_ak4Jet", len(jets_clean))
 	self.out.fillBranch("n_presel_ak8Jet", len(ak8jets_clean))
+	self.out.fillBranch("n_presel_ak8lsJet", len(ak8lsjets_clean))
 	self.out.fillBranch("PFMET",  met_p4.Pt())
 	self.out.fillBranch("PFMETphi", met_p4.Phi())
 	self.out.fillBranch("pu",  pu)
@@ -1437,10 +1774,15 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("event",  ievent)
 	self.out.fillBranch("ls",  luminosityBlock)
 
+	if ievent == 191977:
+	    for jet in jets_clean:
+	        print "event id ",ievent, " jet pt ",jet.pt," eta ",jet.eta," phi ",jet.phi 
+
 	fillBranches_muon(lepton_muons)
 	fillBranches_electron(lepton_electrons)
 	fillBranches_jet(jets_clean)
-	fillBranches_ak8jet(ak8jets_clean, jets)
+	fillBranches_ak8jet(ak8jets_clean, ak8subjets)
+	fillBranches_ak8lsjet(ak8lsjets_clean, ak8lssubjets)
 	
 
         return True

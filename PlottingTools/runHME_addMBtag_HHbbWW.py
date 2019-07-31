@@ -23,7 +23,8 @@ execfile("start.py")
 execfile("functions.py")
 
 
-sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
+CMSSWENV = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/"
+sys.path.append(CMSSWENV+'HhhAnalysis/python/NanoAOD')
 from localSamplelist import *
 #Creating folders and parameters
 def AddFiles(chain, inputDir):
@@ -42,6 +43,7 @@ def AddFiles(chain, inputDir):
 
 doTest = False
 doHME = True
+addMBtagWeight = True
 
 #tree_name="DiHiggsWWBBAna/evtree"
 #tree_name = "t"
@@ -65,6 +67,8 @@ parser.add_argument("-d", "--dataname", dest="dataname", default=None, help="sam
 parser.add_argument("-it", "--iterations", dest="iterations", type=int, default=10000, help="iteration number used HME [Default: 100000]")
 parser.add_argument("-o", "--outputdir",dest="output", default="./",help="output root file directory, [Defualt:PWD] ")
 parser.add_argument("-DY", "--DYestimation",dest="DYestimation",type=str2bool, default=False,help="do DYestimation or not, [Defualt:False] ")
+
+
 #args = parser.parse_args()
 args, unknown = parser.parse_known_args()
 if args.output[-1] != '/':
@@ -111,16 +115,93 @@ hme_stddev_offshellWmass_weight2_reco = array( 'f', maxn*[ 0. ] ) #np.zeros(1, d
 hmecputime                  = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 cross_section               = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 event_weight_sum            = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+bdt_value                   = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
+dy_Mbtag_weight             = array( 'f', maxn*[ 0. ] ) #np.zeros(1, dtype=float)
 hme_bins = []
 for i in range(100):
     hme_bins.append(array( 'f', maxn*[ 0. ] ))
 
+###################################
+### add Mbtag weight for DY estimation
+####################################
+flavours = ['b','c','l']
+def getEff1D(teff, x):
+    hist = teff.GetCopyPassedHisto()
+    xbin = hist.GetXaxis().FindBin(x)
+    return teff.GetEfficiency(xbin)
+
+def getEff2D(teff, x, y):
+    hist = teff.GetCopyPassedHisto()
+    xbin = hist.GetXaxis().FindBin(x)
+    ybin = hist.GetYaxis().FindBin(y)
+    bin = hist.GetBin(xbin, ybin)
+    return teff.GetEfficiency(bin)
+
+def get_Mbtag_weight(bdt_value,  pt1, eta1,  pt2, eta2, allfracs, Teffs):
+    weight = 0.0
+    for f1 in flavours:
+        for f2 in flavours:
+            thisfrac = allfracs[f1+f2]
+            eff1 = getEff2D(Teffs[f1], pt1, eta1)
+            eff2 = getEff2D(Teffs[f2], pt2, eta2)
+	    frac = getEff1D(thisfrac, bdt_value)
+            weight = weight +  frac*eff1*eff2
+            #print "flavours ",f1," ",f2," eff1 ",eff1, " eff2 ",eff2 ," frac ", frac," current weight ", weight
+    return weight 
+
+dy_frac_eff_f = CMSSWENV+"HhhAnalysis/python/DYEstimation/dy_frac_eff_combined.root"
+dytf = ROOT.TFile(dy_frac_eff_f, "READ")
+allfractions = {}
+allTeffs = {}
+
+for f1 in flavours:
+    for f2 in flavours:
+        allfractions[f1+f2] = dytf.Get(f1+f2+"_frac")
+        allfractions[f1+f2].SetDirectory(0)
+for f in flavours:
+    eff = None
+    if f != 'l':
+       eff = dytf.Get("btagging_eff_on_"+f)
+    else:
+       eff = dytf.Get("mistagging_eff_on_light")
+    allTeffs[f] = eff
+    allTeffs[f].SetDirectory(0)
+         
+dytf.Close()
+
+bdt_tmva_variables = [
+        "jet1_pt",
+        "jet1_eta",
+        "jet2_pt",
+        "jet2_eta",
+        "jj_pt",
+        "ll_pt",
+        "ll_eta",
+        "llmetjj_DPhi_ll_met",
+        "ht",
+        "nJetsL"
+
+]
+#bdt_label = "2016_12_18_BDTDY_bb_cc_vs_rest_7var_ht_nJets"
+#bdt_label = "2017_02_17_BDTDY_bb_cc_vs_rest_10var"
+#bdt_label = "2018_04_12_BDTDY_bb_cc_vs_rest_10var"
+bdt_label = "2018_06_22_BDTDY_bb_cc_vs_rest_10var"
+bdt_xml_file = CMSSWENV+"HhhAnalysis/python/DYEstimation/DYBDTTraining/weights/{}_kBDT.weights.xml".format(bdt_label)
+print "bdt_xml_file ",bdt_xml_file
+
+dict_tmva_variables = { var: array('f', [0]) for var in bdt_tmva_variables }
+m_reader = None
+if  args.DYestimation and  addMBtagWeight:
+    m_reader = ROOT.TMVA.Reader("Silent=1")
+    for var in bdt_tmva_variables:
+	m_reader.AddVariable(var, dict_tmva_variables[var])
+    m_reader.BookMVA(bdt_label, bdt_xml_file)
+### end of preparing add Mbtag for DY estimation
 
 
 thisfile = full_local_samplelist[args.jobtype][args.dataname]["path"]
-if args.DYestimation:
-    #thisfile = untagged_samplelist[args.jobtype][args.dataname]["path"]
-    thisfile = full_local_samplelist[args.jobtype][args.dataname]["path"]
+#if args.DYestimation:
+#    thisfile = untagged_samplelist[args.jobtype][args.dataname]["path"]
 
 
 if not os.path.isfile(thisfile):
@@ -178,10 +259,14 @@ TCha2.Branch("hme_stddev_offshellWmass_weight2_reco", hme_stddev_offshellWmass_w
 TCha2.Branch("hmecputime",                    hmecputime,                   "hmecputime/F")
 TCha2.Branch("cross_section",                 cross_section,                "cross_section/F")
 TCha2.Branch("event_weight_sum",              event_weight_sum,             "event_weight_sum/F")
-
 #ignore HME bins now 
 #for i in range(100):
 #    TCha2.Branch("hme_bin%d"%i, hme_bins[i], "hme_bin%d/F"%(i))
+if  args.DYestimation and  addMBtagWeight:
+    br_bdt_value = TCha2.Branch("bdt_value", bdt_value ,"bdt_value/F")
+    br_dy_Mbtag_weight = TCha2.Branch("dy_Mbtag_weight", dy_Mbtag_weight , "dy_Mbtag_weight/F")
+
+
 
 h_h2mass_weight_gen      = ROOT.TH1F("h_h2mass_weight_gen","",100,200.,1200.);  h_h2mass_weight_gen.GetXaxis().SetTitle("HME reco mass [GeV]");
 h_h2mass_weight_gen_sum  = ROOT.TH1F("h_h2mass_weight_gen_sum","",1000,200.,1200.);  h_h2mass_weight_gen_sum.GetXaxis().SetTitle("HME reco mass [GeV]");
@@ -262,6 +347,26 @@ for nEv in range(nStart, nEnd):
   if (cleaning_cuts):
       passCC[0] = 1
   
+  
+  #### add MBtag weight for DY estimation
+  if args.DYestimation and  addMBtagWeight:
+      if not (TCha.isElEl or TCha.isMuMu or TCha.ll_M>12):
+          #print "ignore Muel channel"
+          continue
+          #fillBranches()
+          #continue
+
+
+      def get_value(object, val):
+          return getattr(object, val)
+
+      for var in bdt_tmva_variables:
+          # Special treatment for variables not retrieved from the base object
+          dict_tmva_variables[var][0] = get_value(TCha, var)
+
+      bdt_value[0] = m_reader.EvaluateMVA(bdt_label)
+      dy_Mbtag_weight[0] = get_Mbtag_weight(bdt_value[0], TCha.jet1_pt, abs(TCha.jet1_eta), TCha.jet2_pt, abs(TCha.jet2_eta), allfractions, allTeffs)
+      print " bdt_value ",bdt_value[0]," weight ",dy_Mbtag_weight[0]
 
   #if (cleaning_cuts and TCha.findAllGenParticles and doHME and False):
   if (False):

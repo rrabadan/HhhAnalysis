@@ -59,7 +59,10 @@ filesSignal = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/GravitonToHHTo2B2VTo2
 filesTTbar2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/100000/2E9913D6-BAA9-E811-8ABE-0CC47A4DEF3E.root"]
 fileSignal2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/110000/70B64607-EEB2-E811-B1D7-A0369FD0B268.root"]
 filesDY1J2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAODv4/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/90000/62B5DB6B-F42C-D648-A6EF-5F26495985BF.root"]
-filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11_sync.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11_sync.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v2/myNanoProdMcv2_NANOAOD_11_sync.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v2/myNanoProdMcv2_CMSSW10215_NANOAOD_11_sync.root"]
+filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMcv2_NANO_11.root"]
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_1.root"]
 
 

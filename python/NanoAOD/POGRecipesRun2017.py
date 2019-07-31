@@ -94,20 +94,23 @@ def muonIso(muon):
     return muon.pfRelIso04_all < 0.15
 
 def muonPreselection(muon):
-    looseMuon = muon.isPFcand and muon.isGlobal
+    looseMuon = muon.looseId
     looseminiIso = muon.miniPFRelIso_all < 0.4
     return abs(muon.eta)<2.4 and muon.pt>5 and abs(muon.dxy) <= 0.05 and abs(muon.dz) <= 0.1 and looseminiIso and looseMuon and muon.sip3d < 8
 
 def electronPreselection(ele):
-    looseEle = 1
+    looseEle = ele.mvaFall17V2noIso_WPL
     looseminiIso = ele.miniPFRelIso_all < 0.4
     return abs(ele.eta)<2.5 and ele.pt>7 and abs(ele.dxy) <= 0.05 and abs(ele.dz) <= 0.1 and looseminiIso and ele.lostHits <=1 and looseEle and ele.sip3d < 8    
 
 def ak4jetPreselection(jet):
-    return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId == 6
+    return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId >= 2
 
 def ak8jetPreselection(jet):
-    return abs(jet.eta)<2.4 and jet.pt>200 and jet.jetId == 6 and jet.tau2/jet.tau1 < 0.75 and jet.msoftdrop <= 210 and jet.msoftdrop>=30
+    return abs(jet.eta)<2.4 and jet.pt>200 and jet.jetId >= 2 and jet.tau2/jet.tau1 < 0.75 and jet.msoftdrop < 210 and jet.msoftdrop>30
+
+def ak8lsjetPreselection(jet):
+    return abs(jet.eta)<2.4 and jet.pt>100 and jet.jetId >= 2 and jet.tau2/jet.tau1 < 0.75 
 
 def leptonImpactParameter(lepton):
     return ((abs(lepton.pdgId) == 11 and electronImpactParameterCut(lepton)) or abs(lepton.pdgId) == 13 )

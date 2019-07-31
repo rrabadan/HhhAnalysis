@@ -1348,7 +1348,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 	int mbtags = 0;
 	float bDiscVar1 = allbjets[i].bDiscriminator(bjetDiscrName_);
 	float bDiscVar2 = allbjets[j].bDiscriminator(bjetDiscrName_);
-	if (bDiscVar1 > bjetDiscrCut_medium_) mbtags++;
+	 if (bDiscVar1 > bjetDiscrCut_medium_) mbtags++;
 	if (bDiscVar2 > bjetDiscrCut_medium_) mbtags++;
 	if (mbtags >=  1)
 	  hastwojets = true;
@@ -1409,7 +1409,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     b1jet_neEmEF = allbjets[jet1].neutralEmEnergyFraction();
     //b1jet_vtxMass = allbjets[jet1].userFloat("vtxMass"); b1jet_vtxNtracks = allbjets[jet1].userFloat("vtxNtracks"); 
     //b1jet_vtxPx = allbjets[jet1].userFloat("vtxPx"); b1jet_vtxPy = allbjets[jet1].userFloat("vtxPy");
-    b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
+    //b1jet_vtxPt = sqrt(b1jet_vtxPx*b1jet_vtxPx + b1jet_vtxPy*b1jet_vtxPy);
     //b1jet_vtx3DSig = allbjets[jet1].userFloat("vtx3DSig"); b1jet_vtx3DVal = allbjets[jet1].userFloat("vtx3DVal");
     //b1jet_vtxPosX = allbjets[jet1].userFloat("vtxPosX"); b1jet_vtxPosY = allbjets[jet1].userFloat("vtxPosY"); b1jet_vtxPosZ = allbjets[jet1].userFloat("vtxPosZ");
 
@@ -1451,7 +1451,7 @@ void DiHiggsWWBBAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     //b2jet_neEmEF = allbjets[jet2].neutralEmEnergy()/(allbjets[jet2].p4()*allbjets[jet2].rawFactor()).energy();//neutralEmEnergyFraction
     //b2jet_vtxMass = allbjets[jet2].userFloat("vtxMass"); b2jet_vtxNtracks = allbjets[jet2].userFloat("vtxNtracks"); 
     //b2jet_vtxPx = allbjets[jet2].userFloat("vtxPx"); b2jet_vtxPy = allbjets[jet2].userFloat("vtxPy");
-    b2jet_vtxPt = sqrt(b2jet_vtxPx*b2jet_vtxPx + b2jet_vtxPy*b2jet_vtxPy);
+    //b2jet_vtxPt = sqrt(b2jet_vtxPx*b2jet_vtxPx + b2jet_vtxPy*b2jet_vtxPy);
     //b2jet_vtx3DSig = allbjets[jet2].userFloat("vtx3DSig"); b2jet_vtx3DVal = allbjets[jet2].userFloat("vtx3DVal");
     //b2jet_vtxPosX = allbjets[jet2].userFloat("vtxPosX"); b2jet_vtxPosY = allbjets[jet2].userFloat("vtxPosY"); b2jet_vtxPosZ = allbjets[jet2].userFloat("vtxPosZ");
 

@@ -40,8 +40,9 @@ doHME = True
 #onshellnuptpdf = refPDF.Get("onshellnuptpdf")
 #recobjetrescalec1pdfPU40 = refPDF.Get("recobjetrescalec1pdfPU40")
 
-tree_name="DiHiggsWWBBAna/evtree"
-tree_name = "t"
+#tree_name="DiHiggsWWBBAna/evtree"
+#tree_name = "t"
+tree_name = "Friends"
 benchmarks = ["ttV", "Wjet", "singTop", "VV", "DY", "TTbar", "Data"]
 #whichSample = "Graviton_0419"
 
