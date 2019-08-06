@@ -8,7 +8,6 @@ jobdir = "Btaggingeff"
 outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180410_DYestimation_btaggingEff/"
 #outdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180411_TTbaronly/"
 inputdir =  "/fdata/hepx/store/user/taohuang/HHNtuple_20180410_DYestimation/"
-os.system("mkdir -p %s" % jobdir)
 os.system("mkdir -p %s" % outdir)
 
 
@@ -37,7 +36,8 @@ print "outputdir ",outdir
 print "=============================================================="
 
 #todonanoaod = open("todaonanoaod.txt","w")
-def generateslrm(torun_datasets):
+def generateslrm(torun_datasets, scriptname, jobdir):
+    os.system("mkdir -p %s" % jobdir)
     submitscript = open("submitall_%s.sh"%(jobdir),"w")
     submitscript.write("""#!/bin/bash
 cd $CMSSW_BASE/src/HhhAnalysis/python/DYEstimation/
@@ -67,11 +67,11 @@ eval `scramv1 runtime -sh`
 #export X509_USER_PROXY=$HOME/x509up_u1468
 #voms-proxy-info -all
 #echo $X509_USER_PROXY
-python computeBTaggingEfficiency_SkimNano.py -n {jobtype}  -o {outputdir}  -i {inputdir}
+python {scriptname} -n {jobtype}  -o {outputdir}  -i {inputdir}
 
 echo "job$jobid starts, `date`"
 echo "job$jobid is done, `date`"
-exit 0""".format( inputdir=inputdir, outputdir=outdir, partition=queue, jobtype = job, jobdir =jobdir))
+exit 0""".format( inputdir=inputdir, outputdir=outdir, partition=queue, jobtype = job, jobdir =jobdir, scriptname = scriptname))
 	jobscript.close()
 
 	submitscript.write("""
@@ -89,6 +89,7 @@ def plotallNtuples(torun_datasets, plotdir):
 
 
 
-#generateslrm(torun_datasets)
-plotdir = "plots_btaggingEff/"
-plotallNtuples(torun_datasets, plotdir)
+#generateslrm(torun_datasets, "computeBTaggingEfficiency_SkimNano.py", "")
+generateslrm(torun_datasets, "computeFlavorFractionsOnBDT_SkimNano.py", "DY_flavour_fraction")
+#plotdir = "plots_btaggingEff/"
+#plotallNtuples(torun_datasets, plotdir)

@@ -7,7 +7,9 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(),
 #	lumisToProcess=cms.untracked.VLuminosityBlockRange("254231:1-254231:24")
 )
 process.source.fileNames = [
-	'../lzma_1.root' ##you can change only this line
+    	#'file:/fdata/hepx/store/user/tahuang/JPsiToMuMu_Pt20to100-pythia8-gun/RAW2DIGI_RECO_Muons_JPsiToMuMu_v2/170712_091000/0000/out_reco_1.root'
+    	'file:/fdata/hepx/store/user/taohuang/HH_NanoAOD/nanolzma_1.root'
+	#'../lzma_1.root' ##you can change only this line
 	#'../../NanoAOD/test/lzma.root' ##you can change only this line
 ]
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))

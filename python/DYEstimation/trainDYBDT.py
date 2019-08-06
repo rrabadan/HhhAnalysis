@@ -18,7 +18,8 @@ from tmvaTools import *
 #import Samplelist
 def get_sample(inFileDir, samplename):
     sampleinfo = {}
-    sampleinfo["files"] = [ os.path.join(inFileDir, samplename+"_Friend.root") ]
+    #sampleinfo["files"] = [ os.path.join(inFileDir, samplename+"_Friend.root") ]
+    sampleinfo["files"] = [ os.path.join(inFileDir, samplename+"_Run2017.root") ]
     #allsamplenames = [x.split('/')[1] for x in Samplelist.datasets]
     #index = allsamplenames.index(samplename)
     #sampleinfo["cross_section"] = Samplelist.MCxsections[index]
@@ -29,11 +30,12 @@ def get_sample(inFileDir, samplename):
     sampleinfo["relativeWeight"] = sampleinfo["cross_section"]/h_cutflow.GetBinContent(1)
     return sampleinfo
 
-date = "2017_02_17"
+date = "2019_03_15"
 suffix = "bb_cc_vs_rest_10var"
 label_template = "DATE_BDTDY_SUFFIX"
 
 inFileDir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180405_DYestimation/"
+inFileDir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20180309_DYEstimation/"
 
 # SAMPLES FOR THE TRAINING
 
@@ -67,10 +69,14 @@ inFileDir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180405_DYestimation/"
 #        }
 #
  
-DYJetsToLL_M10to50_db = get_sample(inFileDir, "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")
-DYJetsToLL_M50_0J_db = get_sample(inFileDir, "DYToLL_0J_13TeV-amcatnloFXFX-pythia8")
-DYJetsToLL_M50_1J_db = get_sample(inFileDir, "DYToLL_1J_13TeV-amcatnloFXFX-pythia8")
-DYJetsToLL_M50_2J_db = get_sample(inFileDir, "DYToLL_2J_13TeV-amcatnloFXFX-pythia8")
+#DYJetsToLL_M10to50_db = get_sample(inFileDir, "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8")
+#DYJetsToLL_M50_0J_db = get_sample(inFileDir, "DYToLL_0J_13TeV-amcatnloFXFX-pythia8")
+#DYJetsToLL_M50_1J_db = get_sample(inFileDir, "DYToLL_1J_13TeV-amcatnloFXFX-pythia8")
+#DYJetsToLL_M50_2J_db = get_sample(inFileDir, "DYToLL_2J_13TeV-amcatnloFXFX-pythia8")
+DYJetsToLL_M10to50_db = get_sample(inFileDir, "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8")
+DYJetsToLL_M50_0J_db  = get_sample(inFileDir, "DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8")
+DYJetsToLL_M50_1J_db  = get_sample(inFileDir, "DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8")
+DYJetsToLL_M50_2J_db  = get_sample(inFileDir, "DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8")
 
 bkgFiles = { 
         "DYJetsToLL_M-10to50": { 

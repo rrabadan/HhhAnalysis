@@ -20,7 +20,8 @@ process.source = cms.Source("PoolSource",
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/GravitonM400-02DF7FEF-74D9-E611-956A-02163E013746.root'
 	#'file:/fdata/hepx/store/user/tahuang/TEST_LOCALLY/RadionM400-3217F073-EF25-E611-862F-A0369F7FC210.root'
-	'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v3/000/300/742/00000/00CE998C-717E-E711-AD9B-02163E019CB5.root'
+	#'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v3/000/300/742/00000/00CE998C-717E-E711-AD9B-02163E019CB5.root'
+	'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v2/000/300/636/00000/FC587F5C-E57D-E711-830B-02163E01A3C2.root'
     )
 )
 

@@ -15,7 +15,11 @@ process.source = cms.Source("PoolSource",
   secondaryFileNames = cms.untracked.vstring(),
   fileNames = cms.untracked.vstring(
 #  'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/DYJETS_7A385961-C6D9-E611-85B2-0025905B85BC.root'
-  'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
+   #'file:/fdata/hepx/store/user/lpernie/TEST_LOCALLY/Run2016D-23Sep2016_MINIAOD_12B2DEA9-B68C-E611-99A4-0CC47A1DF810.root'
+	#'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v2/000/300/636/00000/FC587F5C-E57D-E711-830B-02163E01A3C2.root'
+        #'/store/data/Run2017C/DoubleMuon/MINIAOD/PromptReco-v1/000/299/368/00000/22A34E8E-896D-E711-8520-02163E01A6AF.root'
+	#'/store/data/Run2017A/DoubleMuon/MINIAOD/PromptReco-v1/000/296/116/00000/C67BBF64-1E4C-E711-8971-02163E01A22F.root'
+      	'/store/data/Run2017B/DoubleMuon/MINIAOD/PromptReco-v1/000/297/050/00000/B07AE6F3-5656-E711-AC81-02163E0119AE.root'
   )
 )
 
@@ -44,10 +48,24 @@ process.hltfilter = hlt.triggerResultsFilter.clone(
 	l1tResults = '',#not use L1t results
 	throw = cms.bool(False) 
 """
-triggerPaths = cms.vstring( 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
-			     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
-			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
-			     'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+triggerPaths = cms.vstring( 
+    			#2016 data
+			#'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
+			# 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+			# 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			# 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+    			#2017 data, promptReco
+			'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*',
+			'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*',
+			'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*',
+			'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*',
+			'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+			'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			#'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*',
+			#'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*',
+			#'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*',
+			#'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*',
+			#'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*',
 	)
 process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
         triggerConditions = triggerPaths,
@@ -57,7 +75,7 @@ process.hltfilter = cms.EDFilter( "TriggerResultsFilter",
 	l1tIgnoreMask = cms.bool( False ),
 	l1techIgnorePrescales = cms.bool( False ),
 	daqPartitions = cms.uint32( 1 ),
-	throw = cms.bool(True)    
+	throw = cms.bool(False)    
 )
 print sys.argv
 sample = 0#int(sys.argv[1])
@@ -101,7 +119,8 @@ process.DiHiggsWWBBAna = cms.EDAnalyzer('DiHiggsWWBBAnalyzer',
   triggerEvent = cms.InputTag("patTriggerEvent"),
   tracks = cms.InputTag("generalTracks"),
   TriggerResults = cms.InputTag("TriggerResults","","HLT"),
-  TriggerObjects = cms.InputTag("selectedPatTrigger"),
+  #TriggerObjects = cms.InputTag("selectedPatTrigger"),
+  TriggerObjects = cms.InputTag("slimmedPatTrigger"),
   TrackRefitter = cms.InputTag("TrackRefitter"),
   primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
   Traj = cms.InputTag("TrackRefitter"),

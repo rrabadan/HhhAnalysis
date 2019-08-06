@@ -31,7 +31,7 @@ def get_Mbtag_weight(bdt_value,  pt1, eta1,  pt2, eta2, allfracs, Teffs):
             eff1 = getEff2D(Teffs[f1], pt1, eta1)
             eff2 = getEff2D(Teffs[f2], pt2, eta2)
 	    frac = getEff1D(thisfrac, bdt_value)
-	    weight =+ frac*eff1*eff2
+	    weight = weight + frac*eff1*eff2
     return weight 
 
 dy_frac_eff_f = "/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/DYEstimation/dy_frac_eff_combined.root"
@@ -148,7 +148,7 @@ for i in range(0, entries):
 
 
     if not (chain.isElEl or chain.isMuMu or chain.ll_M>12):
-        print "ignore Muel channel"
+        #print "ignore Muel channel"
         #fillBranches()
         br_bdt_value.Fill()
         br_dy_Mbtag_weight.Fill()

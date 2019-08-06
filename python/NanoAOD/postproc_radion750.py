@@ -62,11 +62,14 @@ filesDY1J2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAODv4/DYJetsToLL_1J_TuneCP
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11_sync.root"]
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v2/myNanoProdMcv2_NANOAOD_11_sync.root"]
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v2/myNanoProdMcv2_CMSSW10215_NANOAOD_11_sync.root"]
-filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMcv2_NANO_11.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMcv2_NANO_11.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMc2017_NANO_11_20190730.root"]
+filesRadion750 = ["/fdata/hepx/store/user/taohuang/DiHiggs_run2_sync_NanoAOD/myNanoProdMc2016_NANO_brazos.root"]
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_1.root"]
 
 
-modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+#modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
+modules = [ puWeightyear(Runyear), countHistogramAll_2016(), HHbbWWProducer(True, verbose = 1) ]
 #p=PostProcessor(outputdir, filesTTbar2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
 #p=PostProcessor(outputdir, filesDY1J2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
 p=PostProcessor(outputdir, filesRadion750,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True, outtreeName="syncTree")

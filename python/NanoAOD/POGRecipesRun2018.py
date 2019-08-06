@@ -104,7 +104,8 @@ def electronPreselection(ele):
     return abs(ele.eta)<2.5 and ele.pt>7 and abs(ele.dxy) <= 0.05 and abs(ele.dz) <= 0.1 and looseminiIso and ele.lostHits <=1 and looseEle and ele.sip3d < 8    
 
 def ak4jetPreselection(jet):
-    return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId > 0
+    #return abs(jet.eta)<2.4 and jet.pt>25 and jetLooseID(jet)
+    return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId >= 2
 
 def ak8jetPreselection(jet):
     return abs(jet.eta)<2.4 and jet.pt>200 and jet.jetId >= 2 and jet.tau2/jet.tau1 < 0.75 and jet.msoftdrop < 210 and jet.msoftdrop>30

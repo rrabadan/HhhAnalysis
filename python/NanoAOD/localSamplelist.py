@@ -1,14 +1,17 @@
 import sys
 import ROOT
 #sys.path.append("/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD")
-sys.path.append("/home/taohuang/HhhAnalysis/python/NanoAOD")
-import Samplelist as Slist
+#sys.path.append("/home/taohuang/HhhAnalysis/python/NanoAOD")
+#import Samplelist as Slist
+from RunConfiguration import *
 import os
 
 
+faileddatasets = []
+if Runyear == 2016:
+    faileddatasets =  ["WWToLNuQQ_aTGC_13TeV-madgraph-pythia8", "ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1"]
+    faileddatasets.append("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1")
 
-faileddatasets =  ["WWToLNuQQ_aTGC_13TeV-madgraph-pythia8", "ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1"]
-faileddatasets.append("ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1")
 
 def get_event_weight_sum_file(filepath):
     tfile = ROOT.TFile(filepath, "READ")
@@ -73,8 +76,15 @@ full_local_samplelist = {}
 #localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180502_dataTT/"
 localdir = "HHNtuple_20180518_addSys/"
 localdir = "20180619_HHbbWW_addHME_addSys_10k/"
-localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_20180618_addSys/"
-#localdir = "/fdata/hepx/store/user/taohuang/20180619_HHbbWW_addHME_addSys_10k_addNN/"
+localdir = "20180619_HHbbWW_addHME_addSys_10k_addNN/"
+localdir = "HHNtuple_Run2017_20190309_addSys/"
+#localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190326_loosecut_addSys/"
+#localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190326_loosecut_2016trgeff_addSys/"
+#localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190401_nobtagcut_Tallineff_HLTv3/"
+localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190503_nobtagcut_PUweight/"
+#localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190506_loosecut_PUweight/"
+localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190508_nobtagcut_TallinEff/"
+localdir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190508_nobtagcut_TallinEff_passTrig/"
 addHME = False
 addNN = False
 for i,isample in enumerate(Slist.NumSample):
@@ -86,14 +96,17 @@ for i,isample in enumerate(Slist.NumSample):
     sampleName = Slist.sampleN_short[i]
     #print "isample ",isample, " i ",i," Samplename ",sampleName, " dataset ",Slist.Nanodatasets[i]
     dataname =  Slist.Nanodatasets[i].split('/')[1]
-    localfilepath = os.path.join(localdir, dataname+"_Friend.root")
+    localfilepath = os.path.join(localdir, dataname+"_Run%d.root"%(Runyear))
     if addHME and addNN:
         localfilepath = os.path.join(localdir, dataname+"_HME_Friends_NN.root")
     if addHME and not(addNN):
         localfilepath = os.path.join(localdir, dataname+"_HME_Friends.root")
-    if int(isample) < 13:
-	localfilepath = os.path.join("/fdata/hepx/store/user/taohuang/HHNtuple_20180704_addSys/", dataname+"_Run2016.root")
-
+    #if "DYJetsToLL_0J" in dataname or "DYJetsToLL_1J" in dataname or "DYJetsToLL_2J" in dataname:
+    #if "DY" in dataname:
+    #    oldlocaldir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190506_nobtagcut_PUweight_DY/"
+    #    localfilepath = os.path.join(oldlocaldir,  dataname+"_Run%d.root"%(Runyear))
+    ##if int(isample) < 13:
+    #    localfilepath = os.path.join("20180703_HHbbWW_addHME_addSys_10k_Signalonly/2018-07-05/", dataname+"_HME_Friends_NN.root")
     xsec =  Slist.MCxsections[i]
     if sampleName not in full_local_samplelist.keys():
         full_local_samplelist[sampleName] = {}
@@ -101,13 +114,15 @@ for i,isample in enumerate(Slist.NumSample):
     full_local_samplelist[sampleName][dataname] = {}
     full_local_samplelist[sampleName][dataname]["path"] = localfilepath
     full_local_samplelist[sampleName][dataname]["cross_section"] = xsec
+    #if sampleName == "TT":
+    #     full_local_samplelist[sampleName][dataname]["path"] = "HHNtuples_Run2017_20190306/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_Friend.root"
+    #    full_local_samplelist[sampleName][dataname]["path"] ="HHNtuples_Run2017_20190306/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_Run2017v2.root" 
     if not os.path.isfile(full_local_samplelist[sampleName][dataname]["path"]):
         print "error!! failed to find this file ", full_local_samplelist[sampleName][dataname]["path"]
     #print "to get event weight  sum ",localfilepath
     #full_local_samplelist[sampleName][dataname]["event_weight_sum"] =  get_event_weight_sum_file( localfilepath )
     
 
-#print "full_local_samplelist ",full_local_samplelist
 MCnames = ["TT","DY","sT","Wjet","VV", "ttV"]
 signal = []
 for mass in [260, 270, 300, 350, 400, 450, 500, 550, 600, 650,750, 800, 900]:
@@ -119,23 +134,30 @@ full_local_samplelist["Data"] = {}
 datanames = ["DoubleMuon", "DoubleEG","MuonEG"]
 for dataname in datanames:
     #localdatadir = "20180619_HHbbWW_addHME_addSys_10k/"
-    localdatadir = localdir 
+    #localdatadir = localdir 
+    localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190508_nobtagcut_TallinEff/"
+    #localdatadir = "HHNtuple_Run2017_20190316_data_addSys/"
+    #localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190401_loosecut_Tallineff_addSys/"
+    #localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190401_loosecut_Tallineff_HLTv3/"
+    #localdatadir = "/fdata/hepx/store/user/taohuang/HHNtuple_Run2017_20190401_nobtagcut_Tallineff_HLTv3/"
     full_local_samplelist["Data"][dataname] = {}
-    full_local_samplelist["Data"][dataname]["path"] =  os.path.join(localdatadir,dataname+"Run2016.root")
+    full_local_samplelist["Data"][dataname]["path"] =  os.path.join(localdatadir,dataname+"_Run%d.root"%(Runyear))
     if addHME and addNN:
         full_local_samplelist["Data"][dataname]["path"] =  os.path.join(localdatadir,dataname+"_HME_Friends_NN.root")
     if addHME and not(addNN):
         full_local_samplelist["Data"][dataname]["path"] =  os.path.join(localdatadir,dataname+"_HME_Friends.root")
 
+
     if not os.path.isfile(full_local_samplelist["Data"][dataname]["path"]):
         print "error!! failed to find this file ", full_local_samplelist["Data"][dataname]["path"]
+#print "full_local_samplelist ",full_local_samplelist
 
+addDYdatadriven = False
 
 #print full_local_samplelist
 untagged_MCname = ["TT", "sT"]
 untagged_localdir = '20180619_HHbbWW_addHME_addSys_10k_DYestimation/'
-untagged_localdir = '/fdata/hepx/store/user/taohuang/HHNtuple_20180618_DYEstimation/'
-#untagged_localdir = localdir 
+untagged_localdir = localdir 
 untagged_suffix = "_untagged"
 for mcname in untagged_MCname:
     full_local_samplelist[mcname + untagged_suffix] = {}
@@ -150,7 +172,7 @@ for mcname in untagged_MCname:
         if addHME and not(addNN):
             full_local_samplelist[mcname + untagged_suffix][key + untagged_suffix]['path'] = os.path.join(untagged_localdir, key+"_HME_addMbtagWeight.root")
         full_local_samplelist[mcname + untagged_suffix][key + untagged_suffix]['cross_section'] = full_local_samplelist[ mcname][key]['cross_section']
-    if not os.path.isfile(full_local_samplelist[mcname + untagged_suffix][dataname]["path"]):
+    if not os.path.isfile(full_local_samplelist[mcname + untagged_suffix][dataname]["path"]) and addDYdatadriven:
         print "error!! failed to find this file ", full_local_samplelist[mcname + untagged_suffix][dataname]["path"]
         #full_local_samplelist[mcname + untagged_suffix][key + untagged_suffix]['event_weight_sum'] =  get_event_weight_sum_file( full_local_samplelist[ mcname][key]['path'])
 
@@ -161,13 +183,12 @@ full_local_samplelist["Data" + untagged_suffix] = {}
 datas = ["DoubleMuon", "DoubleEG"]
 untagged_localdatadir = untagged_localdir
 for dataname in datas:
-    full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix] = {}
-    #full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"] =  os.path.join(untagged_localdatadir,dataname+"_Run2016_untagged.root")
-    full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"] =  os.path.join(untagged_localdatadir,dataname+"Run2016.root")
+    full_local_samplelist["Data" + untagged_suffix][dataname] = {}
+    full_local_samplelist["Data" + untagged_suffix][dataname]["path"] =  os.path.join(untagged_localdatadir,dataname+"_Run2016_untagged.root")
     if addHME and addNN:
-        full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"] =  os.path.join(untagged_localdatadir,dataname+"Run2016_HME_addMbtagWeight_NN.root")
+        full_local_samplelist["Data" + untagged_suffix][dataname]["path"] =  os.path.join(untagged_localdatadir,dataname+"Run2016_HME_addMbtagWeight_NN.root")
     if addHME and not(addNN):
-        full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"] =  os.path.join(untagged_localdatadir,dataname+"Run2016_HME_addMbtagWeight.root")
-    if not os.path.isfile(full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"]):
-        print "error!! failed to find this file ", full_local_samplelist["Data" + untagged_suffix][dataname+ untagged_suffix]["path"]
+        full_local_samplelist["Data" + untagged_suffix][dataname]["path"] =  os.path.join(untagged_localdatadir,dataname+"Run2016_HME_addMbtagWeight.root")
+    if not os.path.isfile(full_local_samplelist["Data" + untagged_suffix][dataname]["path"]) and addDYdatadriven:
+        print "error!! failed to find this file ", full_local_samplelist["Data" + untagged_suffix][dataname]["path"]
 #print "full_local_samplelist ",full_local_samplelist

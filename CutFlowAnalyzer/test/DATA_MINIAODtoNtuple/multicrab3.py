@@ -13,10 +13,12 @@ config.JobType.inputFiles   = ["Files/EfficienciesAndSF_BCDEFGH_Tracking.root","
 
 config.section_("Data")
 config.Data.inputDBS        = 'global'
+#config.Data.splitting       = 'FileBased'
+#config.Data.unitsPerJob     = 5
 config.Data.splitting       = 'LumiBased'
 config.Data.unitsPerJob     = 20
-config.Data.lumiMask        = 'Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
-config.Data.outLFNDirBase   = '/store/user/lpernie/'
+config.Data.lumiMask        = 'Cert_294927-304120_13TeV_PromptReco_Collisions17_JSON.txt'
+config.Data.outLFNDirBase   = '/store/user/tahuang/Collisioins17'
 config.Data.publication     = False
 
 config.section_("Site")
@@ -36,14 +38,27 @@ def findNewestDir(directory):
   return lister[-1][0]
 
 datasets  = []; 
-datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
-datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD")
-datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016B-23Sep2016-v3/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016C-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016D-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016E-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016F-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016G-23Sep2016-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017A-PromptReco-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017A-PromptReco-v2/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017A-PromptReco-v3/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017B-PromptReco-v2/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017C-PromptReco-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017C-PromptReco-v2/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017C-PromptReco-v3/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017D-PromptReco-v1/MINIAOD")
+#datasets.append("/DoubleMuon/Run2017E-PromptReco-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2017B-12Sep2017-v1/MINIAOD")
+datasets.append("/DoubleMuon/Run2017C-12Sep2017-v1/MINIAOD")
+
 
 check_f = open("check_crab.sh",'w'); check_f.write("#!/bin/bash\n")
 resub_f = open("resub_crab.sh",'w'); resub_f.write("#!/bin/bash\n")
@@ -62,7 +77,7 @@ if __name__ == '__main__':
     # To plot easily the datasets
     if not OnlySubmitCRAB:
       sampleN   = "Hhh_"+dataset.split('/')[2]
-      path      = "/fdata/hepx/store/user/lpernie/" + dataset.split('/')[1] + "/crab_Hhh_" + dataset.split('/')[2] + "/"
+      path      = "/fdata/hepx/store/user/tahuang/" + dataset.split('/')[1] + "/crab_Hhh_" + dataset.split('/')[2] + "/"
       NewestDir = findNewestDir(path)
       path      = path + NewestDir
       plotter_f.write('  Find_str.append("find ' + path + ' | grep root | grep -v failed > HADD/DATA_' + sampleN + '.txt")\n')
