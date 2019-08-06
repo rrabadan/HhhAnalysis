@@ -25,7 +25,7 @@ YearInfo = {
         "GravitonMasses":[],
         "RadionMasses":[]
         },
-    2016:{
+    2018:{
         "IntLumi": 59.74,
         "GravitonMasses":[],
         "RadionMasses":[270, 320, 350, 400, 450, 500,  600, 650, 900]
