@@ -11,7 +11,15 @@ from PhysicsTools.NanoAODTools.postprocessing.tools import * #deltaR, matching e
 import sys
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
 
-from RunConfiguration import *
+import __builtin__
+
+if hasattr(__builtin__, "Runyear"):
+    Runyear = __builtin__.Runyear
+else:
+    import RunConfiguration as RunConfig
+    Runyear = RunConfig.Runyear
+
+#from RunConfiguration import *
 if Runyear == 2016:
     import POGRecipesRun2016 as POGRecipesRun2
 elif Runyear == 2017:
@@ -24,7 +32,7 @@ else:
 
 import Run2DiLeptonTrigger as Run2Trigger
 
-print "HHbbWWProducer, import finished here"
+print "HHbbWWProducer, import finished here, Runyear ", Runyear
 
 errorcolor1 = '\x1b[1;31m'
 errorcolor2 = '\x1b[0m'

@@ -6,7 +6,8 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import warnings
 
 #from RunConfiguration import *
-Runyear = 2017
+import __builtin__
+__builtin__.Runyear = 2017
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
@@ -66,25 +67,30 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
 #outputdir = "/fdata/hepx/store/user/taohuang/HH_NanoAOD/"
-outputdir = "/eos/uscms/store/user/tahuang/HHbbWW_sync/"
+#outputdir = "/eos/uscms/store/user/tahuang/HHbbWW_sync/"
+outputdir = "/fdata/hepx/store/user/taohuang/HH_Run2_sync_Ntuple/"
 filesTTbar = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIIFall17_NanoAOD.root"]
 filesSignal = ["/fdata/hepx/store/user/taohuang/HH_NanoAOD/GravitonToHHTo2B2VTo2L2Nu_M-400_narrow_13TeV_NanoAOD_2.root"]
 filesTTbar2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/100000/2E9913D6-BAA9-E811-8ABE-0CC47A4DEF3E.root"]
 fileSignal2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAOD/GluGluToRadionToHHTo2B2VTo2L2Nu_M-350_narrow_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/110000/70B64607-EEB2-E811-B1D7-A0369FD0B268.root"]
 filesDY1J2017 = ["/fdata/hepx/store/mc/RunIIFall17NanoAODv4/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/PU2017_12Apr2018_Nano14Dec2018_102X_mc2017_realistic_v6-v1/90000/62B5DB6B-F42C-D648-A6EF-5F26495985BF.root"]
 #filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11_sync.root"]
-#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_1.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017/myNanoProdMc_NANOAOD_11.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMc2017_NANO_11_20190730.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v2/myNanoProdMcv2_CMSSW10215_NANOAOD_11_sync.root"]
+#filesRadion750 = ["/fdata/hepx/store/user/taohuang/Radion750_NanoAOD_RunIIFall17MiniAODv2-PU2017_v3/myNanoProdMcv2_NANO_11.root"]
+filesRadion750 = ["/fdata/hepx/store/user/taohuang/DiHiggs_run2_sync_NanoAOD/myNanoProdMc2017_NANO_11_20190805test.root"]
 #fileRadion750 = ["/eos/uscms/store/user/tahuang/GluGluToRadionToHHTo2B2Tau_M-750_narrow_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018/190728_042406/0000/myNanoProdMcv2_NANO_10.root"]
 #filesRadion750 = ["/eos/uscms/store/user/tahuang/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph-v2/RunIISummer16MiniAODv3-PU2017_NanoAOD/190728_045153/0000/myNanoProdMc2016_NANO_2.root"]
 #filesRadion750 = ["/eos/uscms/store/user/tahuang/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph_correctedcfg/RunIIFall17MiniAODv2-PU2017_NanoAOD_10010X_M-750_CMSSW10215_v2/190627_205303/0000/myNanoProdMcv2_NANO_11.root"]
-filesRadion750 = ["/eos/uscms/store/user/tahuang/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph_correctedcfg/RunIIFall17MiniAODv2-PU2017_NanoAOD_20190730/190731_060502/0000/myNanoProdMc2017_NANO_11.root"]
+#filesRadion750 = ["/eos/uscms/store/user/tahuang/GluGluToRadionToHHTo2B2VTo2L2Nu_M-750_narrow_13TeV-madgraph_correctedcfg/RunIIFall17MiniAODv2-PU2017_NanoAOD_20190730/190731_060502/0000/myNanoProdMc2017_NANO_11.root"]
 
 
 #modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 modules = [ puWeightyear(Runyear), muonScaleRes(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 #p=PostProcessor(outputdir, filesTTbar2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
 #p=PostProcessor(outputdir, filesDY1J2017,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True)
-p=PostProcessor(outputdir, filesRadion750,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True, outtreeName="syncTree")
+p=PostProcessor(outputdir, filesRadion750,"1","keep_and_drop.txt", modules, friend = True, jsonInput = None, provenance=True, outtreeName="syncTree", postfix="Friend_test")
 print "run Postprocessor here "
 p.run()
 
