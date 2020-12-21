@@ -91,10 +91,10 @@ bkgFiles = {
 	           "files": DYJetsToLL_M50_1J_db["files"],
 		   "relativeWeight": DYJetsToLL_M50_1J_db["relativeWeight"]
                 },
-#        "DYJetsToLL_M-50_2J": {
-#	           "files": DYJetsToLL_M50_2J_db["files"],
-#		   "relativeWeight": DYJetsToLL_M50_2J_db["relativeWeight"]
-#                },
+        "DYJetsToLL_M-50_2J": {
+	           "files": DYJetsToLL_M50_2J_db["files"],
+		   "relativeWeight": DYJetsToLL_M50_2J_db["relativeWeight"]
+                },
         }
 
 print "bgfiles  ",bkgFiles
