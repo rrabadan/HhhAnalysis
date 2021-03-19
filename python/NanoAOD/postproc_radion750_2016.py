@@ -12,10 +12,12 @@ __builtin__.Runyear = 2016
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 
-sys.path.append('/afs/cern.ch/work/t/tahuang/HHAnalysis/CMSSW_10_2_0/src/HhhAnalysis/python/NanoAOD')
+#sys.path.append('/afs/cern.ch/work/t/tahuang/HHAnalysis/CMSSW_10_2_0/src/HhhAnalysis/python/NanoAOD')
+sys.path.append('/afs/cern.ch/work/d/daebi/diHiggs/CMSSW_10_2_0/src/HhhAnalysis/python/NanoAOD')
 #from countHistogramProducer import *
 from genParticleProducer import *
-from HHbbWWProducer_sync import *
+#from HHbbWWProducer_sync import *
+from Devin_sync_producer import *
 
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
@@ -59,10 +61,10 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
                             lambda el : el.pt > 10 and abs(el.eta) < 2.5 )
 
 
-outputdir   = "/eos/user/t/tahuang/2021NtupleProduceTest/"
-file2016Test = ["/eos/user/t/tahuang/NanoAODSamples_2019/myNanoProdMc2016_NANO_brazos_20190807.root"]
-file2017Test = ["/eos/user/t/tahuang/NanoAODSamples_2019/myNanoProdMc2017_NANO_brazos.root"]
-file2018Test = ["/eos/user/t/tahuang/NanoAODSamples_2019/myNanoProdMc2018_NANO_10_20190805Test.root"]
+outputdir   = "tao_oldsample_mytest/"
+file2016Test = ["tao_oldsample/myNanoProdMc2016_NANO_brazos_20190807.root"]
+file2017Test = ["tao_oldsample/myNanoProdMc2017_NANO_brazos.root"]
+file2018Test = ["tao_oldsample/myNanoProdMc2018_NANO_10_20190805Test.root"]
 
 #modules = [ puWeightyear(Runyear), countHistogramAll_2016(), jetmetUncertaintiesyear(Runyear), btagSFyear(Runyear),  mht_hh(), HHbbWWProducer(True, verbose = 1) ]
 modules = [ puWeightyear(Runyear),   HHbbWWProducer(True, verbose = 1) ]
