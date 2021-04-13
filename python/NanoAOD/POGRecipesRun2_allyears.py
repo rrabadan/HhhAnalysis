@@ -39,11 +39,21 @@ def ak8subjetMediumBtag(runyear):
     if runyear == 2018: return 0.4184
 
 def conept(lep):
+    """
     #https://github.com/CERN-PH-CMG/cmgtools-lite/blob/f8a34c64a4489d94ff9ac4c0d8b0b06dad46e521/TTHAnalysis/python/tools/conept.py#L74
     if (abs(lep.pdgId) != 11 and abs(lep.pdgId) != 13): return lep.pt
     if (abs(lep.pdgId) != 13 or lep.mediumMuonId > 0) and lep.mvaTTH > 0.90: return lep.pt
     return lep.pt #Currently do not have jetPtRatiov2, looking for a fix
     #else: return 0.90* lep.pt / lep.jetPtRatiov2
+    """
+    #Fix taken from Florian
+    #https://github.com/FlorianBury/HHbbWWAnalysis/blob/84204a8d8c31eb67d7f1a8e4bd77ce00d7232bd6/BaseHHtobbWW.py#L951-L962Le
+    if (abs(lep.pdgId) != 11 and abs(lep.pdgId) != 13): return lep.pt
+    elif (abs(lep.pdgId) == 11 and lep.mvaTTH > 0.30): return lep.pt
+    elif (abs(lep.pdgId) == 13 and lep.mediumId and lep.mvaTTH > 0.50): return lep.pt
+    else: return 0.9 * lep.pt * (1.0 + lep.jetRelIso)
+
+
 
 def get_jet_from_lepton(lep, jets, runyear):
     jetId = lep.jetIdx
@@ -61,7 +71,12 @@ def muonPreselection(muon, runyear):
     return abs(muon.eta)<2.4 and muon.pt>5 and abs(muon.dxy) <= 0.05 and abs(muon.dz) <= 0.1 and muon.looseId and muon.miniPFRelIso_all < 0.4 and muon.sip3d < 8
 
 def muonFakeable(muon, runyear):
-    return True
+    jetDeepJet_cut = False
+    lepMVA_cut = True
+    if muon.mvaTTH <= 0.85:
+        lepMVA_cut = False
+        if muon.jetRelIso <= 0.5 and 
+    return conept(muon) >= 10 and jetDeepJet_cut and lepMVA_cut
 
 def muonTight(muon, runyear):
     return True
