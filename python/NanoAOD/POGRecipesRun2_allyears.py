@@ -75,14 +75,14 @@ def muonFakeable(muon, runyear):
     lepMVA_cut = True
     if muon.mvaTTH <= 0.85:
         lepMVA_cut = False
-        if muon.jetRelIso <= 0.5 and 
+        #if muon.jetRelIso <= 0.5 and 
     return conept(muon) >= 10 and jetDeepJet_cut and lepMVA_cut
 
 def muonTight(muon, runyear):
-    return True
+    return (muon.mvaTTH >= 0.50 and muon.mediumId)
 
 def electronPreselection(ele, runyear):
-    return abs(ele.eta)<2.5 and ele.pt>7 and abs(ele.dxy) <= 0.05 and abs(ele.dz) <= 0.1 and ele.miniPFRelIso_all < 0.4 and ele.lostHits <=1 and ele.mvaFall17V2noIso_WPL and ele.sip3d < 8
+    return abs(ele.eta)<2.5 and ele.pt>7.0 and abs(ele.dxy) <= 0.05 and abs(ele.dz) <= 0.1 and ele.miniPFRelIso_all < 0.4 and ele.lostHits <=1 and ele.mvaFall17V2noIso_WPL and ele.sip3d < 8
 
 def electronFakeable(ele, jets, runyear):
     sieie_cut = False
@@ -104,7 +104,7 @@ def electronFakeable(ele, jets, runyear):
     return conept(ele) >= 10 and sieie_cut and ele.hoe <= 0.10 and ele.eInvMinusPInv >= -0.04 and jetDeepJet_cut and lepMVA_cut and ele.lostHits == 0 and ele.convVeto
 
 def electronTight(ele, runyear):
-    return True
+    return ele.mvaTTH >= 0.30
 
 def ak4jetPreselection(jet, runyear):
     return abs(jet.eta)<2.4 and jet.pt>25 and jet.jetId >= ak4jetIdCut(runyear)
@@ -185,3 +185,52 @@ def ak8lsjetCleaning(jet, ak4jets, ak8jets, runyear):
     return True
 
 #Need to add all the VBF stuff
+
+
+def single_electron(HLT, runyear):
+    if runyear == 2016:
+        return (HLT.Ele27_WPTight_Gsf and HLT.Ele25_eta2p1_WPTight_Gsf and HLT.Ele27_eta2p1_WPLoose_Gsf)
+    if runyear == 2017:
+        return (HLT.Ele35_WPTight_Gsf and HLT.Ele32_WPTight_Gsf)
+    if runyear == 2018:
+        return (HLT.Ele32_WPTight_Gsf)
+
+def single_muon(HLT, runyear):
+    if runyear == 2016:
+        return (HLT.IsoMu22 and HLT.IsoTkMu22 and HLT.IsoMu22_eta2p1 and HLT.IsoTkMu22_eta2p1 and HLT.IsoMu24 and HLT.IsoTkMu24)
+    if runyear == 2017:
+        return (HLT.IsoMu24 and HLT.IsoMu27)
+    if runyear == 2018:
+        return (HLT.IsoMu24 and HLT.IsoMu27)
+
+def double_electron(HLT, runyear):
+    if runyear == 2016:
+        return (HLT.Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ)
+    if runyear == 2017:
+        return (HLT.Ele23_Ele12_CaloIdL_TrackIdL_IsoVL)
+    if runyear == 2018:
+        return (HLT.Ele23_Ele12_CaloIdL_TrackIdL_IsoVL)
+
+def double_muon(HLT, runyear):
+    if runyear == 2016:
+        return (HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL and HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ and HLT.Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL and HLT.Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ)
+    if runyear == 2017:
+        return (HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 and HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)
+    if runyear == 2018:
+        return (HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8)
+
+def muon_electron(HLT, runyear):
+    if runyear == 2016:
+        return (HLT.Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL and HLT.Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ and HLT.Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL and HLT.Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ)
+    if runyear == 2017:
+        return (HLT.Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ and HLT.Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ and HLT.Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL and HLT.Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ)
+    if runyear == 2018:
+        return (HLT.Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ and HLT.Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ and HLT.Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL)
+
+def met_filters(flag, isMC, runyear):
+    badCalib = False; badSc = True
+    if (runyear == 2017 or runyear == 2018): badCalib = True
+    if (runyear == 2016): badCalib = True
+    if (flag.eeBadScFilter and not isMC): badSc = True
+    if (isMC): badSc = True
+    return (flag.goodVertices and flag.globalSuperTightHalo2016Filter and flag.HBHENoiseFilter and flag.HBHENoiseIsoFilter and flag.EcalDeadCellTriggerPrimitiveFilter and flag.BadPFMuonFilter and badCalib and badSc)

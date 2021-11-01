@@ -18,7 +18,7 @@ sys.path.append('/afs/cern.ch/work/d/daebi/diHiggs/CMSSW_10_2_0/src/HhhAnalysis/
 from genParticleProducer import *
 #from HHbbWWProducer_sync import *
 from Devin_sync_producer import *
-
+mass = sys.argv[1]
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.btv.btagSFProducer import *
 btagSF2016_cMVA = lambda : btagSFProducer("2016",  algo = 'cmva', sfFileName='cMVAv2_Moriond17_B_H.csv')## file is under NanoAODTools
@@ -62,7 +62,16 @@ mht_hh = lambda : mhtProducer( lambda j : j.pt > 20 and abs(j.eta) < 2.4,
 
 
 outputdir   = "tao_oldsample_mytest/"
+outputdir   = "add_cov_test/"
+outputdir   = "mysample_test_m{mass}/".format(mass = mass)
+#file2016Test = ["add_cov/NANOAODSIM_M-260_1.root"]
 file2016Test = ["tao_oldsample/myNanoProdMc2016_NANO_brazos_20190807.root"]
+
+filedir = "/eos/user/d/daebi/hhBBww_datasets/2016/signal/m{mass}/".format(mass = mass)
+print os.listdir(filedir)
+file2016Test = [filedir + s for s in os.listdir(filedir)]
+print file2016Test
+#file2016Test = ["/afs/cern.ch/work/d/daebi/diHiggs/nanoAOD_test_v2/src/myNanoProdMc2016_NANO.root"]
 file2017Test = ["tao_oldsample/myNanoProdMc2017_NANO_brazos.root"]
 file2018Test = ["tao_oldsample/myNanoProdMc2018_NANO_10_20190805Test.root"]
 
