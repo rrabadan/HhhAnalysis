@@ -284,6 +284,9 @@ class HHbbWWProducer(Module):
 
 	self.out.branch("PFMET",  "F")
 	self.out.branch("PFMETphi",  "F")
+        self.out.branch("PFMETCovXX", "F")
+        self.out.branch("PFMETCovXY", "F")
+        self.out.branch("PFMETCovYY", "F")
 	self.out.branch("n_presel_mu", "I")
 	self.out.branch("n_presel_ele", "I")
 	self.out.branch("n_presel_ak4Jet", "I")
@@ -418,6 +421,7 @@ class HHbbWWProducer(Module):
 		#self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
 		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
 	    """
+        self.out.branch("category", "I")
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_eventcounter.Write()
@@ -727,6 +731,42 @@ class HHbbWWProducer(Module):
 		self.h_cutflowlist[l1t].Fill( cutflow_bin, weight)
 	    cutflow_bin = cutflow_bin - 1
 	
+    def single_leptop(self, e_fake, e_tight, mu_fake, mu_tight, ak4_btagged, ak8_btagged, taus):
+        top_e_pt = 0; top_mu_pt = 0
+        if len(e_fake) > 0: top_e_pt = POGRecipesRun2.conept(e_fake[0])
+        if len(mu_fake) > 0: top_mu_pt = POGRecipesRun2.conept(mu_fake[0]) #at least 1 fakeable lepton
+        if top_e_pt > top_mu_pt:
+          if top_e_pt < 32: return False
+        else: 
+          if top_mu_pt < 25: return False #top lepton conept is fakeable AND passes GeV cuts
+        #Invariant mass of pair must be greater than 12GeV !!!!Not added yet!!!!
+        if (len(e_tight) + len(mu_tight)) > 1: return False #No more than 1 tight lepton
+        if (len(e_tight) == 1):
+          if e_tight[0] == e_fake[0]: return False
+        if (len(mu_tight) == 1):
+          if mu_tight[0] != mu_fake[0]: return False #Tight lepton should be highest conept
+        #Tau veto
+        #if (
+
+        #No pair of same-flavour, opposite-sign preselected leptons within 10GeV of Z mass !!!!Idk how to make pairs?!!!!
+        if not (len(ak8_btagged) >= 1 or len(ak4_btagged) >= 1): return False #at least one medium btag
+        #if not (len(ak8_btagged) == 0 and 
+        return True
+
+    def double_leptop(self, e_fake, e_tight, mu_fake, mu_tight, ak4_btagged, ak8_btagged):
+        if not((len(e_fake) + len(mu_fake)) >= 2): return False #at least 2 fakeable leptons
+        leptons_fake = e_fake + mu_fake
+        leptons_fake.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
+        #if ((leptons_fake[0] in e_fake) and (leptons_fake[1] in e_fake)) #must pass double E or single E
+        #if ((leptons_fake[0] in mu_fake) and (leptons_fake[1] in mu_fake)) #must pass double Mu or single Mu
+        #if (((leptons_fake[0] in e_fake) and (leptons_fake[1] in mu_fake)) or ((leptons_fake[0] in mu_fake) and (leptons_fake[1] in e_fake))) #must pass single E or single Mu or MuE
+        if ((POGRecipesRun2.conept(leptons_fake[0]) < 25) or (POGRecipesRun2.conept(leptons_fake[1]) < 15)): return False #conepT > 25 for leading, 15 for sub
+        if ((leptons_fake[0].charge * leptons_fake[1].charge != -1)): return False #must be opposite charge
+        #invariant mass of preselected lepton pair is greater than 12 GeV
+        if ((len(e_tight) + len(mu_tight)) > 2): return False #no more than 2 tight leptons
+        #no pair within 10GeV of Z
+        return True
+
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
@@ -801,8 +841,12 @@ class HHbbWWProducer(Module):
         ak8jets = list(Collection(event, "FatJet"))
         ak8subjets = list(Collection(event, "SubJet"))
 
-        ak8lsjets = list(Collection(event, "FatJetAK8LSLoose"))
-        ak8lssubjets = list(Collection(event, "SubJetAK8LSLoose"))
+        #ak8lsjets = list(Collection(event, "FatJetAK8LSLoose"))
+        #ak8lssubjets = list(Collection(event, "SubJetAK8LSLoose"))
+        ak8lsjets = []
+        ak8lssubjets = []
+        ak8lsjets_pre = []
+        ak8lsjets_clean = []
 
         #####################################
         ## di-leps selection
@@ -826,8 +870,8 @@ class HHbbWWProducer(Module):
         electrons_pre = [x for x in electrons if POGRecipesRun2.electronPreselection(x, Runyear)]
         electrons_cleaned = [x for x in electrons_pre if POGRecipesRun2.leptonCleaning(x, muons_pre, Runyear)]
 
-        muons_pre.sort(key=lambda x:x.pt, reverse=True)
-        electrons_cleaned.sort(key=lambda x:x.pt, reverse=True)
+        muons_pre.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
+        electrons_cleaned.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
 
 
         muons_fakeable = [x for x in muons_pre if POGRecipesRun2.muonFakeable(x, Runyear)]
@@ -844,8 +888,146 @@ class HHbbWWProducer(Module):
         ak8jets_clean = [x for x in ak8jets_pre if POGRecipesRun2.ak8jetCleaning(x, muons_fakeable, electrons_fakeable, Runyear)]
         ak8jets_btagged = [x for x in ak8jets_clean if POGRecipesRun2.ak8jetBtagging(x, ak8subjets, Runyear)]
 
-        ak8lsjets_pre = [x for x in ak8lsjets if POGRecipesRun2.ak8lsjetPreselection(x, ak8lssubjets, muons_pre, electrons_pre, Runyear)]
-        ak8lsjets_clean = [x for x in ak8lsjets_pre if POGRecipesRun2.ak8lsjetCleaning(x, jets_btagged, ak8jets_btagged, Runyear)]
+        #ak8lsjets_pre = [x for x in ak8lsjets if POGRecipesRun2.ak8lsjetPreselection(x, ak8lssubjets, muons_pre, electrons_pre, Runyear)]
+        #ak8lsjets_clean = [x for x in ak8lsjets_pre if POGRecipesRun2.ak8lsjetCleaning(x, jets_btagged, ak8jets_btagged, Runyear)]
+
+
+
+        #Starting the Event Selection!
+        HLT = Object(event, "HLT")
+        flag = Object(event, "Flag")
+        #print "Starting Triggers"
+        #print "Single Electron? ", POGRecipesRun2.single_electron(HLT, Runyear)
+        #print "Single Muon?     ", POGRecipesRun2.single_muon(HLT, Runyear)
+        #print "Double Electron? ", POGRecipesRun2.double_electron(HLT, Runyear)
+        #print "Double Muon?     ", POGRecipesRun2.double_muon(HLT, Runyear)
+        #print "Muon Electron?   ", POGRecipesRun2.muon_electron(HLT, Runyear)
+        #print "Flag Filters?    ", POGRecipesRun2.met_filters(flag, self.isMC, Runyear)
+
+        if not (POGRecipesRun2.met_filters(flag, self.isMC, Runyear)): print "Bad event! Fails flag filters!"; return True
+
+        taus = list(Collection(event, "Tau"))
+        #print "Is single? ", self.single_leptop(electrons_fakeable, electrons_tight, muons_fakeable, muons_tight, jets_btagged, ak8jets_btagged, taus)
+        #print "Is double? ", self.double_lepton(electrons_fakeable, electrons_tight, muons_fakeable, muons_tight, jets_btagged, ak8jets_btagged)
+
+
+        #event_category = "None"
+        event_category = 0
+        #Checking Single
+        #At least 1 fakebale lepton
+        fake_leptons = muons_fakeable + electrons_fakeable
+        fake_leptons.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
+        tight_leptons = muons_tight + electrons_tight
+        tight_leptons.sort(key = lambda x:POGRecipesRun2.conept(x), reverse=True)
+        if len(fake_leptons) > 0:
+          leading_lepton = fake_leptons[0]
+
+          #Leading cone-pT passes single trigger and cone-pt cuts ####ADD THE TRIGGER STUFF
+          if ((leading_lepton in muons_fakeable and POGRecipesRun2.conept(leading_lepton) > 25) or (leading_lepton in electrons_fakeable and POGRecipesRun2.conept(leading_lepton) > 32)):
+
+            #Invariant mass of each pair of presel leptons must be greater than 12GeV
+            leading_lepton_p4 = ROOT.TLorentzVector()
+            sub_p4 = ROOT.TLorentzVector()
+            pair_p4 = ROOT.TLorentzVector()
+            tmp_invarMass = False
+            for i in range(1, len(fake_leptons)):
+              leading_lepton_p4.SetPtEtaPhiM(leading_lepton.pt, leading_lepton.eta, leading_lepton.phi, leading_lepton.mass)
+              sub_p4.SetPtEtaPhiM(fake_leptons[i].pt, fake_leptons[i].eta, fake_leptons[i].phi, fake_leptons[i].mass)
+              pair_p4 =  leading_lepton_p4 + sub_p4
+              pair_mass = pair_p4.M()
+              #print "Pair mass is ", pair_mass, " but lead/sub = ", leading_lepton_p4.M(), "/", sub_p4.M()
+              if (pair_mass > 12):  tmp_invarMass = True
+            if tmp_invarMass:
+
+
+              #Not more than 1 tight  lepton in event and tight should be same as highest cone-pt fakeable lepton
+              if (len(tight_leptons) <= 1):
+                if (len(tight_leptons) == 1):
+                  if (tight_leptons[0] == leading_lepton):
+
+
+                    #Tau veto: no tau passing pt>20, abs(eta) < 2.3, abs(dxy) <= 1000, abs(dz) <= 0.2, "decayModeFindingNewDMs", decay modes = {0, 1, 2, 10, 11}, and "byMediumDeepTau2017v2VSjet", "byVLooseDeepTau2017v2VSmu", "byVVVLooseDeepTau2017v2VSe". Taus overlapping with fakeable electrons or fakeable muons within dR < 0.3 are not considered for the tau veto.
+                    tmp_TauVeto = True
+                    for i in taus:
+                      print "pt ", i.pt
+                      print "eta ", i.eta
+                      print "dxy ", i.dxy
+                      print "dz ", i.dz
+                      print "idDecayModeNewDMs ", i.idDecayModeNewDMs
+                      print "decayMode ", i.decayMode
+                      print "idDeepTau2017v2VSjet ", i.idDeepTau2017v2p1VSjet
+                      print "isDeepTau2017v2VSmu ", i.idDeepTau2017v2p1VSmu
+                      print "idDeepTau2017v2VSe ", i.idDeepTau2017v2p1VSe
+                      print "check if dR < 0.3 with fakeables"
+                      for fake in (muons_fakeable + electrons_fakeable):
+                        print "dR = ", deltaR(fake.eta, fake.phi, i.eta, i.phi)
+
+                      #if (i.pt > 20 or abs(i.eta) < 2.3 or abs(i.dxy) <= 1000 or abs(i.dz) <= 0.2 or i.idDecayModeNewDMs):
+                        #print "Bad Tau"
+                        #tmp_TauVeto = False
+                    if tmp_TauVeto:
+
+
+                      #No pair of same-flavor, opposite-sign preselected leptons within  10GeV of the Z mass
+                      presel_leptons = muons_pre + electrons_pre
+                      pre1 = ROOT.TLorentzVector()
+                      pre2 = ROOT.TLorentzVector()
+                      pre_pair = ROOT.TLorentzVector()
+                      Z_mass = 80
+                      tmp_Zmass_pass = True
+                      for i in presel_leptons:
+                        for j in presel_leptons:
+                          if i == j: continue
+                          if not ((i in muons_pre and j in muons_pre) or (i in electrons_pre and j in electrons_pre)): continue
+                          if (i.charge == j.charge): continue
+                          pre1.SetPtEtaPhiM(i.pt, i.eta, i.phi, i.mass)
+                          pre2.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)
+                          pre_pair = pre1 + pre2
+                          #print "Pre pair mass is ", pre_pair.M()
+                          if (pre_pair.M() > Z_mass-10  and pre_pair.M() < Z_mass+10):
+                            tmp_Zmass_pass = False
+                      if tmp_Zmass_pass:
+
+
+                        #At least one medium btag (that can be on a AK8 jet) :: (#selJetsAK8_b >= 1 || #b-medium >= 1) :: Where #b-medium is the number of AK4 jets with at least medium b-tag score and #selJetsAK8_b is the number of AK8 jets that have at least one subjet that passes medium b-tag score
+                        if (len(ak8jets_btagged) >= 1 or len(jets_btagged) >= 1):
+                          #The minimal number of jets to construct an Hbb and admit an hadronic W with a missing jet :: (#selJetsAK8_b == 0 && #selJetsAK4 >= 3) || (#selJetsAK8_b >= 1 && nJet_that_not_bb >= 1) :: Where "nJet_that_not_bb" is the number of AK4 jets that do not overlap with the leading selJetAK8_b within dR = 1.2
+                          #event_category = "Single"
+                          event_category = 1
+
+        #print "Category is ", event_category
+
+
+        """
+        print "Checking single lep"
+        print "Find leading conept!"
+        top_ele_pt = 0; top_mu_pt = 0;
+        if(len(electrons_fakeable) >= 1): top_ele_pt = POGRecipesRun2.conept(electrons_fakeable[0])
+        if (len(muons_fakeable) >= 1): top_mu_pt = POGRecipesRun2.conept(muons_fakeable[0])
+        leading_lep = 0
+        if max(top_ele_pt, top_mu_pt) > 0:
+          if top_ele_pt > top_mu_pt: 
+            if top_ele_pt > 32:
+              leading_lep = electrons_fakeable[0]; print "using top electron"
+          else: 
+            if top_mu_pt > 25:
+              leading_lep = muons_fakeable[0]; print "using top muon"
+         if(        
+
+
+
+
+        if ((len(electrons_fakeable) >= 1 and POGRecipesRun2.single_electron(HLT, Runyear)) or (len(muons_fakeable) >= 1 and POGRecipesRun2.single_muon(HLT, Runyear))):
+          print "Maybe single?"
+
+        print "Checking dobule lep"
+        if (POGRecipesRun2.single_electron(HLT, Runyear) or POGRecipesRun2.single_muon(HLT, Runyear) or POGRecipesRun2.double_electron(HLT, Runyear) or POGRecipesRun2.double_muon(HLT, Runyear) or POGRecipesRun2.muon_electron(HLT, Runyear)):
+          print "Maybe double?"
+
+        """
+
+
+
 
         """
 	def fajet_subjetCSVsum(jet):  
@@ -1723,12 +1905,16 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("n_presel_ak8lsJet", len(ak8lsjets_clean))
 	self.out.fillBranch("PFMET",  met_p4.Pt())
 	self.out.fillBranch("PFMETphi", met_p4.Phi())
+        self.out.fillBranch("PFMETCovXX", getattr(event, "MET_covXX"))
+        self.out.fillBranch("PFMETCovXY", getattr(event, "MET_covXY"))
+        self.out.fillBranch("PFMETCovYY", getattr(event, "MET_covYY"))
 	self.out.fillBranch("pu",  pu)
 	self.out.fillBranch("PU_weight",  event_pu_weight)
         self.out.fillBranch("MC_weight",  genweight)
 	self.out.fillBranch("run",  run)
 	self.out.fillBranch("event",  ievent)
 	self.out.fillBranch("ls",  luminosityBlock)
+        self.out.fillBranch("category",  event_category)
 
 	if ievent == 191977:
 	    for jet in jets_clean:
