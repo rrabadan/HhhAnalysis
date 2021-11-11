@@ -372,7 +372,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
         c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
 
 
-def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawData, year):
+def makeComparePlot(masspoints_v0, key_to_limits, reference, xtitle, text, plotname, drawData, year):
     colors = [ROOT.kBlack, ROOT.kRed, ROOT.kMagenta+2,ROOT.kBlue+1, ROOT.kOrange+2, ROOT.kAzure, ROOT.kCyan, ROOT.kViolet]
     markers = [20, 21,22,23, 24, 33, 34, 32, 29]
     onesigma_up = []
@@ -386,7 +386,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
         central[key] = []
         data[key] = []
         key_masspoints[key] =[]
-    key0 = key_to_limits.keys()[0]
+    #key0 = key_to_limits.keys()[0]
     #for mass in masspoints_v0:
     #    limits = key_to_limits[key0][mass]	
     #    if len(limits.keys()) < 6:
@@ -408,7 +408,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
                 central[key].append(limits[50.0])
                 data[key].append(limits[-1])
                 key_masspoints[key].append(mass)
-                if key == key0:
+                if key == reference:
                     twosigma_low.append(limits[2.5])
                     onesigma_low.append(limits[16.0])
                     onesigma_up.append(limits[84.0])
@@ -421,8 +421,8 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
                 continue
             
     ## first set of limits. also ploting the error band usually
-    fakeerrors = [0.0]*len(key_masspoints[key0])
-    masspoints = key_masspoints[key0]
+    fakeerrors = [0.0]*len(key_masspoints[reference])
+    masspoints = key_masspoints[reference]
     #g_onesigma = TGraphAsymmErrors(len(masspoints),  np.array(masspoints),  np.array(central), np.array(fakeerrors), np.array(fakeerrors), np.array(onesigma_low), np.array(onesigma_up))
     #g_twosigma = TGraphAsymmErrors(len(masspoints),  np.array(masspoints),  np.array(central), np.array(fakeerrors), np.array(fakeerrors), np.array(twosigma_low), np.array(twosigma_up))
     c1 = ROOT.TCanvas("c1","c1",600, 800)
@@ -441,8 +441,8 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
     masspoints_all = masspoints + list(reversed(masspoints))
     masspoints_f =  np.array(masspoints)+0.0
     #print "allXpoints ",masspoints_all," onesigma ",onesigma_all," float masspoints ",masspoints_f
-    g_data = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(data[key0]))
-    g_central = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(central[key0]))
+    g_data = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(data[reference]))
+    g_central = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(central[reference]))
     g_onesigma = ROOT.TGraph(len(masspoints)*2,  np.array(masspoints_all)+0.0,  np.array(onesigma_all))
     g_twosigma = ROOT.TGraph(len(masspoints)*2,  np.array(masspoints_all)+0.0,  np.array(twosigma_all))
 
@@ -471,12 +471,14 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
     leg2 = ROOT.TLegend(0.65,0.76-0.04*len(key_to_limits.keys()), 0.9, 0.76)
     leg2.SetFillColor(ROOT.kWhite)
     leg2.SetTextFont(42)
-    leg2.AddEntry(g_central, key0, "lp")
+    leg2.AddEntry(g_central, reference, "lp")
     #if drawData:
     i = 1
     g_data_rest = {}
     g_central_rest = {}
-    for key in key_to_limits.keys()[1:]: 
+    for key in key_to_limits.keys(): 
+        if key == reference:
+            continue
         if drawData :
             g_data_rest[key] = ROOT.TGraph(len(key_masspoints[key]),  np.array(key_masspoints[key])+0.0,  np.array(data[key]))
             g_data_rest[key].SetLineWidth(2)
@@ -517,7 +519,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
     g_central.Draw("lpsame")
     if drawData :
         g_data.Draw("lpsame")
-    suffixname =  plotname.split("/")[-1]
+    suffixname =  reference
     g_data.SetName("%s_data"%suffixname)
     g_central.SetName("%s_central"%suffixname)
     g_onesigma.SetName("%s_onesigma"%suffixname)
@@ -538,12 +540,16 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawDa
     leg.Draw("same")
 
     for key in g_central_rest.keys(): 
+        g_central_rest[key].SetName(key+"_central")
         g_central_rest[key].Draw("samelp")
+        g_central_rest[key].Write()
         if drawData :
             g_data_rest[key].Draw("samelp")
+            g_data_rest[key].SetName(key+"_data")
+            g_data_rest[key].Write()
     leg2.Draw("same")
 
-    tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*10+year)
+    tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*20+year)
     tex0.SetNDC(); tex0.SetTextSize(.04); tex0.SetTextFont(42)
     tex0.Draw("same")
     tex1 = ROOT.TLatex(0.2,0.21, text)

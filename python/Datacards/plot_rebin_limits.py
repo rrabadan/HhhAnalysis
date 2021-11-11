@@ -81,6 +81,7 @@ def get_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode, plotdir, ma
 def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, compareplotdir, qltbinning):
     
     addFlorianCompare = True
+    florian_text = "Florian_FR_allcat_allsys"
     florian_limits = {}
     if addFlorianCompare:
         florian_limits = get_florian_limits(2, masspoints, scriptsuffix)
@@ -107,6 +108,7 @@ def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, c
         nominalbin = nominalbin+"qltbin"
     ##compare within one year, different categories
     plot_catergories = False
+    reference = "allcat"
     cats_to_plot = ["allcat","boosted_DY_VVV", "boosted_other", "resolved1b_GGF",
     "resolved2b_GGF","resolved_DY_VVV","resolved_other"]
     if plot_catergories:
@@ -115,25 +117,29 @@ def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, c
             for cat in cats_to_plot:
                 cat_to_limits[cat] = all_limits_dict[nominalbin][year][cat]
             if addFlorianCompare and year == "FR":
+                reference = florian_text
                 cat_to_limits["Florian_FR_allcat_allsys"] = florian_limits
             text="Evtcategories_"+year+"_"+nominalbin
             plotname = os.path.join(compareplotdir, text)
-            limithelper.makeComparePlot(masspoints, cat_to_limits, xtitle, text, plotname, False, year)
+            reference = florian_text
+            limithelper.makeComparePlot(masspoints, cat_to_limits, reference, xtitle, text, plotname, False, year)
 
     ##compare different years
     plot_years = False
     cats_plot_years = ["allcat", "resolved1b_GGF", "resolved2b_GGF"]
     years_to_plot = ["FR"] + runyears
+    reference = "FR"
     if plot_years:
         for cat in cats_plot_years:
             years_to_limits = {}
             for year in years_to_plot:
-                years_to_limits = all_limits_dict[nominalbin][year][cat]
+                years_to_limits[year] = all_limits_dict[nominalbin][year][cat]
             if addFlorianCompare and cat == "allcat":
+                reference = florian_text
                 years_to_limits["Florian_FR_allcat_allsys"] = florian_limits
             text="Runyears_"+cat+"_"+nominalbin
             plotname = os.path.join(compareplotdir, text)
-            limithelper.makeComparePlot(masspoints, years_to_limits, xtitle, text, plotname, False, "Full Run2")
+            limithelper.makeComparePlot(masspoints, years_to_limits, reference, xtitle, text, plotname, False, "Full Run2")
 
 
     ##compare different HME binnings
@@ -142,6 +148,7 @@ def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, c
     nnbins_bincompare = [10, 20]
     hmebins_bincompare = [0,1,2]
     plot_HMTbinnings = True
+    reference = "HMEv0"
     if plot_HMTbinnings:
         for year in years_bincompare:
             for cat in cats_bincompare:
@@ -153,12 +160,14 @@ def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, c
                             binsuffix = binsuffix+"qltbin"
                         hmebins_to_limits["HMEv%d"%hmebin] = all_limits_dict[binsuffix][year][cat]
                     if addFlorianCompare and year == "FR" and cat == "allcat":
+                        reference = florian_text
                         hmebins_to_limits["Florian_FR_allcat_allsys"] = florian_limits
                     text="HMEbins_"+year+"_"+cat+"_nnbin%d"%nnbin
                     plotname = os.path.join(compareplotdir, text)
-                    limithelper.makeComparePlot(masspoints, hmebins_to_limits, xtitle, text, plotname, False, year)
+                    limithelper.makeComparePlot(masspoints, hmebins_to_limits, reference, xtitle, text, plotname, False, year)
 
     plot_nnbinnings = True
+    reference = "nnbin10"
     if plot_nnbinnings:
         for year in years_bincompare:
             for cat in cats_bincompare:
@@ -170,10 +179,11 @@ def get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, c
                             binsuffix = binsuffix+"qltbin"
                         nnbins_to_limits["nnbin%d"%nnbin] = all_limits_dict[binsuffix][year][cat]
                     if addFlorianCompare and year == "FR" and cat == "allcat":
+                        reference = florian_text
                         nnbins_to_limits["Florian_FR_allcat_allsys"] = florian_limits
                     text="NNbins_"+year+"_"+cat+"_hmebin%d"%hmebin
                     plotname = os.path.join(compareplotdir, text)
-                    limithelper.makeComparePlot(masspoints, nnbins_to_limits, xtitle, text, plotname, False, year)
+                    limithelper.makeComparePlot(masspoints, nnbins_to_limits, reference, xtitle, text, plotname, False, year)
 		        
 
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900]
@@ -183,7 +193,7 @@ hmbins_v = [0,1,2,3]
 #masspoints = [ 300, 400, 450, 500, 550, 600, 650, 700, 900]
 #masspoints = [900]
 
-nnbins_v = [10, 20]
+#nnbins_v = [10, 20]
 #hmbins_v = [3]
 
 scriptsuffix = "s1fb_tm1_autoMC10" 
@@ -191,7 +201,8 @@ scriptsuffix = "s1fb_tm1_autoMC10"
 mode = "lnN"
 #mode = "allsys"
 compareplotdir = "compare_limitsplots_FR2lnN_rebin_2021106"
-qltbinning = True
+compareplotdir = "compare_limitsplots_FR2lnN_rebin_2021106_equalbin"
+qltbinning = False
 
 #get_florian_limits(2, masspoints, scriptsuffix)
 get_limits_allbinnings(masspoints, nnbins_v, hmbins_v, scriptsuffix, mode, compareplotdir, qltbinning)

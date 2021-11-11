@@ -76,8 +76,8 @@ def generateHMEbins(mass, version=0):
     if mass<800:
         xbins = xbins[:-1]
     xbins.append(highM)
+    xbins[-1] = 2000.0
     xbins[0]  = 0.0
-    xbins.append(2000.0)
     print("Benchmark ", mass , " v ", version, " HME mass bins ",xbins)
     return np.asarray(xbins)
     #return xbins
@@ -100,8 +100,8 @@ def generateHMEbinsv2(mass):
             x = xbins[-1]+150.0
         xbins.append(x)
 
+    xbins[-1] = 2000.0
     xbins[0] = 0.0
-    xbins.append(2000.0)
     print("Benchmark ", mass ," HME mass bins ",xbins)
     return np.asarray(xbins)
 	
@@ -117,7 +117,7 @@ def generateHMEbinsv3(mass):
         xbins.append(x)
 
     xbins[0]  = 0.0
-    xbins.append(2000.0)
+    xbins[-1] = 2000.0
     print("Benchmark ", mass ," HME mass bins ",xbins)
     return np.asarray(xbins)
 	
@@ -132,7 +132,7 @@ def generateHMEbinsv4(a):
       x = int(xbins[-1]*a)
       xbins.append(x)
     xbins[0]  = 0.0
-    xbins.append(2000.0)
+    xbins[-1] = 2000.0
     print("generateHMEbinsv4: ",a,xbins)
     return np.asarray(xbins)
 
@@ -184,64 +184,42 @@ def find_quantile_binning(hist, n):
     #print("new binning ", xbin_list)
     return np.asarray(xbin_list)
 
-def find_quantile_HMEbinning(hist, n):
-    """Return the quantile binning for 1D histogram
-    """
-    projHistY = hist.ProjectionY()
-    return find_quantile_binning(projHistY, n)
 
-
-def find_threshold_binning_linearized2d(totalhist, mainbkg_list,  nbin_y, thresh, use_quadratic_thresh=False):
+def find_quantile_binning_linearized2d(totalhist, mainbkg_list,  nbin_y, thresh):
     """Return the quantile binning for linearized 2D histogram
     """
     nbin = int(totalhist.GetNbinsX()/nbin_y)
     #print("totalhist.GetNbinsX() ",totalhist.GetNbinsX(), " nbiny ", nbin_y, " totalhist.GetNbinsX()/nbin_y ",totalhist.GetNbinsX()/nbin_y)
-    thresh_array = None
-    if use_quadratic_thresh:
-        thresh_array = thresh + np.arange(0, nbin) ** 2
-        
     axis = totalhist.GetXaxis()
     mainbkg_sum = [0.0]*len(mainbkg_list)
     xbin_list = []
-    newbin_index = 0
     for i in range(nbin_y):
         #upbound = axis.GetBinUpEdge()
         upbin  = (nbin_y-i)*nbin
         lowbin = (nbin_y-i-1)*nbin+1
         xbin_list.insert(0, axis.GetBinUpEdge(upbin))
+        #print("i ",i, " lowbin ",lowbin, " upbin ",upbin, " current xbinlist ", xbin_list)
         j = upbin
         mainbkg_sum = [0.0]*len(mainbkg_list)
         bincontent_sum = 0.0
         binerr2_sum = 0.0
-        newbin_index = 0
-        #print("i ",i, " lowbin ",lowbin, " upbin ",upbin, " current xbinlist ", xbin_list)
         while j >= lowbin:
             for ih,h in enumerate(mainbkg_list):
                 mainbkg_sum[ih] += h.GetBinContent(j)
             bincontent_sum += totalhist.GetBinContent(j)
             binerr2_sum  += totalhist.GetBinError(j)**2
             nonzero = all(x>0.0 for x in mainbkg_sum)
-            thisthresh = thresh_array[newbin_index] if use_quadratic_thresh else  thresh
-            if bincontent_sum-sqrt(binerr2_sum) >= thisthresh and nonzero:
+            if bincontent_sum-sqrt(binerr2_sum) >= thresh and nonzero:
                 if axis.GetBinUpEdge(j) not in xbin_list:
                     xbin_list.insert(0, axis.GetBinUpEdge(j))
                     #print("inserting new binedge ", axis.GetBinUpEdge(j))
-                #print("biny i ",i," newbin_index ", newbin_index, " thresh ", thresh, xbin_list)
                 mainbkg_sum = [0.0]*len(mainbkg_list)
                 bincontent_sum = 0.0
                 binerr2_sum = 0.0
-                newbin_index += 1
             j -= 1
 
     xbin_list.insert(0, axis.GetBinLowEdge(1))
     #print("quantile binning for linearized 2D ", xbin_list)
-    return np.asarray(xbin_list)
-
-def find_threshold_binning_linearized2d_new(totalhist, mainbkg_list,  nbin_y, thresh, quadraticthreshalgo=False):
-    """Return the quantile binning for linearized 2D histogram
-    reserved for new threshold algorithm
-    """
-    xbins_list = []
     return np.asarray(xbin_list)
 
 
@@ -251,8 +229,6 @@ def rebinx_2d(hist, xbins):
     ybins = getBinsArray(hist, 1)
     #print("rebinx, keep ybins ", ybins)
     hist_nbin_x = hist.GetNbinsX()
-    if xbins ==  getBinsArray(hist, 0):
-        return hist
     #print("rebinx ", len(xbins), " getNbinsX ", hist_nbin_x)
     xaxis = hist.GetXaxis() 
     xmin = xaxis.GetBinLowEdge(1)
@@ -293,8 +269,6 @@ def rebiny_2d(hist, ybins):
     """
     xbins = getBinsArray(hist, 0)
     #print("rebiny, keep xbins ", xbins)
-    if ybins == getBinsArray(hist, 1):
-        return hist
     hist_nbin_y = hist.GetNbinsY()
     xaxis = hist.GetYaxis() 
     ymin = xaxis.GetBinLowEdge(1)
@@ -425,6 +399,7 @@ def rebin_hist1d(hist, xbins):
 
 def rebin_onefile(rootfile, newfile, xbins, ybins, mode=""):
     rfile = ROOT.TFile(rootfile,"READ") 
+    #hist = rfile.Get("ggHH_M_550_hbbhtt")
     keylist = rfile.GetListOfKeys()
     #print("keylist ",keylist)
     if len(keylist) == 0:
@@ -439,8 +414,7 @@ def rebin_onefile(rootfile, newfile, xbins, ybins, mode=""):
         if ihist >= maxhist and maxhist > 0:
             print("only rebins %d histograms now"%maxhist)
             break
-        #isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
-        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "signal_ggf" not in key.ReadObj().GetName()  
+        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
         if not hist_totexpect and isbkg_nominal:
             hist_totexpect = key.ReadObj().Clone()
         elif isbkg_nominal:
@@ -477,10 +451,9 @@ def rebin_onefile(rootfile, newfile, xbins, ybins, mode=""):
         #hist.Draw("hist")
         #c1.SaveAs(newfile[:-5]+hist.GetName()+"_1d.png")
         hist.Write()
-    rfile2.Close()
 
-def rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode="allsys", quantile_binning=True):
-    if not (type(xbins).__module__ == np.__name__) and not quantile_binning:
+def rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode="", quantile_binning=True):
+    if not (type(xbins).__module__ == np.__name__):
         print("input new bins are not array type")
         return 0
     rfile = ROOT.TFile(rootfile,"READ") 
@@ -497,8 +470,7 @@ def rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode="allsys", quanti
         if ihist >= maxhist and maxhist > 0:
             print("only rebins %d histograms now"%maxhist)
             break
-        #isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
-        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "signal_ggf" not in key.ReadObj().GetName()  
+        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
         if not hist_totexpect and isbkg_nominal:
             hist_totexpect = key.ReadObj().Clone()
         elif isbkg_nominal:
@@ -538,14 +510,13 @@ def rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode="allsys", quanti
         #hist.Draw("hist")
         #c1.SaveAs(newfile[:-5]+hist.GetName()+"_1d.png")
         hist.Write()
-    rfile2.Close()
 
-def rebin_onefile_signode(rootfile, newfile, xbins, ybins, mode,  thresh, quadraticthreshalgo=False,
-HMEqtlbinning=False):
-    if not (type(xbins).__module__ == np.__name__ ) and not (type(ybins).__module__ == np.__name__ or HMEqtlbinning):
+def rebin_onefile_signode(rootfile, newfile, xbins, ybins, mode="", quantile_binning=True):
+    if not (type(xbins).__module__ == np.__name__ and type(ybins).__module__ == np.__name__):
         print("input new bins are not array type")
         return 0
     rfile = ROOT.TFile(rootfile,"READ") 
+    #hist = rfile.Get("ggHH_M_550_hbbhtt")
     keylist = rfile.GetListOfKeys()
     #print("keylist ",keylist)
     if len(keylist) == 0:
@@ -560,8 +531,7 @@ HMEqtlbinning=False):
         if ihist >= maxhist and maxhist > 0:
             print("only rebins %d histograms now"%maxhist)
             break
-        #isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
-        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "signal_ggf" not in key.ReadObj().GetName()  
+        isbkg_nominal = "__" not in key.ReadObj().GetName() and "data_obs" not in key.ReadObj().GetName() and "ggHH_" not in key.ReadObj().GetName()  
         if isinstance(hist_totexpect, type(None)) and isbkg_nominal:
             hist_totexpect = key.ReadObj().Clone()
         elif isbkg_nominal:
@@ -579,11 +549,6 @@ HMEqtlbinning=False):
         hist_totexpect.SetName("total_expect")
         hist_totexpect.SetTitle("Total background MC")
         histlist.append(hist_totexpect)
-    ### use quantile HME binning
-    if HMEqtlbinning:
-        nybin = len(ybins)-1 if len(ybins)>3 else ybins[0]
-        ybins = find_quantile_HMEbinning(hist_signal, nybin)
-        print("use quantile HME binning for ",newfile, ybins)
 
     histlist_rebin = []
     mainbkgs = ["TT","ST","DY"]
@@ -603,15 +568,15 @@ HMEqtlbinning=False):
             print("hist type is not 1D or 2D, no rebin")
             histlist_rebin.append(hist)
 
-    if thresh > 0:
-        xbins = find_threshold_binning_linearized2d(hist_totexpect_rebin, mainbkg_list, len(ybins)-1, thresh,
-        quadraticthreshalgo) ##total 8 bins
+    thresh = 5.0 ## threshold for quantile binning
+    if quantile_binning:
+        xbins = find_quantile_binning_linearized2d(hist_totexpect_rebin, mainbkg_list, len(ybins)-1, thresh) ##total 8 bins
         print("use quantile binning for ",newfile," xbins ",xbins)
 
     rfile2 = ROOT.TFile(newfile,"RECREATE") 
     rfile2.cd()
     for hist in histlist_rebin:
-        if thresh>0:
+        if quantile_binning:
             hist = rebin_hist1d(hist, xbins)  
         hist.SetDirectory(rfile2) 
         #c1 = ROOT.TCanvas("c", "canvas", 800, 800)
@@ -620,9 +585,8 @@ HMEqtlbinning=False):
         #hist.Draw("hist")
         #c1.SaveAs(newfile[:-5]+hist.GetName()+"_1d.png")
         hist.Write()
-    rfile2.Close()
 
-def rebin_onefolder(oldfolder, newfolder, xbins, ybins, runyears, mode,  thresh, quadraticthreshalgo, HMEqtlbinning):
+def rebin_onefolder(oldfolder, newfolder, xbins, ybins, runyears, mode="", quantile_binning=True):
     if len(xbins) == 3:
         nbins = xbins[0]; xmin = xbins[1]; xmax =  xbins[2]
         xbins = []
@@ -659,19 +623,20 @@ def rebin_onefolder(oldfolder, newfolder, xbins, ybins, runyears, mode,  thresh,
                 newfilename = None
                 if mode == "lnN":
                     newfilename = filename[:-5]+"_rebin1d_%s.root"%mode
+                #elif quantile_binning:
+                #    newfilename = filename[:-5]+"_rebin1d_qtlbin.root"
                 else:
                     newfilename = filename[:-5]+"_rebin1d.root"
                 newfile  = os.path.join(newfolder, newfilename)
                 print("oldfile ", rootfile, " new file ", newfile)
                 if signalnode:
-                    rebin_onefile_signode(rootfile, newfile, xbins, ybins, mode, thresh, quadraticthreshalgo,
-                    HMEqtlbinning)
+                    rebin_onefile_signode(rootfile, newfile, xbins, ybins, mode, quantile_binning)
                 else:
-                    rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode)## use quantile binning for bkg node
+                    rebin_onefile_bkgnode(rootfile, newfile, xbins, ybins, mode, quantile_binning)
         
     
 def checkbrokenfile(oldfolder):
-    ### note: found HH_800_boosted_GGF_2016.root is broken for v1 
+    ### note: found HH_800_boosted_GGF_2016.root is broken
     print("checking folder ", oldfolder)
     allfiles = os.listdir(oldfolder)
     for filename in allfiles:
@@ -682,55 +647,34 @@ def checkbrokenfile(oldfolder):
     
 xbins= [10,  0.0, 1.0]
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900]
-ybins = [250.0, 287, 330, 379, 435, 500, 575, 661, 760, 873, 1003, 1153, 1200.0, 2000.0]
 #HME_bins = [0, 1, 2, 3]
-HME_bins= [1.1, 1.15, 1.2]
-nn_bins = [10, 20, 40]
-threshlist = [2, 5, 10] 
+hme_a = [1.1, 1.15, 1.2, 1.25]
+
+masspoints = [600]
+#masspoints = [800]
+HME_bins=[3]
+nn_bins=[10]
+mode = "lnN"
 mode = "allsys"
-quadraticthreshalgo = False
-HMEquantile_binning = False
-
-if HMEquantile_binning:
-    HME_bins = [5, 10, 15]
-if quadraticthreshalgo:
-    threshlist = [10]
-
-
-if HMEquantile_binning and quadraticthreshalgo:
-    print("Running rebin mode with HME quantile binning and quadratic threshold algo, and systematics: ", mode)
-elif HMEquantile_binning and not quadraticthreshalgo:
-    print("Running rebin mode with HME quantile binning and fixed threshold algo, and systematics: ", mode)
-elif not HMEquantile_binning and quadraticthreshalgo:
-    print("Running rebin mode with customized HME binning and quadratic threshold algo, and systematics: ", mode)
-else:
-    print("Running rebin mode with customized HME binning and fixed threshold algo, and systematics: ", mode)
-
-#masspoints = [600]
-##masspoints = [800]
-#HME_bins=[3]
-#nn_bins=[10]
-print("arguments number ",len(sys.argv), sys.argv)
+quantile_binning = True
+#node = "GGF"
+#node = "DY"
+#print("arguments number ",len(sys.argv), sys.argv)
 ## arguments: 3 + '-b' +'-q'
 condormode = len(sys.argv) >= 3+2
 if condormode:
     print("runnning rebin with condor mode", sys.argv)
-    if len(sys.argv) == 7:
-        nn_bins = [int(sys.argv[3])]
-        threshlist = [int(sys.argv[4])]
-    elif len(sys.argv) == 6:
-        nn_bins = [int(sys.argv[3])]
-        threshlist = [2, 5, 10] 
-    elif len(sys.argv) == 5:
-        nn_bins =  [10, 20, 40, 400]
-        threshlist = [2, 5, 10] 
-
-    #elif threshalgo:
-    #    nn_bins = [10, 20, 40]
-    #else:
-    #    nn_bins =  [5, 8, 10, 20]
-    masspoints = [int(sys.argv[1])]
-    hmebin_version = [float(sys.argv[2])]
+    if len(sys.argv) == 6:
+        nnbin_version = int(sys.argv[3])
+        nn_bins = [nnbin_version]
+    elif quantile_binning:
+        nn_bins = [10, 20]
+    else:
+        nn_bins =  [5, 8, 10, 20]
+    mass = int(sys.argv[1])
+    hmebin_version = int(sys.argv[2])
+    masspoints = [mass]
+    HME_bins= [hmebin_version]
 
 folder = None
 #if mass <= 500:
@@ -740,47 +684,30 @@ folder = None
 #newfolder = folder+"_rebin%HMEv%d"%hmebin_version
 #rebin_onefolder(mass, hmebin_version, folder, newfolder, xbins, ["2016", "2017","2018"])
     
-#outputfolder = "/afs/cern.ch/work/t/tahuang/CombinedLimit/ForGithub/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit/Rebin_Florian"
-## put rebinned root file to eos
-
-outputfolder = "/eos/user/t/tahuang/HHbbww_resonant_DL_Rebin_v2_202111"
-#if not condormode:
-#    outputfolder ="./"
+outputfolder = "/afs/cern.ch/work/t/tahuang/CombinedLimit/ForGithub/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit/Rebin_Florian"
+if not condormode:
+    outputfolder ="./"
 
 
 for mass in masspoints:
-  if mass <= 500:
-      folder = "/eos/user/t/tahuang/FR2_Florian_v2/datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2"%mass
-  else:
-      folder = "/eos/user/t/tahuang/FR2_Florian_v2/datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2"%mass
-  #checkbrokenfile(folder)
   #for hmebin_version in HME_bins:
-  for hmebin_version in HME_bins:
+  for hmebin_version in hme_a:
       for nnbin_version in nn_bins:
-          for thresh in threshlist:
-              #newname = folder.split('/')[-1] + "_rebin_nnbin%dHMEv%d"%(nnbin_version, hmebin_version)
-              binsuffix = "nnbin%dHME%.2fthresh%d"%(nnbin_version, hmebin_version, thresh)
-              if HMEquantile_binning and not quadraticthreshalgo:
-                  binsuffix = "nnbin%dHME%dqtlthresh%d"%(nnbin_version, hmebin_version, thresh)
-              elif HMEquantile_binning and quadraticthreshalgo:
-                  binsuffix = "nnbin%dHME%dqtlthreshquadratic"%(nnbin_version, hmebin_version)
-              elif not HMEquantile_binning and quadraticthreshalgo:
-                  binsuffix = "nnbin%dHME%.2fthreshquadratic"%(nnbin_version, hmebin_version)
-              binsuffix = binsuffix.replace('.','p')
-                  
-              newname = "Graviton_syst_allbenchmarks_FR2_rebin_%s"%binsuffix
-              #newfolder = folder+"_rebin_nnbin%dHMEv%d"%(nnbin_version, hmebin_version)
-              newfolder = os.path.join(outputfolder, newname)
-              #newfolder = folder
-              xbins = [nnbin_version, 0.0, 1.0]
-              #ybins = generateHMEbins(int(mass), hmebin_version) for v1 only
-              if HMEquantile_binning:
-                  ybins = [int(hmebin_version), 0.0, 2000.0]
-              else:
-                  ybins = generateHMEbinsv4(hmebin_version)## mass-independent  for v2
-              rebin_onefolder(folder, newfolder, xbins, ybins, ["2016", "2017","2018"], mode, thresh, quadraticthreshalgo,
-              HMEquantile_binning)
-              #os.system("cp "+folder+"/*txt "+newfolder+"/")
-              #rebin_onefolder(folder, newfolder, xbins, ybins, ["2016"], mode, thresh, quadraticthreshalgo,
-              #HMEquantile_binning)
-              #continue
+        if mass <= 500:
+            folder = "/eos/user/t/tahuang/FR2_Florian/datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2"%mass
+        else:
+            folder = "/eos/user/t/tahuang/FR2_Florian/datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2"%mass
+        newname = folder.split('/')[-1] + "_rebin_nnbin%dHMEv%d"%(nnbin_version, hmebin_version)
+        if quantile_binning:
+            newname = newname+"qltbin"
+        #newfolder = folder+"_rebin_nnbin%dHMEv%d"%(nnbin_version, hmebin_version)
+        newfolder = os.path.join(outputfolder, newname)
+        #newfolder = folder
+        xbins = [nnbin_version, 0.0, 1.0]
+        print("new xbins ",xbins)
+        ybins = generateHMEbins(int(mass), hmebin_version)
+        #rebin_onefolder(folder, newfolder, xbins, ybins, ["2016", "2017","2018"], mode, quantile_binning)
+        #os.system("cp "+folder+"/*txt "+newfolder+"/")
+        rebin_onefolder(folder, newfolder, xbins, ybins, ["2016"], mode, quantile_binning)
+        #checkbrokenfile(folder)
+        #continue
