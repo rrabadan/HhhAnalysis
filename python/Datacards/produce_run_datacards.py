@@ -11,9 +11,10 @@ eventcat = ["boosted_DY_VVV", "boosted_GGF", "boosted_other", "resolved1b_GGF", 
 runyears = ["2016", "2017","2018"]
 
 folder = "/afs/cern.ch/work/t/tahuang/CombinedLimit/ForGithub/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit/Rebin_Florian/"
-def produce_datacard(infile, outfile, path, bkg_qltbinning=True, mode=""):
+def produce_datacard(infile, outfile, path, bkg_qtlbinning=True, mode=""):
     binname = infile.split("/")[-1][:-4]
     bkgnode = "GGF" not in binname
+    qtlbinning = True
     #print("binname ",binname)
     fw = open(outfile, 'w')
     with open(infile, 'r') as f:
@@ -22,17 +23,19 @@ def produce_datacard(infile, outfile, path, bkg_qltbinning=True, mode=""):
             systematic_name = line.split(' ')[0]
             mainSys_true = any(sysname in systematic_name for sysname in mainSys)
             if '.root' in line:
-                if bkg_qltbinning and bkgnode:
+                if bkg_qtlbinning and bkgnode:
                     line = line.replace(binname+'.root', path+binname+'_rebin1d_qtlbin.root')
                 elif mode == "lnN":
                     line = line.replace('.root', '_rebin1d_lnN.root')
+                elif qtlbinning:
+                    line = line.replace('.root', '_rebin1d_qtlbin.root')
                 else:
                     line = line.replace('.root', '_rebin1d.root')
                 #print("root file line ", line)
             if line.startswith('nuisance'):
                 line = line[:-1] + " ifexists \n"
                 #print("nuisance line ",line)
-            if (startSys and ('lnN' in line  or (mode == "mainSys" and mainSys_true) or mode == "all")) or not startSys or line.startswith('---------'):
+            if (startSys and ('lnN' in line  or (mode == "mainSys" and mainSys_true) or mode == "allsys")) or not startSys or line.startswith('---------'):
                 fw.write(line) 
             if line.startswith('rate'):
                 startSys = True
@@ -44,7 +47,7 @@ def produce_datacard(infile, outfile, path, bkg_qltbinning=True, mode=""):
     fw.close()
 
 
-def produce_datacard_onebinning(binsuffix, masspoints, bkg_qltbinning=True, mode="lnN"):
+def produce_datacard_onebinning(binsuffix, masspoints, bkg_qtlbinning=True, mode="lnN"):
     for mass in masspoints:
         inputfolder = None
         originpath = "/eos/user/t/tahuang/FR2_Florian/datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2/"%(mass)
@@ -52,6 +55,7 @@ def produce_datacard_onebinning(binsuffix, masspoints, bkg_qltbinning=True, mode
             inputfolder = folder+"datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
         else:
             inputfolder = folder+"datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
+            originpath =  "/eos/user/t/tahuang/FR2_Florian/datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2/"%(mass)
         #allfiles = glob.glob(os.path.join(inputfolder,"*.txt"))
         #print("mass ",mass, " all txt ",allfiles)
         combine_FR = "combineCards.py " 
@@ -70,7 +74,7 @@ def produce_datacard_onebinning(binsuffix, masspoints, bkg_qltbinning=True, mode
                 new_fname = filename+"_rebin1d_%s"%mode
                 combine_str += " {fname}={newfname}.txt ".format(fname = filename, newfname=new_fname)
                 newf = os.path.join(inputfolder, new_fname+".txt")
-                produce_datacard(oldf, newf, originpath, bkg_qltbinning, mode)
+                produce_datacard(oldf, newf, originpath, bkg_qtlbinning, mode)
                 combine_str += " > HH_{mass}_allcat_{year}_rebin1d_{mode}.txt".format(mass = mass, year=year, mode = mode)
             os.system(combine_str)
             combine_FR += " bbWW=HH_{mass}_allcat_{year}_rebin1d_{mode}.txt ".format(mass = mass, year=year, mode = mode)
@@ -79,6 +83,7 @@ def produce_datacard_onebinning(binsuffix, masspoints, bkg_qltbinning=True, mode
 	    
 
 def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,  mode="lnN"):
+    eospath = "/eos/user/t/tahuang/FR2_Florian_v1_rebin/"
     #scriptsuffix = "s1fb_tm1_autoMC10" 
     runyears_all = runyears + ["FR"]
     #eventcat_all = eventcat+["allcat"]
@@ -89,18 +94,26 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
         os.system("mkdir "+condordir)
     condor_all_fname = os.path.join(condordir, "condor_submit_allmass_allcat_FR{mode}{binsuffix}.sh".format(mode=mode, binsuffix=binsuffix))
     condor_all = open(condor_all_fname, "write")
+    inputfolder = "Graviton_syst_allbenchmarks_FR2{binsuffix}".format(binsuffix=binsuffix)
+    if not os.path.exists(inputfolder):
+        print("creating folder for rebin analysis", inputfolder)
+        os.mkdir(inputfolder)
+    eosfolder = os.path.join(eospath, inputfolder) 
     for mass in masspoints:
-        inputfolder = None
-        if mass < 550:
-            inputfolder = folder+"datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
-        else:
-            inputfolder = folder+"datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
+        #inputfolder = None
+        #if mass < 550:
+        #    inputfolder = folder+"datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
+        #else:
+        #    inputfolder = folder+"datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_%d_raw_FR2%s"%(mass, binsuffix)
         #allfiles = glob.glob(os.path.join(inputfolder,"*.txt"))
         #print("mass ",mass, " all txt ",allfiles)
         for year in runyears_all:
             script_year_name = "Graviton_{mass}_{year}_{scriptsuffix}{mode}".format(mass=mass, year=year, scriptsuffix=scriptsuffix, mode=mode)
             file_script_year = os.path.join(inputfolder, script_year_name+".sh")
             script_year = open(file_script_year, "write")	    
+            script_year.write("#!/bin/bash\n")
+            script_year.write("echo 'start to process "+file_script_year +"'\n")
+            script_year.write("pushd "+inputfolder+"\n")
             for cat in eventcat_all:
                 if year == "FR" and cat != "allcat":
                     continue
@@ -109,6 +122,7 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
                    ## broken file
                    continue 
                 new_fname = filename+"_rebin1d_%s"%mode
+                dcfile = os.path.join(eosfolder, new_fname+".txt")
                 #########################################3
                 ## script to run data card
                 #ws_fname = os.path.join(inputfolder, "%s_combine_workspace.root"%(new_fname))
@@ -122,9 +136,10 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
                 script.write("eval `scramv1 runtime -sh`\n")
                 script.write("# If workspace does not exist, create it once\n")
                 #script.write("if [ ! -f  %s ]; then\n"%(ws_fname))
-                script.write("text2workspace.py {dcfile}.txt -m {mass} -o {wsfile} &> {dcfile}_text2ws.log\n".format(mass = mass, dcfile=new_fname, wsfile=ws_fname))
+                script.write("text2workspace.py {dcfile} -m {mass} -o {wsfile} &> {dcfile}_text2ws.log\n".format(mass =
+                mass, dcfile=dcfile, wsfile=ws_fname))
                 #script.write("fi\n\n")
-                script.write("ValidateDatacards.py {dcfile}.txt --mass {mass} --printLevel 3 --jsonFile validateDatacard_{dcfile}.json \n".format(mass = mass, dcfile =new_fname))
+                script.write("ValidateDatacards.py {dcfile} --mass {mass} --printLevel 3 --jsonFile  validateDatacard_{fname}.json \n".format(mass = mass, dcfile = dcfile, fname=new_fname))
                 script.write("# Run limit\n")
                 #script.write("combine -M AsymptoticLimits --rMax 500 -m {mass} -n {prefix}_M{mass}_{ch} {prefix}_M{mass}_{ch}_combine_workspace.root &> {prefix}_M{mass}_{ch}_{suffix}.log\n".format(mass = mass, ch = channel,  suffix =scriptsuffix,  prefix = prefix))
                 #script.write("combine -M AsymptoticLimits --rMax 500 -m {mass} -n {prefix}_M{mass}_{ch} {prefix}_M{mass}_{ch}_combine_workspace.root -s 1 -t 100   &> {prefix}_M{mass}_{ch}_{suffix}.log\n".format(mass = mass, ch = channel,  suffix =scriptsuffix,  prefix = prefix))
@@ -138,21 +153,23 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
                 #script.write("combine -M AsymptoticLimits -m {mass} -n {prefix}_M{mass}_{ch} {prefix}_M{mass}_{ch}_combine_workspace.root -s $i -t -1 --picky --verbose 1  &> {prefix}_M{mass}_{ch}_{suffix}.log\n".format(mass = mass, ch = channel,  suffix =scriptsuffix,  prefix = prefix))
                 
                 ### asimov fit
-                script.write("combine -M AsymptoticLimits -m {mass} -n {dcfile} {dcfile}_combine_workspace.root -s 1 -t -1 --verbose 1  &> {dcfile}_{suffix}_limits.log\n".format(mass = mass, dcfile = new_fname, suffix =scriptsuffix))
+                script.write("combine -M AsymptoticLimits -m {mass} -n {fname} {fname}_combine_workspace.root -s 1 -t -1 --verbose 1  &> {fname}_{suffix}_limits.log\n".format(mass = mass, fname = new_fname, suffix =scriptsuffix))
 
                 script.write("popd\n")
                 script.write("echo 'finish channel %s'\n"% new_fname)
                 script.close()
                 os.system("chmod 775 "+fname)
             ############## end of loop over all event categories
+            script_year.write("popd\n")
             script_year.close()
             os.system("chmod 775 "+file_script_year)
             if runscript:
-                rqstime = "workday"
-                #if cat == "allcat":
-                #    rqstime = "testmatch" 
                 batchfname = os.path.join(condordir, "Batch_%s%s.cmd"%(script_year_name, binsuffix))
                 batchscript = open(batchfname, "write")
+                rqstime = "workday"
+                if  year == "FR" or mode == "allsys":
+                    rqstime = "testmatch" 
+                    batchscript.write("Notification          = Complete\n")
                 batchscript.write("""universe              = vanilla 
 executable            = {script}
 arguments             = no
@@ -180,27 +197,25 @@ queue
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900]
 nnbins_v = [5, 8, 10, 20]
 hmbins_v = [0,1,2,3]
+#masspoints = [550, 600, 650, 700, 800, 900]
 
-#masspoints = [800]
+#masspoints = [260]
 nnbins_v = [10, 20]
-#hmbins_v = [2]
+#hmbins_v = [1]
 
 scriptsuffix = "s1fb_tm1_autoMC10" 
 runscript = True
 #mode = "mainSys"
-mode = "lnN"
-bkg_qltbinning = True
+#mode = "lnN"
+mode = "allsys"
+bkg_qtlbinning = True
+qtlbinning = True
 
-for nnbin in nnbins_v:
-    for hmebin in hmbins_v:
-        binsuffix = "_rebin_nnbin%sHMEv%d"%(nnbin, hmebin)
-        if bkg_qltbinning:
-            binsuffix = binsuffix+"qltbin"
-        produce_datacard_onebinning(binsuffix, masspoints, bkg_qltbinning, mode)
-        #generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix, runscript, mode)
-infolder = "/"   
-outfolder = ""
-mode = "lnN"
-input_card = "HH_260_resolved2b_GGF_2016.txt"
-output_card = input_card[:-4]+"_rebin1d_%s.txt"%mode
-#produce_datacard(input_card, output_card, "")
+for mode in ["lnN","allsys"]:
+    for nnbin in nnbins_v:
+        for hmebin in hmbins_v:
+            binsuffix = "_rebin_nnbin%sHMEv%d"%(nnbin, hmebin)
+            if qtlbinning:
+                binsuffix = binsuffix+"qltbin"
+            #produce_datacard_onebinning(binsuffix, masspoints, bkg_qtlbinning, mode)
+            generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix, runscript, mode)

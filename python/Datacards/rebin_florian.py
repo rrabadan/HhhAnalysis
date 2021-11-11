@@ -565,10 +565,12 @@ def rebin_onefolder(oldfolder, newfolder, xbins, ybins, runyears, mode="", quant
                 signalnode = ("GGF" in filename)
                 rootfile = os.path.join(oldfolder, filename)
                 newfilename = None
-                if mode != "":
+                if mode == "lnN":
                     newfilename = filename[:-5]+"_rebin1d_%s.root"%mode
+                #elif quantile_binning:
+                #    newfilename = filename[:-5]+"_rebin1d_qtlbin.root"
                 else:
-                    newfilename = filename[:-5]+"_rebin1d_qtlbin.root"
+                    newfilename = filename[:-5]+"_rebin1d.root"
                 newfile  = os.path.join(newfolder, newfilename)
                 print("oldfile ", rootfile, " new file ", newfile)
                 if signalnode:
@@ -591,12 +593,12 @@ xbins= [10,  0.0, 1.0]
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900]
 #HME_bins = [0, 1, 2, 3]
 
-masspoints = [700]
+masspoints = [600]
 #masspoints = [800]
 HME_bins=[3]
 nn_bins=[10]
 mode = "lnN"
-mode = ""
+mode = "allsys"
 quantile_binning = True
 #node = "GGF"
 #node = "DY"
@@ -646,8 +648,8 @@ for mass in masspoints:
         xbins = [nnbin_version, 0.0, 1.0]
         print("new xbins ",xbins)
         ybins = generateHMEbins(int(mass), hmebin_version)
-        rebin_onefolder(folder, newfolder, xbins, ybins, ["2016", "2017","2018"], mode, quantile_binning)
+        #rebin_onefolder(folder, newfolder, xbins, ybins, ["2016", "2017","2018"], mode, quantile_binning)
         #os.system("cp "+folder+"/*txt "+newfolder+"/")
-        #rebin_onefolder(folder, newfolder, xbins, ybins, ["2016"], mode, quantile_binning)
+        rebin_onefolder(folder, newfolder, xbins, ybins, ["2016"], mode, quantile_binning)
         #checkbrokenfile(folder)
         #continue

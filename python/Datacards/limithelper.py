@@ -7,20 +7,20 @@ import numpy as np
 #or ROOT.gROOT.SetBatch(1)
 
 def rescalesignal(rootfile, rdir, prefix, factor):
-       rfile = ROOT.TFile(rootfile, "UPDATE")
-       #rdir = "mjj_vs_NN_M400"
-       a = rfile.Get(rdir)
-       #print "a ",a, " ",a.GetListOfKeys()
-       keys = a.GetListOfKeys()
-       #print "keys ",keys
-       for i, key in enumerate(keys):
-	    #obj = ROOT.TH1F(key.ReadObj())
-	    obj = key.ReadObj()
-	    #print "obj ",obj
-	    if prefix in obj.GetName():
-		obj.Scale(factor)
-		#print "hist name ", obj.GetName()
-       rfile.Write("",ROOT.TObject.kOverwrite)
+    rfile = ROOT.TFile(rootfile, "UPDATE")
+    #rdir = "mjj_vs_NN_M400"
+    a = rfile.Get(rdir)
+    #print "a ",a, " ",a.GetListOfKeys()
+    keys = a.GetListOfKeys()
+    #print "keys ",keys
+    for i, key in enumerate(keys):
+        #obj = ROOT.TH1F(key.ReadObj())
+        obj = key.ReadObj()
+        #print "obj ",obj
+        if prefix in obj.GetName():
+            obj.Scale(factor)
+        #print "hist name ", obj.GetName()
+    rfile.Write("",ROOT.TObject.kOverwrite)
 
 def rescalesignalall(masslist, workdir, factor):
     channels =   ["ElEl","MuEl","MuMu"]
@@ -59,23 +59,23 @@ def extractlimitfromtxtfile(logfile):
         limits_lines[key] = []
     for line in logopen:
         if line.startswith("Expected "):
-	    for key in [2.5, 16.0, 50.0, 84.0, 97.5]:
-	        keystr = "Expected %4.1f"%key
-	        if keystr in line:
-		    limits_lines[key].append(line)
+            for key in [2.5, 16.0, 50.0, 84.0, 97.5]:
+                keystr = "Expected %4.1f"%key
+                if keystr in line:
+                    limits_lines[key].append(line)
         elif line.startswith("Observed Limit:"):
-	    limits_lines[-1].append(line)
+            limits_lines[-1].append(line)
     #print("limits_lines ", limits_lines)
     for key in percents:
         if len(limits_lines[key]) == 0:
-	    continue
+            continue
         line = limits_lines[key][-1] 
-	if key != -1:
-	    #print(key, "Expected %4.1f%%:"%key)
-	    line = line.replace("Expected %4.1f%%:"%key, "")
-	nums = extranumber(line)
+        if key != -1:
+            #print(key, "Expected %4.1f%%:"%key)
+            line = line.replace("Expected %4.1f%%:"%key, "")
+        nums = extranumber(line)
         if len(nums)>0:
-	    limits[key]  = nums[0] * signal_xsec
+            limits[key]  = nums[0] * signal_xsec
     #for line in logopen:
     #    #if line.startswith ("median expected limit: "):
     #	if line.startswith("Expected 50.0%:"):
@@ -132,7 +132,7 @@ def extractlimitfromtxtfile_t100(logfile):
             nums = extranumber(line)
             limits[2.5] = nums[0] * signal_xsec
             limits[97.5] = nums[1] * signal_xsec
-	elif line.startswith("Observed Limit:"):
+        elif line.startswith("Observed Limit:"):
             nums = extranumber(line)
             observed_list.append(nums[0])
 	    observed_tot = observed_tot+nums[0]
@@ -184,27 +184,27 @@ def CombineLimitplots(filelist, histlist, masspoints, xtitle, legends, text, plo
 
     ## draw error band
     if drawUncertainty:
-	i =  len(tfilelist)- 1
-	tf = tfilelist[i]
+        i =  len(tfilelist)- 1
+        tf = tfilelist[i]
         tf.cd()
-	g_central = tf.Get(histlist[i]+"_central")
-	g_central.SetLineColor(colors[i])
-	g_central.SetMarkerColor(colors[i])
-	g_central.SetMarkerStyle(markers[i])
-	g_onesigma = tf.Get(histlist[i]+"_onesigma")
-	g_twosigma = tf.Get(histlist[i]+"_twosigma")
-	g_twosigma.SetFillColorAlpha(ROOT.kOrange, 0.5)
-	g_twosigma.SetLineStyle(2)
-	g_onesigma.SetFillColorAlpha(ROOT.kGreen+2, 0.5)
-	g_onesigma.SetLineStyle(2)
-	#leg0.AddEntry(g_data,"Observed","l")
-	leg0.AddEntry(g_central,"Expected 95% upper limit","l")
-	leg0.AddEntry(g_onesigma,"1 std. deviation, Expected","f")
-	leg0.AddEntry(g_twosigma,"2 std. deviation, Expected","f")
-	#if not drawData:
-	#    g_central.Draw("lsame")
-	g_twosigma.Draw("fe3same")
-	g_onesigma.Draw("fe3same")
+        g_central = tf.Get(histlist[i]+"_central")
+        g_central.SetLineColor(colors[i])
+        g_central.SetMarkerColor(colors[i])
+        g_central.SetMarkerStyle(markers[i])
+        g_onesigma = tf.Get(histlist[i]+"_onesigma")
+        g_twosigma = tf.Get(histlist[i]+"_twosigma")
+        g_twosigma.SetFillColorAlpha(ROOT.kOrange, 0.5)
+        g_twosigma.SetLineStyle(2)
+        g_onesigma.SetFillColorAlpha(ROOT.kGreen+2, 0.5)
+        g_onesigma.SetLineStyle(2)
+        #leg0.AddEntry(g_data,"Observed","l")
+        leg0.AddEntry(g_central,"Expected 95% upper limit","l")
+        leg0.AddEntry(g_onesigma,"1 std. deviation, Expected","f")
+        leg0.AddEntry(g_twosigma,"2 std. deviation, Expected","f")
+        #if not drawData:
+        #    g_central.Draw("lsame")
+        g_twosigma.Draw("fe3same")
+        g_onesigma.Draw("fe3same")
 
 
     leg = ROOT.TLegend(0.15,0.15,0.4,0.15+0.045*len(tfilelist))
@@ -222,20 +222,20 @@ def CombineLimitplots(filelist, histlist, masspoints, xtitle, legends, text, plo
         g_data.SetLineColor(colors[i])
         g_data.SetMarkerColor(colors[i])
         g_data.SetMarkerStyle(markers[i])
-	g_central = tf.Get(histlist[i]+"_central")
-	g_central.SetLineColor(colors[i])
-	g_central.SetMarkerColor(colors[i])
-	g_central.SetMarkerStyle(markers[i])
-	if drawData:
-	    g_data.Draw("lpsame")
-	    g_central.SetLineStyle(2)
-	    g_central.Draw("lsame")
-	    thisleg = leg.AddEntry(g_data, legends[i],"p")
-	    thisleg.SetTextColor(colors[i])
-	else:
-	    g_central.Draw("lpsame")
-	    thisleg = leg.AddEntry(g_central, legends[i],"p")
-	    thisleg.SetTextColor(colors[i])
+        g_central = tf.Get(histlist[i]+"_central")
+        g_central.SetLineColor(colors[i])
+        g_central.SetMarkerColor(colors[i])
+        g_central.SetMarkerStyle(markers[i])
+        if drawData:
+            g_data.Draw("lpsame")
+            g_central.SetLineStyle(2)
+            g_central.Draw("lsame")
+            thisleg = leg.AddEntry(g_data, legends[i],"p")
+            thisleg.SetTextColor(colors[i])
+        else:
+            g_central.Draw("lpsame")
+            thisleg = leg.AddEntry(g_central, legends[i],"p")
+            thisleg.SetTextColor(colors[i])
     tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*10+ runyear)
     tex0.SetNDC(); tex0.SetTextSize(.04); tex0.SetTextFont(42)
     tex0.Draw("same")
@@ -246,11 +246,11 @@ def CombineLimitplots(filelist, histlist, masspoints, xtitle, legends, text, plo
     leg0.Draw("same")
     leg.Draw("same")
     if drawData:
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW_combined.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW_combined.C")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW_combined.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW_combined.C")
     else:
-	c1.SaveAs(plotname+"_95Upperlmit_nodata_HHbbWW_combined.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_nodata_HHbbWW_combined.C")
+        c1.SaveAs(plotname+"_95Upperlmit_nodata_HHbbWW_combined.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_nodata_HHbbWW_combined.C")
 
 def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=False, runyear="2016"):
     onesigma_up = []
@@ -261,10 +261,10 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     data = []
     masspoints = []
     for mass in masspoints_v0:
-        limits = alllimits[mass]	
-        if len(limits.keys()) < 6:
+        if mass in alllimits.keys() and len(alllimits[mass].keys()) < 6:
             print("warning!!!!!!, not all limits found on mass %d"%mass, limits)
             continue
+        limits = alllimits[mass]	
         central.append(limits[50.0])
         twosigma_low.append(limits[2.5])
         onesigma_low.append(limits[16.0])
@@ -277,7 +277,8 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     #g_twosigma = TGraphAsymmErrors(len(masspoints),  np.array(masspoints),  np.array(central), np.array(fakeerrors), np.array(fakeerrors), np.array(twosigma_low), np.array(twosigma_up))
     c1 = ROOT.TCanvas("c1","c1",600, 800)
     outfilename = plotname+".root"
-    tfile = ROOT.TFile(outfilename,"UPDATE")
+    #tfile = ROOT.TFile(outfilename,"UPDATE")
+    tfile = ROOT.TFile(outfilename,"RECREATE")
     
     c1.SetLogy()
     c1.SetGridx()  
@@ -326,7 +327,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     #yhigh = max(twosigma_up)*1.2
     #ylow = min(twosigma_low)*.9
     yhigh = 2000.0 #10000.0
-    ylow = 1.0#10.0
+    ylow = 0.01#10.0
     b1.GetYaxis().SetRangeUser(ylow, yhigh)
     b1.SetStats(0)
 
@@ -335,7 +336,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     g_onesigma.Draw("fe3same")
     g_central.Draw("lpsame")
     if drawData :
-	g_data.Draw("lpsame")
+        g_data.Draw("lpsame")
     suffixname =  plotname.split("/")[-1]
     g_data.SetName("%s_data"%suffixname)
     g_central.SetName("%s_central"%suffixname)
@@ -351,7 +352,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     leg.SetFillColor(ROOT.kWhite)
     leg.SetTextFont(42)
     if drawData :
-	leg.AddEntry(g_data,"Observed","pl")
+        leg.AddEntry(g_data,"Observed","pl")
     leg.AddEntry(g_central,"Expected 95% upper limit","l")
     leg.AddEntry(g_onesigma,"1 std. deviation, Expected","f")
     leg.AddEntry(g_twosigma,"2 std. deviation, Expected","f")
@@ -364,14 +365,14 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     
     leg.Draw("same")
     if drawData:
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.C")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.C")
     else:
-	c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
+        c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
 
 
-def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawdata, year):
+def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawData, year):
     colors = [ROOT.kBlack, ROOT.kRed, ROOT.kMagenta+2,ROOT.kBlue+1, ROOT.kOrange+2, ROOT.kAzure, ROOT.kCyan, ROOT.kViolet]
     markers = [20, 21,22,23, 24, 33, 34, 32, 29]
     onesigma_up = []
@@ -380,31 +381,53 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     twosigma_low = []
     central = {}
     data = {}
+    key_masspoints = {}
     for key in key_to_limits.keys(): 
-	central[key] = []
-	data[key] = []
-    masspoints = []
-    key0 = keys[0]
-    for mass in masspoints_v0:
-        limits = key_to_limits[key0][mass]	
-        if len(limits.keys()) < 6:
-            print("warning!!!!!!, not all limits found on mass %d"%mass, limits)
-            continue
-        twosigma_low.append(limits[2.5])
-        onesigma_low.append(limits[16.0])
-        onesigma_up.append(limits[84.0])
-        twosigma_up.append(limits[97.5])
-        for key in key_to_limits.keys(): 
-	    central[key].append(key_to_limits[key][50.0])
-	    data[key].append(key_to_limits[key]limits[-1])
-        masspoints.append(mass)
-
-    fakeerrors = [0.0]*len(masspoints)
+        central[key] = []
+        data[key] = []
+        key_masspoints[key] =[]
+    key0 = key_to_limits.keys()[0]
+    #for mass in masspoints_v0:
+    #    limits = key_to_limits[key0][mass]	
+    #    if len(limits.keys()) < 6:
+    #        print("warning!!!!!!, not all limits found on mass %d"%mass, limits)
+    #        continue
+    #    twosigma_low.append(limits[2.5])
+    #    onesigma_low.append(limits[16.0])
+    #    onesigma_up.append(limits[84.0])
+    #    twosigma_up.append(limits[97.5])
+    #    for key in key_to_limits.keys(): 
+    #        #print("mass ", mass, " key ", key, " median limit ", key_to_limits[key][mass][50.0])
+    #        central[key].append(key_to_limits[key][mass][50.0])
+    #        data[key].append(key_to_limits[key][mass][-1])
+    #    masspoints.append(mass)
+    for key in key_to_limits.keys():
+        for mass in masspoints_v0:
+            if mass in key_to_limits[key].keys() and len(key_to_limits[key][mass].keys()) == 6:
+                limits = key_to_limits[key][mass]
+                central[key].append(limits[50.0])
+                data[key].append(limits[-1])
+                key_masspoints[key].append(mass)
+                if key == key0:
+                    twosigma_low.append(limits[2.5])
+                    onesigma_low.append(limits[16.0])
+                    onesigma_up.append(limits[84.0])
+                    twosigma_up.append(limits[97.5])
+            elif mass in key_to_limits[key].keys():
+                print("warning!!!!!!, not all limits found on mass %d for %s"%(mass, key), key_to_limits[key][mass])
+                continue
+            else:
+                print("warning!!!!!!, benchmark mass %d is not found for %s "%(mass, key))
+                continue
+            
+    ## first set of limits. also ploting the error band usually
+    fakeerrors = [0.0]*len(key_masspoints[key0])
+    masspoints = key_masspoints[key0]
     #g_onesigma = TGraphAsymmErrors(len(masspoints),  np.array(masspoints),  np.array(central), np.array(fakeerrors), np.array(fakeerrors), np.array(onesigma_low), np.array(onesigma_up))
     #g_twosigma = TGraphAsymmErrors(len(masspoints),  np.array(masspoints),  np.array(central), np.array(fakeerrors), np.array(fakeerrors), np.array(twosigma_low), np.array(twosigma_up))
     c1 = ROOT.TCanvas("c1","c1",600, 800)
     outfilename = plotname+".root"
-    tfile = ROOT.TFile(outfilename,"UPDATE")
+    tfile = ROOT.TFile(outfilename,"RECREATE")
     
     c1.SetLogy()
     c1.SetGridx()  
@@ -453,9 +476,9 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     i = 1
     g_data_rest = {}
     g_central_rest = {}
-    for key in key_to_limits.keys(): 
-	if drawData :
-	    g_data_rest[key] = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(data[key]))
+    for key in key_to_limits.keys()[1:]: 
+        if drawData :
+            g_data_rest[key] = ROOT.TGraph(len(key_masspoints[key]),  np.array(key_masspoints[key])+0.0,  np.array(data[key]))
             g_data_rest[key].SetLineWidth(2)
             g_data_rest[key].SetLineStyle(1)
             g_data_rest[key].SetLineColor(colors[i])
@@ -463,16 +486,15 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
             g_data_rest[key].SetMarkerSize(1)
             g_data_rest[key].SetMarkerColor(colors[i])
 
-	g_central_rest[key]  = ROOT.TGraph(len(masspoints),  np.array(masspoints)+0.0,  np.array(central[key]))
+        g_central_rest[key]  = ROOT.TGraph(len(key_masspoints[key]),  np.array(key_masspoints[key])+0.0,  np.array(central[key]))
         g_central_rest[key].SetLineWidth(2)
         g_central_rest[key].SetLineStyle(7)
         g_central_rest[key].SetLineColor(colors[i])
         g_central_rest[key].SetMarkerStyle(markers[i])
         g_central_rest[key].SetMarkerSize(1)
         g_central_rest[key].SetMarkerColor(colors[i])
-        g_data_rest[key].Draw("samelp")
-	leg2.AddEntry(g_central_rest[key], key, "lp")
-	i += 1
+        leg2.AddEntry(g_central_rest[key], key, "lp")
+        i += 1
 
     #b1 = ROOT.TH1F("b2","b2",14, 250.0, 950.0)
     minx = min(masspoints)*0.9
@@ -485,7 +507,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     #yhigh = max(twosigma_up)*1.2
     #ylow = min(twosigma_low)*.9
     yhigh = 2000.0 #10000.0
-    ylow = 1.0#10.0
+    ylow = 0.01#10.0
     b1.GetYaxis().SetRangeUser(ylow, yhigh)
     b1.SetStats(0)
 
@@ -494,7 +516,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     g_onesigma.Draw("fe3same")
     g_central.Draw("lpsame")
     if drawData :
-	g_data.Draw("lpsame")
+        g_data.Draw("lpsame")
     suffixname =  plotname.split("/")[-1]
     g_data.SetName("%s_data"%suffixname)
     g_central.SetName("%s_central"%suffixname)
@@ -509,18 +531,19 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     leg.SetFillColor(ROOT.kWhite)
     leg.SetTextFont(42)
     if drawData :
-	leg.AddEntry(g_data,"Observed","pl")
+        leg.AddEntry(g_data,"Observed","pl")
     leg.AddEntry(g_central,"Expected 95% upper limit","l")
     leg.AddEntry(g_onesigma,"1 std. deviation, Expected","f")
     leg.AddEntry(g_twosigma,"2 std. deviation, Expected","f")
     leg.Draw("same")
 
-    for key in key_to_limits.keys(): 
-	if drawData :
+    for key in g_central_rest.keys(): 
+        g_central_rest[key].Draw("samelp")
+        if drawData :
             g_data_rest[key].Draw("samelp")
     leg2.Draw("same")
 
-    tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*10+runyear)
+    tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*10+year)
     tex0.SetNDC(); tex0.SetTextSize(.04); tex0.SetTextFont(42)
     tex0.Draw("same")
     tex1 = ROOT.TLatex(0.2,0.21, text)
@@ -529,11 +552,11 @@ def makeComparePlot(masspoints_v0, key_to_limits, xtitle, text, plotname, drawda
     
 
     if drawData:
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.C")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_data_HHbbWW.C")
     else:
-	c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
-	c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
+        c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
+        c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
 
 
 if __name__ == '__main__':
