@@ -40,10 +40,10 @@ for nnbin in nnbins_v:
             if mass >= 550:
                 thisfolder = "datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_{mass}_raw_FR2_rebin_{binsuffix}".format(binsuffix=binsuffix, mass=mass)
             inputfolder = os.path.join(intpath, thisfolder)
-            os.system("cp -f " + inputfolder + "/*.root " + finalfolder )
-            os.system("cp -f " + inputfolder + "/*.txt " + finalfolder)
+            #os.system("cp -f " + inputfolder + "/*.root " + finalfolder )
+            #os.system("cp -f " + inputfolder + "/*.txt " + finalfolder)
             os.system("cp -f " + inputfolder + "/*.log " + folder_results)
-            os.system("cp -f " + inputfolder + "/*.sh " + folder_results)
+            #os.system("cp -f " + inputfolder + "/*.sh " + folder_results)
 
 
 

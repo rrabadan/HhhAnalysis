@@ -21,6 +21,7 @@ def rescalesignal(rootfile, rdir, prefix, factor):
             obj.Scale(factor)
         #print "hist name ", obj.GetName()
     rfile.Write("",ROOT.TObject.kOverwrite)
+    rfile.Close()
 
 def rescalesignalall(masslist, workdir, factor):
     channels =   ["ElEl","MuEl","MuMu"]
@@ -105,6 +106,7 @@ def extractlimitfromtxtfile(logfile):
     #        pass
     #          
     #print "limits ",limits
+    logopen.close()
     return limits
 
 def extractlimitfromtxtfile_t100(logfile):
@@ -140,6 +142,7 @@ def extractlimitfromtxtfile_t100(logfile):
     from numpy import median
     limits[-1] = median(observed_list)
     print limits
+    logopen.close()
     return limits
 
 
@@ -359,7 +362,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
     tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*10+runyear)
     tex0.SetNDC(); tex0.SetTextSize(.04); tex0.SetTextFont(42)
     tex0.Draw("same")
-    tex1 = ROOT.TLatex(0.2,0.21, text)
+    tex1 = ROOT.TLatex(0.13,0.21, text)
     tex1.SetNDC(); tex1.SetTextSize(.04); tex1.SetTextFont(42)
     tex1.Draw("same")
     
@@ -371,6 +374,7 @@ def makeBrazilPlot(masspoints_v0, alllimits, xtitle, text, plotname, drawData=Fa
         c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
         c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
 
+    tfile.Close()
 
 def makeComparePlot(masspoints_v0, key_to_limits, reference, xtitle, text, plotname, drawData, year):
     colors = [ROOT.kBlack, ROOT.kRed, ROOT.kMagenta+2,ROOT.kBlue+1, ROOT.kOrange+2, ROOT.kAzure, ROOT.kCyan, ROOT.kViolet]
@@ -552,7 +556,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, reference, xtitle, text, plotn
     tex0 = ROOT.TLatex(0.08,0.91, "#scale[1.4]{#font[61]{CMS}} Internal"+" "*20+year)
     tex0.SetNDC(); tex0.SetTextSize(.04); tex0.SetTextFont(42)
     tex0.Draw("same")
-    tex1 = ROOT.TLatex(0.2,0.21, text)
+    tex1 = ROOT.TLatex(0.13,0.21, text)
     tex1.SetNDC(); tex1.SetTextSize(.04); tex1.SetTextFont(42)
     tex1.Draw("same")
     
@@ -563,6 +567,7 @@ def makeComparePlot(masspoints_v0, key_to_limits, reference, xtitle, text, plotn
     else:
         c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.pdf")
         c1.SaveAs(plotname+"_95Upperlmit_expected_HHbbWW.C")
+    tfile.Close()
 
 
 if __name__ == '__main__':

@@ -81,6 +81,9 @@ def produce_datacard_onebinning(binsuffix, masspoints, bkg_qtlbinning=True, mode
                 new_fname = filename+"_rebin1d_%s"%mode
                 combine_str += " {fname}={newfname}.txt ".format(fname = filename, newfname=new_fname)
                 newf = os.path.join(inputfolder, new_fname+".txt")
+                #if os.path.exists(newf):
+                #    print("file exists, continue ", newf)
+                #    continue
                 produce_datacard(oldf, newf, originpath, bkg_qtlbinning, mode)
                 combine_str += " > HH_{mass}_allcat_{year}_rebin1d_{mode}.txt".format(mass = mass, year=year, mode = mode)
             os.system(combine_str)
@@ -107,7 +110,7 @@ queue
     batchscript.close()
 
 
-def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode):
+def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode, condor_all_fname):
     """
     check whether limits are produced from condorjob, if not, resubmit the jobs
     """
@@ -116,19 +119,20 @@ def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode):
     #eventcat_all = eventcat+["allcat"]
     eventcat_all = ["boosted_GGF","resolved1b_GGF", "resolved2b_GGF", "allcat"]
     eventcat_all = ["allcat"]
-    condordir  = os.path.join(localfolder, "combinecondor")
+    condordir  = os.path.join(localfolder, "combinecondorv2")
     if not os.path.exists(condordir):
         print("creating condor dir", condordir)
         os.system("mkdir "+condordir)
-    condor_all_fname = os.path.join(condordir, "condor_resubmit_allmass_allcat_FR{mode}{binsuffix}.sh".format(mode=mode, binsuffix=binsuffix))
     condor_all = open(condor_all_fname, "write")
-    inputfolder = os.path.join(localfolder, "Graviton_syst_allbenchmarks_FR2{binsuffix}".format(binsuffix=binsuffix))
+    dirname = "Graviton_syst_allbenchmarks_FR2_rebin_{binsuffix}".format(binsuffix=binsuffix)
+    inputfolder = os.path.join(localfolder, dirname)
     if not os.path.exists(inputfolder):
         print("Error!! script to run datacard are not found ", inputfolder)
         exit()
+    Njobs = 0
     for mass in masspoints:
         for year in runyears_all:
-            script_year_name = "Graviton_{mass}_{year}_{scriptsuffix}{mode}".format(mass=mass, year=year, scriptsuffix=scriptsuffix, mode=mode)
+            script_year_name = "resubmit_Graviton_{mass}_{year}_{scriptsuffix}{mode}".format(mass=mass, year=year, scriptsuffix=scriptsuffix, mode=mode)
             file_script_year = os.path.join(inputfolder, script_year_name+".sh")
             script_year = open(file_script_year, "write")	    
             script_year.write("#!/bin/bash\n")
@@ -141,9 +145,10 @@ def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode):
                 #if "HH_{mass}_{cat}_{year}".format(mass = mass, cat=cat, year=year) == "HH_800_boosted_GGF_2016":
                 #   ## broken file
                 #   continue 
-                new_fname = "HH_DL_{mass}_{cat}_{year}".format(mass = mass, cat=cat, year=year) + "_rebin1d_%s"%mode
+                new_fname = "HH_{mass}_{cat}_{year}_rebin1d_{mode}".format(mass = mass, cat=cat, year=year, mode=mode)
                 fname = os.path.join(inputfolder, "Graviton_%s_%s.sh"%(new_fname, scriptsuffix))
-                limitfilename = new_fname+"_rebin1d_{mode}_{scriptsuffix}_limits.log".format(mass = mass, cat=cat, year=year, mode=mode, scriptsuffix=scriptsuffix)
+                #HH_900_allcat_FR_rebin1d_allsys_s1fb_tm1_autoMC10_limits.log
+                limitfilename = new_fname+"_{scriptsuffix}_limits.log".format(mass = mass, cat=cat, year=year, mode=mode, scriptsuffix=scriptsuffix)
                 #inputfolder = "datacard_fit_Resonant_LowMass_Graviton_2D_syst_M_{mass}_raw_FR2_rebin_{binsuffix}".format(binsuffix=binsuffix, mass=mass)
                 #if mass >= 550:
                 #    inputfolder = "datacard_fit_Resonant_HighMass_Graviton_2D_syst_M_{mass}_raw_FR2_rebin_{binsuffix}".format(binsuffix=binsuffix, mass=mass)
@@ -163,11 +168,12 @@ def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode):
             script_year.close()
             os.system("chmod 775 "+file_script_year)
             if not allcat_found:
-                print("regenerate condor job for  M ", mass, " runyear ", year)
+                Njobs += 1
                 rqstime = "workday"
                 if  year == "FR" or mode == "allsys":
                     rqstime = "testmatch" 
-                batchfname = os.path.join(condordir, "Batch_resubmit_%s%s.cmd"%(script_year_name, binsuffix))
+                batchfname = os.path.join(condordir, "Batch_%s%s.cmd"%(script_year_name, binsuffix))
+                print("regenerate condor job ", batchfname )
                 condorjob(file_script_year, batchfname, script_year_name+binsuffix, rqstime)
                 condor_all.write("condor_submit "+batchfname+"\n")
             #Notification          = Complete
@@ -177,6 +183,7 @@ def checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode):
             ###  -R "pool>30000"
             ### bjobs  chekc status 
         ### end of mass loop
+    print("Total jobs ", Njobs, condor_all_fname)
     condor_all.close()
     os.system("chmod u+x "+condor_all_fname)
     #os.system("source "+fname_all)
@@ -273,7 +280,7 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
                 rqstime = "workday"
                 if  year == "FR" or mode == "allsys":
                     rqstime = "testmatch" 
-                batchfname = os.path.join(condordir, "Batch_%s_rebin_%s.cmd"%(script_year_name, binsuffix))
+                batchfname = os.path.join(condordir, "Batch_%s%s.cmd"%(script_year_name, binsuffix))
                 condorjob(file_script_year, batchfname, script_year_name+binsuffix, rqstime)
                 condor_all.write("condor_submit "+batchfname+"\n")
             #Notification          = Complete
@@ -287,14 +294,18 @@ def generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix,  runscript,
     os.system("chmod u+x "+condor_all_fname)
     #os.system("source "+fname_all)
 
-def generate_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, threholds, HMEqtl, quadraticthresh):
+def generate_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, thresholds, HMEqtl, quadraticthresh):
     bkg_qtlbinning = True
+    EqualNNbin = thresholds==[0]
     condordir = "combinecondorv2"
     ##condor_submit_allmass_allcat_FR_nnbin10HME10qtlthresh10_lnN.sh 
-    condorname = "condjor_submit"
-    condorname += "i_HMqtlbin" if HMEqtl else "_HMEnorm"
-    condorname += "_quadraticthresh" if quadraticthresh else "_fixedthresh"
-    condorall = os.path.join(condordir, condorname+".sh")
+    condorname = "condor_submit_all"
+    condorname += "_HMqtlbin" if HMEqtl else "_HMEnorm"
+    if EqualNNbin:
+        condorname += "_equalNNbin"
+    else:
+        condorname += "_quadraticthresh" if quadraticthresh else "_fixedthresh"
+    condorall = os.path.join(condordir, condorname+"_"+mode+".sh")
     condorall_w = open(condorall, "w")
     condorall_w.write("echo 'starting to submit job "+condorname+"...'\n")
     for hmev in HME_bins:
@@ -307,13 +318,53 @@ def generate_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bin
                   binsuffix = "nnbin%dHME%dqtlthreshquadratic"%(nnv, hmev)
               elif not HMEqtl and quadraticthresh:
                   binsuffix = "nnbin%dHME%.2fthreshquadratic"%(nnv, hmev)
+              if thresh == 0:##equalNN binnings
+                   binsuffix = "nnbin%dHME%.2fNothresh"%(nnv, hmev) 
               binsuffix = binsuffix.replace('.','p')
               lastjob = hmev == HME_bins[-1] and nnv == nn_bins[-1] and thresh == thresholds[-1]
               if lastjob:
                   print("creating condor job ",binsuffix)
-              condorall_w.write("source condor_submit_allmass_allcat_FR_"+binsuffix+"_"+mode+".sh\n")
               #produce_datacard_onebinning(binsuffix, masspoints, bkg_qtlbinning, mode)
-              #generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix, runscript, mode)
+              generate_scripts_onebinning(binsuffix, masspoints, scriptsuffix, runscript, mode)
+              condorall_w.write("source condor_submit_allmass_allcat_FR_"+binsuffix+"_"+mode+".sh\n")
+    condorall_w.write("echo 'finished submitting job "+condorname+"...'\n")
+    condorall_w.close()
+    os.system("chmod u+x "+condorall)
+
+def checkcondorjob_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, thresholds, HMEqtl, quadraticthresh):
+    bkg_qtlbinning = True
+    EqualNNbin = thresholds==[0]
+    condordir = "combinecondorv2"
+    ##condor_submit_allmass_allcat_FR_nnbin10HME10qtlthresh10_lnN.sh 
+    condorname = "condor_resubmit_all"
+    condorname += "_HMqtlbin" if HMEqtl else "_HMEnorm"
+    if EqualNNbin:
+        condorname += "_equalNNbin"
+    else:
+        condorname += "_quadraticthresh" if quadraticthresh else "_fixedthresh"
+    condorall = os.path.join(condordir, condorname+"_"+mode+".sh")
+    condorall_w = open(condorall, "w")
+    condorall_w.write("echo 'starting to submit job "+condorname+"...'\n")
+    for hmev in HME_bins:
+      for nnv in nn_bins:
+          for thresh in thresholds:
+              binsuffix = "nnbin%dHME%.2fthresh%d"%(nnv, hmev, thresh)
+              if HMEqtl and not quadraticthresh:
+                  binsuffix = "nnbin%dHME%dqtlthresh%d"%(nnv, hmev, thresh)
+              elif HMEqtl and quadraticthresh:
+                  binsuffix = "nnbin%dHME%dqtlthreshquadratic"%(nnv, hmev)
+              elif not HMEqtl and quadraticthresh:
+                  binsuffix = "nnbin%dHME%.2fthreshquadratic"%(nnv, hmev)
+              if thresh == 0:##equalNN binnings
+                   binsuffix = "nnbin%dHME%.2fNothresh"%(nnv, hmev) 
+              binsuffix = binsuffix.replace('.','p')
+              lastjob = hmev == HME_bins[-1] and nnv == nn_bins[-1] and thresh == thresholds[-1]
+              if lastjob:
+                  print("creating condor job ",binsuffix)
+              condor_all_fname = os.path.join(condordir, "condor_resubmit_allmass_allcat_FR_{binsuffix}_{mode}.sh".format(mode=mode, binsuffix=binsuffix))
+              checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode, condor_all_fname)
+              condorall_w.write("source "+ condor_all_fname.split('/')[-1] +"\n")
+    condorall_w.write("echo 'finished submitting job "+condorname+"...'\n")
     condorall_w.close()
     os.system("chmod u+x "+condorall)
 
@@ -329,6 +380,8 @@ def generate_scripts_v1(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_
             #checkcondorjob_limits_onebinning(masspoints, binsuffix, scriptsuffix, mode)
 
 masspoints = [260, 270, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900]
+masspoints = [260, 270, 300, 350, 400, 450, 500, 600, 650, 700, 800, 900]
+masspoints = [260, 270, 300, 350, 400, 450, 500]
 nn_bins = [5, 8, 10, 20]
 HME_bins = [0,1,2,3]
 #masspoints = [550, 600, 650, 700, 800, 900]
@@ -337,15 +390,19 @@ qtlbinning = False
 if qtlbinning:
     nn_bins = [10, 20]
 
-masspoints = [260]
+#masspoints = [260]
 
 scriptsuffix = "s1fb_tm1_autoMC10" 
 runscript = True
 #mode = "mainSys"
 mode = "lnN"
-#mode = "allsys"
+mode = "allsys"
+EqualNNbin = False
+irange = 4
+if EqualNNbin:
+    irange =1 
 
-for i in range(4):
+for i in range(irange):
     HMEquantile_binning = i/2
     quadraticthreshalgo = i%2
     HME_bins = [1.1, 1.15, 1.2]
@@ -358,6 +415,9 @@ for i in range(4):
        HME_bins = [5, 10, 15]
     if quadraticthreshalgo:
        thresholds = [10]
+    if EqualNNbin:
+        thresholds = [0]
+        nn_bins = [5, 10,20]
 
     if HMEquantile_binning and quadraticthreshalgo:
         print("Running rebin mode with HME quantile binning and quadratic threshold algo, and systematics: ", mode)
@@ -367,6 +427,7 @@ for i in range(4):
         print("Running rebin mode with customized HME binning and quadratic threshold algo, and systematics: ", mode)
     else:
         print("Running rebin mode with customized HME binning and fixed threshold algo, and systematics: ", mode)
+    print("NN binning options ", nn_bins, " HME binning options ", HME_bins," thresholds ", thresholds)
 
-    generate_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, thresholds, HMEquantile_binning, quadraticthreshalgo)
-    
+    #generate_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, thresholds, HMEquantile_binning, quadraticthreshalgo)
+    checkcondorjob_scripts(masspoints, scriptsuffix, runscript, mode, nn_bins, HME_bins, thresholds, HMEquantile_binning, quadraticthreshalgo)
