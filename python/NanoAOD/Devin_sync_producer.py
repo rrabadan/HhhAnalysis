@@ -1580,46 +1580,46 @@ class HHbbWWProducer(Module):
 
 
 
-	def fillBranches_ak8jet(ak8jets, ak8subjets):
+	def fillBranches_ak8jet(out, ak8jets, ak8subjets):
             if (len(ak8jets) >= 1):
 		ak8jet1 = ak8jets[0]
 		ak8jet1_p4 = ROOT.TLorentzVector()
 		ak8jet1_p4.SetPtEtaPhiM(ak8jets[0].pt, ak8jets[0].eta, ak8jets[0].phi, ak8jets[0].mass)
 		subjet1 = ak8subjets[ak8jet1.subJetIdx1]
 		subjet2 = ak8subjets[ak8jet1.subJetIdx2]
-		self.out.fillBranch("ak8Jet1_pt",                 ak8jet1.pt);
-		self.out.fillBranch("ak8Jet1_E",                  ak8jet1_p4.E());
-		self.out.fillBranch("ak8Jet1_eta",                ak8jet1.eta);
-		self.out.fillBranch("ak8Jet1_phi",                ak8jet1.phi);
-		self.out.fillBranch("ak8Jet1_msoftdrop",          ak8jet1.msoftdrop);
-		self.out.fillBranch("ak8Jet1_btagHbb",            ak8jet1.btagHbb);
-		self.out.fillBranch("ak8Jet1_tau1",               ak8jet1.tau1);
-		self.out.fillBranch("ak8Jet1_tau2",               ak8jet1.tau2);
-		self.out.fillBranch("ak8Jet1_subjet0_pt",         subjet1.pt);
-		self.out.fillBranch("ak8Jet1_subjet0_eta",        subjet1.eta);
-		self.out.fillBranch("ak8Jet1_subjet0_phi",        subjet1.phi);
-		self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
-		self.out.fillBranch("ak8Jet1_subjet1_pt",         subjet2.pt);
-		self.out.fillBranch("ak8Jet1_subjet1_eta",        subjet2.eta);
-		self.out.fillBranch("ak8Jet1_subjet1_phi",        subjet2.phi);
-		self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
+		out.fillBranch("ak8Jet1_pt",                 ak8jet1.pt);
+		out.fillBranch("ak8Jet1_E",                  ak8jet1_p4.E());
+		out.fillBranch("ak8Jet1_eta",                ak8jet1.eta);
+		out.fillBranch("ak8Jet1_phi",                ak8jet1.phi);
+		out.fillBranch("ak8Jet1_msoftdrop",          ak8jet1.msoftdrop);
+		out.fillBranch("ak8Jet1_btagHbb",            ak8jet1.btagHbb);
+		out.fillBranch("ak8Jet1_tau1",               ak8jet1.tau1);
+		out.fillBranch("ak8Jet1_tau2",               ak8jet1.tau2);
+		out.fillBranch("ak8Jet1_subjet0_pt",         subjet1.pt);
+		out.fillBranch("ak8Jet1_subjet0_eta",        subjet1.eta);
+		out.fillBranch("ak8Jet1_subjet0_phi",        subjet1.phi);
+		out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
+		out.fillBranch("ak8Jet1_subjet1_pt",         subjet2.pt);
+		out.fillBranch("ak8Jet1_subjet1_eta",        subjet2.eta);
+		out.fillBranch("ak8Jet1_subjet1_phi",        subjet2.phi);
+		out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
 	    else:
-		self.out.fillBranch("ak8Jet1_pt",                 -10000.0);
-		self.out.fillBranch("ak8Jet1_E",                  -10000.0);
-		self.out.fillBranch("ak8Jet1_eta",                -10000.0);
-		self.out.fillBranch("ak8Jet1_phi",                -10000.0);
-		self.out.fillBranch("ak8Jet1_msoftdrop",          -10000.0);
-		self.out.fillBranch("ak8Jet1_btagHbb",            -10000.0);
-		self.out.fillBranch("ak8Jet1_tau1",               -10000.0);
-		self.out.fillBranch("ak8Jet1_tau2",               -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet0_pt",         -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet0_eta",        -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet0_phi",        -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet0_CSV",        -10000.0);   
-		self.out.fillBranch("ak8Jet1_subjet1_pt",         -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet1_eta",        -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet1_phi",        -10000.0);
-		self.out.fillBranch("ak8Jet1_subjet1_CSV",        -10000.0);   
+		out.fillBranch("ak8Jet1_pt",                 -10000.0);
+		out.fillBranch("ak8Jet1_E",                  -10000.0);
+		out.fillBranch("ak8Jet1_eta",                -10000.0);
+		out.fillBranch("ak8Jet1_phi",                -10000.0);
+		out.fillBranch("ak8Jet1_msoftdrop",          -10000.0);
+		out.fillBranch("ak8Jet1_btagHbb",            -10000.0);
+		out.fillBranch("ak8Jet1_tau1",               -10000.0);
+		out.fillBranch("ak8Jet1_tau2",               -10000.0);
+		out.fillBranch("ak8Jet1_subjet0_pt",         -10000.0);
+		out.fillBranch("ak8Jet1_subjet0_eta",        -10000.0);
+		out.fillBranch("ak8Jet1_subjet0_phi",        -10000.0);
+		out.fillBranch("ak8Jet1_subjet0_CSV",        -10000.0);   
+		out.fillBranch("ak8Jet1_subjet1_pt",         -10000.0);
+		out.fillBranch("ak8Jet1_subjet1_eta",        -10000.0);
+		out.fillBranch("ak8Jet1_subjet1_phi",        -10000.0);
+		out.fillBranch("ak8Jet1_subjet1_CSV",        -10000.0);   
 	    
 	        
 
@@ -1665,12 +1665,13 @@ class HHbbWWProducer(Module):
 		    fillBranches_ak4jet(out, jets_clean[i], i+1)
 		else:
 		    fillBranches_ak4jet(out, None, i+1)
+	    fillBranches_ak8jet(out, ak8jets_clean, ak8subjets)
 	    fillrest(out)
 
 	fillall(self.out)
 	fillall(self.Single_Signal)
         self.Single_Signal.fill()
-        print("Entries self.out ", self.out._tree.GetEntries(), " self.Single_Signal ", self.Single_Signal._tree.GetEntries())
+        #print("Entries self.out ", self.out._tree.GetEntries(), " self.Single_Signal ", self.Single_Signal._tree.GetEntries())
 
         
 
