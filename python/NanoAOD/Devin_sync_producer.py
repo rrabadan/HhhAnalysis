@@ -88,6 +88,7 @@ class HHbbWWProducer(Module):
 	self.nEv_DoubleMuon = 0
 	self.nEv_MuonEG = 0
 	#self.lepSFmanager = POGRecipesRun2.LeptonSFManager(True)
+	self.Single_Signal = None
 
     def beginJob(self, histFile=None,histDirName=None):
 	print "BeginJob "
@@ -314,10 +315,10 @@ class HHbbWWProducer(Module):
 	self.Single_Signal._file = wrappedOutputTree._file
 	self.Single_Signal._intree = wrappedOutputTree._intree
 	self.Single_Signal._tree.SetDirectory(wrappedOutputTree._file)
-	print("current self.out outputfile ", self.out._file, " tree ", self.out._tree, " intree ", self.out._intree)
-	print("current self.Single_Signal outputfile ", self.Single_Signal._file, " tree ", self.Single_Signal._tree, " intree ", self.Single_Signal._intree)
 	addbranches(self.out)
         addbranches(self.Single_Signal)
+	print("current self.out outputfile ", self.out._file, " tree ", self.out._tree, " intree ", self.out._intree, " len branches ", len(self.out._branches.keys()))
+	print("current self.Single_Signal outputfile ", self.Single_Signal._file, " tree ", self.Single_Signal._tree, " intree ", self.Single_Signal._intree, " len branches ", len(self.Single_Signal._branches.keys()))
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_eventcounter.Write()
@@ -1577,221 +1578,6 @@ class HHbbWWProducer(Module):
 		out.fillBranch(ak4Jetstr+"_cMVAv2",             -10000.0);
 		out.fillBranch(ak4Jetstr+"_CSV",                -10000.0);
 
-	"""    
-	def fillBranches_muon(leptons):
-	    if (len(leptons) >= 1):
-		lep1 = leptons[0]
-		lep1_p4 = ROOT.TLorentzVector()
-		lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
-		self.out.fillBranch("mu1_pt",                     lep1.pt);
-		self.out.fillBranch("mu1_E",                      lep1_p4.E());
-		self.out.fillBranch("mu1_eta",                    lep1.eta);
-		self.out.fillBranch("mu1_phi",                    lep1.phi);
-		self.out.fillBranch("mu1_pdgid",                  lep1.pdgId);
-		self.out.fillBranch("mu1_charge",                 lep1.charge);
-		self.out.fillBranch("mu1_sip3D",                  lep1.sip3d);
-		self.out.fillBranch("mu1_miniRelIso",             lep1.miniPFRelIso_all);
-		self.out.fillBranch("mu1_miniRelIsoCharged",      lep1.miniPFRelIso_chg);
-		self.out.fillBranch("mu1_dxy",                    lep1.dxy);
-		self.out.fillBranch("mu1_dz",                     lep1.dz);
-		self.out.fillBranch("mu1_segmentCompatibility",   lep1.segmentComp);
-		self.out.fillBranch("mu1_leptonMVA",              lep1.mvaTTH);
-		self.out.fillBranch("mu1_dxyAbs",                 abs(lep1.dxy));
-	    else:
-		self.out.fillBranch("mu1_pt",                     -10000.0);
-		self.out.fillBranch("mu1_E",                      -10000.0);
-		self.out.fillBranch("mu1_eta",                    -10000.0);
-		self.out.fillBranch("mu1_phi",                    -10000.0);
-		self.out.fillBranch("mu1_pdgid",                  -100000);
-		self.out.fillBranch("mu1_charge",                 -10000.0);
-		self.out.fillBranch("mu1_sip3D",                  -10000.0);
-		self.out.fillBranch("mu1_miniRelIso",             -10000.0);
-		self.out.fillBranch("mu1_miniRelIsoCharged",      -10000.0);
-		self.out.fillBranch("mu1_dxy",                    -10000.0);
-		self.out.fillBranch("mu1_dxyAbs",                 -10000.0);
-		self.out.fillBranch("mu1_dz",                     -10000.0);
-		self.out.fillBranch("mu1_segmentCompatibility",   -10000.0);
-		self.out.fillBranch("mu1_leptonMVA",              -10000.0);
-	    
-	    if (len(leptons) >= 2):
-		lep2 = leptons[1]
-		lep2_p4 = ROOT.TLorentzVector()
-		lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
-		self.out.fillBranch("mu2_pt",                     lep2.pt);
-		self.out.fillBranch("mu2_E",                      lep2_p4.E());
-		self.out.fillBranch("mu2_eta",                    lep2.eta);
-		self.out.fillBranch("mu2_phi",                    lep2.phi);
-		self.out.fillBranch("mu2_pdgid",                  lep2.pdgId);
-		self.out.fillBranch("mu2_charge",                 lep2.charge);
-		self.out.fillBranch("mu2_sip3D",                  lep2.sip3d);
-		self.out.fillBranch("mu2_miniRelIso",             lep2.miniPFRelIso_all);
-		self.out.fillBranch("mu2_miniRelIsoCharged",      lep2.miniPFRelIso_chg);
-		self.out.fillBranch("mu2_dxy",                    lep2.dxy);
-		self.out.fillBranch("mu2_dz",                     lep2.dz);
-		self.out.fillBranch("mu2_segmentCompatibility",   lep2.segmentComp);
-		self.out.fillBranch("mu2_leptonMVA",              lep2.mvaTTH);
-		self.out.fillBranch("mu2_dxyAbs",                 abs(lep2.dxy));
-	    else:
-		self.out.fillBranch("mu2_pt",                     -10000.0);
-		self.out.fillBranch("mu2_E",                      -10000.0);
-		self.out.fillBranch("mu2_eta",                    -10000.0);
-		self.out.fillBranch("mu2_phi",                    -10000.0);
-		self.out.fillBranch("mu2_pdgid",                  -100000);
-		self.out.fillBranch("mu2_charge",                 -10000.0);
-		self.out.fillBranch("mu2_sip3D",                  -10000.0);
-		self.out.fillBranch("mu2_miniRelIso",             -10000.0);
-		self.out.fillBranch("mu2_miniRelIsoCharged",      -10000.0);
-		self.out.fillBranch("mu2_dxy",                    -10000.0);
-		self.out.fillBranch("mu2_dxyAbs",                 -10000.0);
-		self.out.fillBranch("mu2_dz",                     -10000.0);
-		self.out.fillBranch("mu2_segmentCompatibility",   -10000.0);
-		self.out.fillBranch("mu2_leptonMVA",              -10000.0);
-
-	def fillBranches_electron(leptons):
-	    if (len(leptons) >= 1):
-		lep1 = leptons[0]
-		lep1_p4 = ROOT.TLorentzVector()
-		lep1_p4.SetPtEtaPhiM(leptons[0].pt, leptons[0].eta, leptons[0].phi, leptons[0].mass)
-		self.out.fillBranch("ele1_pt",                    lep1.pt);
-		self.out.fillBranch("ele1_E",                     lep1_p4.E());
-		self.out.fillBranch("ele1_eta",                   lep1.eta);
-		self.out.fillBranch("ele1_phi",                   lep1.phi);
-		self.out.fillBranch("ele1_pdgid",                 lep1.pdgId);
-		self.out.fillBranch("ele1_charge",                lep1.charge);
-		self.out.fillBranch("ele1_sip3D",                 lep1.sip3d);
-		self.out.fillBranch("ele1_miniRelIso",            lep1.miniPFRelIso_all);
-		self.out.fillBranch("ele1_miniRelIsoCharged",     lep1.miniPFRelIso_chg);
-		self.out.fillBranch("ele1_dxy",                   lep1.dxy);
-		self.out.fillBranch("ele1_dz",                    lep1.dz);
-		self.out.fillBranch("ele1_leptonMVA",             lep1.mvaTTH);
-		self.out.fillBranch("ele1_dxyAbs",                abs(lep1.dxy));
-		self.out.fillBranch("ele1_ntMVAeleID",            0.0);##not available ?
-	    else:
-		self.out.fillBranch("ele1_pt",                    -10000.0);
-		self.out.fillBranch("ele1_E",                     -10000.0);
-		self.out.fillBranch("ele1_eta",                   -10000.0);
-		self.out.fillBranch("ele1_phi",                   -10000.0);
-		self.out.fillBranch("ele1_pdgid",                 -100000);
-		self.out.fillBranch("ele1_charge",                -10000.0);
-		self.out.fillBranch("ele1_sip3D",                 -10000.0);
-		self.out.fillBranch("ele1_miniRelIso",            -10000.0);
-		self.out.fillBranch("ele1_miniRelIsoCharged",     -10000.0);
-		self.out.fillBranch("ele1_dxy",                   -10000.0);
-		self.out.fillBranch("ele1_dxyAbs",                -10000.0);
-		self.out.fillBranch("ele1_dz",                    -10000.0);
-		self.out.fillBranch("ele1_ntMVAeleID",            -10000.0);
-		self.out.fillBranch("ele1_leptonMVA",             -10000.0);
-	    
-	    if (len(leptons) >= 2):
-		lep2 = leptons[1]
-		lep2_p4 = ROOT.TLorentzVector()
-		lep2_p4.SetPtEtaPhiM(leptons[1].pt, leptons[1].eta, leptons[1].phi, leptons[1].mass)
-		self.out.fillBranch("ele2_pt",                    lep2.pt);
-		self.out.fillBranch("ele2_E",                     lep2_p4.E());
-		self.out.fillBranch("ele2_eta",                   lep2.eta);
-		self.out.fillBranch("ele2_phi",                   lep2.phi);
-		self.out.fillBranch("ele2_pdgid",                 lep2.pdgId);
-		self.out.fillBranch("ele2_charge",                lep2.charge);
-		self.out.fillBranch("ele2_sip3D",                 lep2.sip3d);
-		self.out.fillBranch("ele2_miniRelIso",            lep2.miniPFRelIso_all);
-		self.out.fillBranch("ele2_miniRelIsoCharged",     lep2.miniPFRelIso_chg);
-		self.out.fillBranch("ele2_dxy",                   lep2.dxy);
-		self.out.fillBranch("ele2_dz",                    lep2.dz);
-		self.out.fillBranch("ele2_leptonMVA",             lep2.mvaTTH);
-		self.out.fillBranch("ele2_dxyAbs",                abs(lep2.dxy));
-		self.out.fillBranch("ele2_ntMVAeleID",            0.0);##not available ?
-	    else:
-		self.out.fillBranch("ele2_pt",                    -10000.0);
-		self.out.fillBranch("ele2_E",                     -10000.0);
-		self.out.fillBranch("ele2_eta",                   -10000.0);
-		self.out.fillBranch("ele2_phi",                   -10000.0);
-		self.out.fillBranch("ele2_pdgid",                 -100000);
-		self.out.fillBranch("ele2_charge",                -10000.0);
-		self.out.fillBranch("ele2_sip3D",                 -10000.0);
-		self.out.fillBranch("ele2_miniRelIso",            -10000.0);
-		self.out.fillBranch("ele2_miniRelIsoCharged",     -10000.0);
-		self.out.fillBranch("ele2_dxy",                   -10000.0);
-		self.out.fillBranch("ele2_dxyAbs",                -10000.0);
-		self.out.fillBranch("ele2_dz",                    -10000.0);
-		self.out.fillBranch("ele2_ntMVAeleID",            -10000.0);
-		self.out.fillBranch("ele2_leptonMVA",             -10000.0);
-
-	def fillBranches_jet(jets):
-            if (len(jets) >= 1):
-		jet1 = jets[0]
-		jet1_p4 = ROOT.TLorentzVector()
-		jet1_p4.SetPtEtaPhiM(jets[0].pt, jets[0].eta, jets[0].phi, jets[0].mass)
-		self.out.fillBranch("ak4Jet1_pt",                 jet1.pt);
-		self.out.fillBranch("ak4Jet1_E",                  jet1_p4.E());
-		self.out.fillBranch("ak4Jet1_eta",                jet1.eta);
-		self.out.fillBranch("ak4Jet1_phi",                jet1.phi);
-		self.out.fillBranch("ak4Jet1_cMVAv2",             jet1.btagCMVA);
-		#self.out.fillBranch("ak4Jet1_CSV",                jet1.btagDeepB);
-		self.out.fillBranch("ak4Jet1_CSV",                jet1.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak4Jet1_pt",                 -10000.0);
-		self.out.fillBranch("ak4Jet1_E",                  -10000.0);
-		self.out.fillBranch("ak4Jet1_eta",                -10000.0);
-		self.out.fillBranch("ak4Jet1_phi",                -10000.0);
-		self.out.fillBranch("ak4Jet1_cMVAv2",             -10000.0);
-		self.out.fillBranch("ak4Jet1_CSV",                -10000.0);
-
-            if (len(jets) >= 2):
-		jet2 = jets[1]
-		jet2_p4 = ROOT.TLorentzVector()
-		jet2_p4.SetPtEtaPhiM(jets[1].pt, jets[1].eta, jets[1].phi, jets[1].mass)
-		self.out.fillBranch("ak4Jet2_pt",                 jet2.pt);
-		self.out.fillBranch("ak4Jet2_E",                  jet2_p4.E());
-		self.out.fillBranch("ak4Jet2_eta",                jet2.eta);
-		self.out.fillBranch("ak4Jet2_phi",                jet2.phi);
-		self.out.fillBranch("ak4Jet2_cMVAv2",             jet2.btagCMVA);
-	       #self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepB);
-		self.out.fillBranch("ak4Jet2_CSV",                jet2.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak4Jet2_pt",                 -10000.0);
-		self.out.fillBranch("ak4Jet2_E",                  -10000.0);
-		self.out.fillBranch("ak4Jet2_eta",                -10000.0);
-		self.out.fillBranch("ak4Jet2_phi",                -10000.0);
-		self.out.fillBranch("ak4Jet2_cMVAv2",             -10000.0);
-		self.out.fillBranch("ak4Jet2_CSV",                -10000.0);
-
-            if (len(jets) >= 3):
-		jet3 = jets[2]
-		jet3_p4 = ROOT.TLorentzVector()
-		jet3_p4.SetPtEtaPhiM(jets[2].pt, jets[2].eta, jets[2].phi, jets[2].mass)
-		self.out.fillBranch("ak4Jet3_pt",                 jet3.pt);
-		self.out.fillBranch("ak4Jet3_E",                  jet3_p4.E());
-		self.out.fillBranch("ak4Jet3_eta",                jet3.eta);
-		self.out.fillBranch("ak4Jet3_phi",                jet3.phi);
-		self.out.fillBranch("ak4Jet3_cMVAv2",             jet3.btagCMVA);
-	       #self.out.fillBranch("ak4Jet3_CSV",                jet3.btagDeepB);
-		self.out.fillBranch("ak4Jet3_CSV",                jet3.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak4Jet3_pt",                 -10000.0);
-		self.out.fillBranch("ak4Jet3_E",                  -10000.0);
-		self.out.fillBranch("ak4Jet3_eta",                -10000.0);
-		self.out.fillBranch("ak4Jet3_phi",                -10000.0);
-		self.out.fillBranch("ak4Jet3_cMVAv2",             -10000.0);
-		self.out.fillBranch("ak4Jet3_CSV",                -10000.0);
-            if (len(jets) >= 4):
-		jet4 = jets[3]
-		jet4_p4 = ROOT.TLorentzVector()
-		jet4_p4.SetPtEtaPhiM(jets[3].pt, jets[3].eta, jets[3].phi, jets[3].mass)
-		self.out.fillBranch("ak4Jet4_pt",                 jet4.pt);
-		self.out.fillBranch("ak4Jet4_E",                  jet4_p4.E());
-		self.out.fillBranch("ak4Jet4_eta",                jet4.eta);
-		self.out.fillBranch("ak4Jet4_phi",                jet4.phi);
-		self.out.fillBranch("ak4Jet4_cMVAv2",             jet4.btagCMVA);
-	       #self.out.fillBranch("ak4Jet4_CSV",                jet4.btagDeepB);
-		self.out.fillBranch("ak4Jet4_CSV",                jet4.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak4Jet4_pt",                 -10000.0);
-		self.out.fillBranch("ak4Jet4_E",                  -10000.0);
-		self.out.fillBranch("ak4Jet4_eta",                -10000.0);
-		self.out.fillBranch("ak4Jet4_phi",                -10000.0);
-		self.out.fillBranch("ak4Jet4_cMVAv2",             -10000.0);
-		self.out.fillBranch("ak4Jet4_CSV",                -10000.0);
-
 
 
 	def fillBranches_ak8jet(ak8jets, ak8subjets):
@@ -1813,12 +1599,10 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8Jet1_subjet0_eta",        subjet1.eta);
 		self.out.fillBranch("ak8Jet1_subjet0_phi",        subjet1.phi);
 		self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepB);   
-		#self.out.fillBranch("ak8Jet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
 		self.out.fillBranch("ak8Jet1_subjet1_pt",         subjet2.pt);
 		self.out.fillBranch("ak8Jet1_subjet1_eta",        subjet2.eta);
 		self.out.fillBranch("ak8Jet1_subjet1_phi",        subjet2.phi);
 		self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepB);
-		#self.out.fillBranch("ak8Jet1_subjet1_CSV",        subjet2.btagDeepFlavB);
 	    else:
 		self.out.fillBranch("ak8Jet1_pt",                 -10000.0);
 		self.out.fillBranch("ak8Jet1_E",                  -10000.0);
@@ -1837,135 +1621,6 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8Jet1_subjet1_phi",        -10000.0);
 		self.out.fillBranch("ak8Jet1_subjet1_CSV",        -10000.0);   
 	    
-            if (len(ak8jets) >= 2):
-		ak8jet2 = ak8jets[1]
-		ak8jet2_p4 = ROOT.TLorentzVector()
-		ak8jet2_p4.SetPtEtaPhiM(ak8jets[1].pt, ak8jets[1].eta, ak8jets[1].phi, ak8jets[1].mass)
-		subjet1 = ak8subjets[ak8jet2.subJetIdx1]
-		subjet2 = ak8subjets[ak8jet2.subJetIdx2]
-		self.out.fillBranch("ak8Jet2_pt",                 ak8jet2.pt);
-		self.out.fillBranch("ak8Jet2_E",                  ak8jet2_p4.E());
-		self.out.fillBranch("ak8Jet2_eta",                ak8jet2.eta);
-		self.out.fillBranch("ak8Jet2_phi",                ak8jet2.phi);
-		self.out.fillBranch("ak8Jet2_msoftdrop",          ak8jet2.msoftdrop);
-		self.out.fillBranch("ak8Jet2_btagHbb",            ak8jet2.btagHbb);
-		self.out.fillBranch("ak8Jet2_tau1",               ak8jet2.tau1);
-		self.out.fillBranch("ak8Jet2_tau2",               ak8jet2.tau2);
-		self.out.fillBranch("ak8Jet2_subjet0_pt",         subjet1.pt);
-		self.out.fillBranch("ak8Jet2_subjet0_eta",        subjet1.eta);
-		self.out.fillBranch("ak8Jet2_subjet0_phi",        subjet1.phi);
-		self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepB);   
-		#self.out.fillBranch("ak8Jet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
-		self.out.fillBranch("ak8Jet2_subjet1_pt",         subjet2.pt);
-		self.out.fillBranch("ak8Jet2_subjet1_eta",        subjet2.eta);
-		self.out.fillBranch("ak8Jet2_subjet1_phi",        subjet2.phi);
-		self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepB);
-		#self.out.fillBranch("ak8Jet2_subjet1_CSV",        subjet2.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak8Jet2_pt",                 -10000.0);
-		self.out.fillBranch("ak8Jet2_E",                  -10000.0);
-		self.out.fillBranch("ak8Jet2_eta",                -10000.0);
-		self.out.fillBranch("ak8Jet2_phi",                -10000.0);
-		self.out.fillBranch("ak8Jet2_msoftdrop",          -10000.0);
-		self.out.fillBranch("ak8Jet2_tau1",               -10000.0);
-		self.out.fillBranch("ak8Jet2_tau2",               -10000.0);
-		self.out.fillBranch("ak8Jet2_btagHbb",            -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet0_pt",         -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet0_eta",        -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet0_phi",        -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet0_CSV",        -10000.0);   
-		self.out.fillBranch("ak8Jet2_subjet1_pt",         -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet1_eta",        -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet1_phi",        -10000.0);
-		self.out.fillBranch("ak8Jet2_subjet1_CSV",        -10000.0);   
-	    
-	def fillBranches_ak8lsjet(ak8lsjets, ak8lssubjets):
-            if (len(ak8lsjets) >= 1):
-		ak8lsjet1 = ak8lsjets[0]
-		ak8lsjet1_p4 = ROOT.TLorentzVector()
-		ak8lsjet1_p4.SetPtEtaPhiM(ak8lsjets[0].pt, ak8lsjets[0].eta, ak8lsjets[0].phi, ak8lsjets[0].mass)
-		subjet1 = ak8lssubjets[ak8lsjet1.subJetIdx1]
-		subjet2 = ak8lssubjets[ak8lsjet1.subJetIdx2]
-		self.out.fillBranch("ak8lsJet1_pt",                 ak8lsjet1.pt);
-		self.out.fillBranch("ak8lsJet1_E",                  ak8lsjet1_p4.E());
-		self.out.fillBranch("ak8lsJet1_eta",                ak8lsjet1.eta);
-		self.out.fillBranch("ak8lsJet1_phi",                ak8lsjet1.phi);
-		self.out.fillBranch("ak8lsJet1_msoftdrop",          ak8lsjet1.msoftdrop);
-		self.out.fillBranch("ak8lsJet1_btagHbb",            ak8lsjet1.btagHbb);
-		self.out.fillBranch("ak8lsJet1_tau1",               ak8lsjet1.tau1);
-		self.out.fillBranch("ak8lsJet1_tau2",               ak8lsjet1.tau2);
-		self.out.fillBranch("ak8lsJet1_subjet0_pt",         subjet1.pt);
-		self.out.fillBranch("ak8lsJet1_subjet0_eta",        subjet1.eta);
-		self.out.fillBranch("ak8lsJet1_subjet0_phi",        subjet1.phi);
- 	        self.out.fillBranch("ak8lsJet1_subjet0_CSV",        subjet1.btagDeepB);   
-		#self.out.fillBranch("ak8lsJet1_subjet0_CSV",        subjet1.btagDeepFlavB);   
-		self.out.fillBranch("ak8lsJet1_subjet1_pt",         subjet2.pt);
-		self.out.fillBranch("ak8lsJet1_subjet1_eta",        subjet2.eta);
-		self.out.fillBranch("ak8lsJet1_subjet1_phi",        subjet2.phi);
-	        self.out.fillBranch("ak8lsJet1_subjet1_CSV",        subjet2.btagDeepB);
-		#self.out.fillBranch("ak8lsJet1_subjet1_CSV",        subjet2.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak8lsJet1_pt",                 -10000.0);
-		self.out.fillBranch("ak8lsJet1_E",                  -10000.0);
-		self.out.fillBranch("ak8lsJet1_eta",                -10000.0);
-		self.out.fillBranch("ak8lsJet1_phi",                -10000.0);
-		self.out.fillBranch("ak8lsJet1_msoftdrop",          -10000.0);
-		self.out.fillBranch("ak8lsJet1_btagHbb",            -10000.0);
-		self.out.fillBranch("ak8lsJet1_tau1",               -10000.0);
-		self.out.fillBranch("ak8lsJet1_tau2",               -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet0_pt",         -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet0_eta",        -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet0_phi",        -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet0_CSV",        -10000.0);   
-		self.out.fillBranch("ak8lsJet1_subjet1_pt",         -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet1_eta",        -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet1_phi",        -10000.0);
-		self.out.fillBranch("ak8lsJet1_subjet1_CSV",        -10000.0);   
-	    
-            if (len(ak8lsjets) >= 2):
-		ak8lsjet2 = ak8lsjets[1]
-		ak8lsjet2_p4 = ROOT.TLorentzVector()
-		ak8lsjet2_p4.SetPtEtaPhiM(ak8lsjets[1].pt, ak8lsjets[1].eta, ak8lsjets[1].phi, ak8lsjets[1].mass)
-		subjet1 = ak8lssubjets[ak8lsjet2.subJetIdx1]
-		subjet2 = ak8lssubjets[ak8lsjet2.subJetIdx2]
-		self.out.fillBranch("ak8lsJet2_pt",                 ak8lsjet2.pt);
-		self.out.fillBranch("ak8lsJet2_E",                  ak8lsjet2_p4.E());
-		self.out.fillBranch("ak8lsJet2_eta",                ak8lsjet2.eta);
-		self.out.fillBranch("ak8lsJet2_phi",                ak8lsjet2.phi);
-		self.out.fillBranch("ak8lsJet2_msoftdrop",          ak8lsjet2.msoftdrop);
-		self.out.fillBranch("ak8lsJet2_btagHbb",            ak8lsjet2.btagHbb);
-		self.out.fillBranch("ak8lsJet2_tau1",               ak8lsjet2.tau1);
-		self.out.fillBranch("ak8lsJet2_tau2",               ak8lsjet2.tau2);
-		self.out.fillBranch("ak8lsJet2_subjet0_pt",         subjet1.pt);
-		self.out.fillBranch("ak8lsJet2_subjet0_eta",        subjet1.eta);
-		self.out.fillBranch("ak8lsJet2_subjet0_phi",        subjet1.phi);
-	        self.out.fillBranch("ak8lsJet2_subjet0_CSV",        subjet1.btagDeepB);   
-		#self.out.fillBranch("ak8lsJet2_subjet0_CSV",        subjet1.btagDeepFlavB);   
-		self.out.fillBranch("ak8lsJet2_subjet1_pt",         subjet2.pt);
-		self.out.fillBranch("ak8lsJet2_subjet1_eta",        subjet2.eta);
-		self.out.fillBranch("ak8lsJet2_subjet1_phi",        subjet2.phi);
-	        self.out.fillBranch("ak8lsJet2_subjet1_CSV",        subjet2.btagDeepB);
-		#self.out.fillBranch("ak8lsJet2_subjet1_CSV",        subjet2.btagDeepFlavB);
-	    else:
-		self.out.fillBranch("ak8lsJet2_pt",                 -10000.0);
-		self.out.fillBranch("ak8lsJet2_E",                  -10000.0);
-		self.out.fillBranch("ak8lsJet2_eta",                -10000.0);
-		self.out.fillBranch("ak8lsJet2_phi",                -10000.0);
-		self.out.fillBranch("ak8lsJet2_msoftdrop",          -10000.0);
-		self.out.fillBranch("ak8lsJet2_tau1",               -10000.0);
-		self.out.fillBranch("ak8lsJet2_tau2",               -10000.0);
-		self.out.fillBranch("ak8lsJet2_btagHbb",            -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet0_pt",         -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet0_eta",        -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet0_phi",        -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet0_CSV",        -10000.0);   
-		self.out.fillBranch("ak8lsJet2_subjet1_pt",         -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet1_eta",        -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet1_phi",        -10000.0);
-		self.out.fillBranch("ak8lsJet2_subjet1_CSV",        -10000.0);   
-	"""
-	    
-	        
 	        
 
         met_p4 = ROOT.TLorentzVector()## mass=0, eta=0
@@ -2011,8 +1666,11 @@ class HHbbWWProducer(Module):
 		else:
 		    fillBranches_ak4jet(out, None, i+1)
 	    fillrest(out)
+
 	fillall(self.out)
 	fillall(self.Single_Signal)
+        self.Single_Signal.fill()
+        print("Entries self.out ", self.out._tree.GetEntries(), " self.Single_Signal ", self.Single_Signal._tree.GetEntries())
 
         
 
