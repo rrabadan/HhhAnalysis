@@ -2,11 +2,14 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 print "ROOT version ",ROOT.gROOT.GetVersion()
 from math import sqrt,cos
+import copy
 import random
 #random.randint(0,100)
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection,Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
+from PhysicsTools.NanoAODTools.postprocessing.framework.output import FriendOutput
+
 from PhysicsTools.NanoAODTools.postprocessing.tools import * #deltaR, matching etc..
 import sys
 sys.path.append('/home/taohuang/DiHiggsAnalysis/CMSSW_9_4_0_pre1/src/HhhAnalysis/python/NanoAOD')
@@ -112,323 +115,209 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleEG"].SetLineColor(ROOT.kBlue)
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
 
-        self.Single_Signal = ROOT.TTree("Single_Signal", "Single_Signal")
+        #self.Single_Signal = ROOT.TTree("Single_Signal", "Single_Signal")
         #self.Single_Fake   = ROOT.TTree("Single_Fake", "Single_Fake")
         #self.Double_Signal = ROOT.TTree("Double_Signal", "Double_Signal")
         #self.Double_Fake   = ROOT.TTree("Double_Fake", "Double_Fake")
 
-        self.out = wrappedOutputTree
-        self.out.branch("ak4Jet1_idx",  "I");
-        self.out.branch("ak4Jet1_pt",  "F");
-        self.out.branch("ak4Jet1_E",  "F");
-        self.out.branch("ak4Jet1_eta",  "F");
-        self.out.branch("ak4Jet1_phi",  "F");
-        self.out.branch("ak4Jet1_cMVAv2",  "F");
-        self.out.branch("ak4Jet1_CSV",  "F");
-        self.out.branch("ak4Jet2_idx",  "I");
-        self.out.branch("ak4Jet2_pt",  "F");
-        self.out.branch("ak4Jet2_E",  "F");
-        self.out.branch("ak4Jet2_eta",  "F");
-        self.out.branch("ak4Jet2_phi",  "F");
-        self.out.branch("ak4Jet2_cMVAv2",  "F");
-        self.out.branch("ak4Jet2_CSV",  "F");
-        self.out.branch("ak4Jet3_idx",  "I");
-        self.out.branch("ak4Jet3_pt",  "F");
-        self.out.branch("ak4Jet3_E",  "F");
-        self.out.branch("ak4Jet3_eta",  "F");
-        self.out.branch("ak4Jet3_phi",  "F");
-        self.out.branch("ak4Jet3_cMVAv2",  "F");
-        self.out.branch("ak4Jet3_CSV",  "F");
-        self.out.branch("ak4Jet4_idx",  "I");
-        self.out.branch("ak4Jet4_pt",  "F");
-        self.out.branch("ak4Jet4_E",  "F");
-        self.out.branch("ak4Jet4_eta",  "F");
-        self.out.branch("ak4Jet4_phi",  "F");
-        self.out.branch("ak4Jet4_cMVAv2",  "F");
-        self.out.branch("ak4Jet4_CSV",  "F");
+	def addbranches(out):
+	    out.branch("ak4Jet1_idx",  "I");
+	    out.branch("ak4Jet1_pt",  "F");
+	    out.branch("ak4Jet1_E",  "F");
+	    out.branch("ak4Jet1_eta",  "F");
+	    out.branch("ak4Jet1_phi",  "F");
+	    out.branch("ak4Jet1_cMVAv2",  "F");
+	    out.branch("ak4Jet1_CSV",  "F");
+	    out.branch("ak4Jet2_idx",  "I");
+	    out.branch("ak4Jet2_pt",  "F");
+	    out.branch("ak4Jet2_E",  "F");
+	    out.branch("ak4Jet2_eta",  "F");
+	    out.branch("ak4Jet2_phi",  "F");
+	    out.branch("ak4Jet2_cMVAv2",  "F");
+	    out.branch("ak4Jet2_CSV",  "F");
+	    out.branch("ak4Jet3_idx",  "I");
+	    out.branch("ak4Jet3_pt",  "F");
+	    out.branch("ak4Jet3_E",  "F");
+	    out.branch("ak4Jet3_eta",  "F");
+	    out.branch("ak4Jet3_phi",  "F");
+	    out.branch("ak4Jet3_cMVAv2",  "F");
+	    out.branch("ak4Jet3_CSV",  "F");
+	    out.branch("ak4Jet4_idx",  "I");
+	    out.branch("ak4Jet4_pt",  "F");
+	    out.branch("ak4Jet4_E",  "F");
+	    out.branch("ak4Jet4_eta",  "F");
+	    out.branch("ak4Jet4_phi",  "F");
+	    out.branch("ak4Jet4_cMVAv2",  "F");
+	    out.branch("ak4Jet4_CSV",  "F");
 
-        self.out.branch("ak8Jet1_pt",            "F");
-        self.out.branch("ak8Jet1_E",             "F");
-        self.out.branch("ak8Jet1_eta",           "F");
-        self.out.branch("ak8Jet1_phi",           "F");
-        self.out.branch("ak8Jet1_msoftdrop",     "F");
-        self.out.branch("ak8Jet1_tau1",          "F");
-        self.out.branch("ak8Jet1_tau2",          "F");
-        self.out.branch("ak8Jet1_btagHbb",       "F");
-	self.out.branch("ak8Jet1_subjet0_pt",    "F");
-	self.out.branch("ak8Jet1_subjet0_eta",   "F");
-	self.out.branch("ak8Jet1_subjet0_phi",   "F");
-	self.out.branch("ak8Jet1_subjet0_CSV",   "F");   
-	self.out.branch("ak8Jet1_subjet1_pt",    "F");
-	self.out.branch("ak8Jet1_subjet1_eta",   "F");
-	self.out.branch("ak8Jet1_subjet1_phi",   "F");
-	self.out.branch("ak8Jet1_subjet1_CSV",   "F");   
-        self.out.branch("ak8Jet2_pt",            "F");
-        self.out.branch("ak8Jet2_E",             "F");
-        self.out.branch("ak8Jet2_eta",           "F");
-        self.out.branch("ak8Jet2_phi",           "F");
-        self.out.branch("ak8Jet2_msoftdrop",     "F");
-        self.out.branch("ak8Jet2_btagHbb",       "F");
-        self.out.branch("ak8Jet2_tau1",          "F");
-        self.out.branch("ak8Jet2_tau2",          "F");
-	self.out.branch("ak8Jet2_subjet0_pt",    "F");
-	self.out.branch("ak8Jet2_subjet0_eta",   "F");
-	self.out.branch("ak8Jet2_subjet0_phi",   "F");
-	self.out.branch("ak8Jet2_subjet0_CSV",   "F");   
-	self.out.branch("ak8Jet2_subjet1_pt",    "F");
-	self.out.branch("ak8Jet2_subjet1_eta",   "F");
-	self.out.branch("ak8Jet2_subjet1_phi",   "F");
-	self.out.branch("ak8Jet2_subjet1_CSV",   "F");   
+	    out.branch("ak8Jet1_pt",            "F");
+	    out.branch("ak8Jet1_E",             "F");
+	    out.branch("ak8Jet1_eta",           "F");
+	    out.branch("ak8Jet1_phi",           "F");
+	    out.branch("ak8Jet1_msoftdrop",     "F");
+	    out.branch("ak8Jet1_tau1",          "F");
+	    out.branch("ak8Jet1_tau2",          "F");
+	    out.branch("ak8Jet1_btagHbb",       "F");
+	    out.branch("ak8Jet1_subjet0_pt",    "F");
+	    out.branch("ak8Jet1_subjet0_eta",   "F");
+	    out.branch("ak8Jet1_subjet0_phi",   "F");
+	    out.branch("ak8Jet1_subjet0_CSV",   "F");   
+	    out.branch("ak8Jet1_subjet1_pt",    "F");
+	    out.branch("ak8Jet1_subjet1_eta",   "F");
+	    out.branch("ak8Jet1_subjet1_phi",   "F");
+	    out.branch("ak8Jet1_subjet1_CSV",   "F");   
+	    out.branch("ak8Jet2_pt",            "F");
+	    out.branch("ak8Jet2_E",             "F");
+	    out.branch("ak8Jet2_eta",           "F");
+	    out.branch("ak8Jet2_phi",           "F");
+	    out.branch("ak8Jet2_msoftdrop",     "F");
+	    out.branch("ak8Jet2_btagHbb",       "F");
+	    out.branch("ak8Jet2_tau1",          "F");
+	    out.branch("ak8Jet2_tau2",          "F");
+	    out.branch("ak8Jet2_subjet0_pt",    "F");
+	    out.branch("ak8Jet2_subjet0_eta",   "F");
+	    out.branch("ak8Jet2_subjet0_phi",   "F");
+	    out.branch("ak8Jet2_subjet0_CSV",   "F");   
+	    out.branch("ak8Jet2_subjet1_pt",    "F");
+	    out.branch("ak8Jet2_subjet1_eta",   "F");
+	    out.branch("ak8Jet2_subjet1_phi",   "F");
+	    out.branch("ak8Jet2_subjet1_CSV",   "F");   
 
-        self.out.branch("ak8lsJet1_pt",            "F");
-        self.out.branch("ak8lsJet1_E",             "F");
-        self.out.branch("ak8lsJet1_eta",           "F");
-        self.out.branch("ak8lsJet1_phi",           "F");
-        self.out.branch("ak8lsJet1_msoftdrop",     "F");
-        self.out.branch("ak8lsJet1_tau1",          "F");
-        self.out.branch("ak8lsJet1_tau2",          "F");
-        self.out.branch("ak8lsJet1_btagHbb",       "F");
-	self.out.branch("ak8lsJet1_subjet0_pt",    "F");
-	self.out.branch("ak8lsJet1_subjet0_eta",   "F");
-	self.out.branch("ak8lsJet1_subjet0_phi",   "F");
-	self.out.branch("ak8lsJet1_subjet0_CSV",   "F");   
-	self.out.branch("ak8lsJet1_subjet1_pt",    "F");
-	self.out.branch("ak8lsJet1_subjet1_eta",   "F");
-	self.out.branch("ak8lsJet1_subjet1_phi",   "F");
-	self.out.branch("ak8lsJet1_subjet1_CSV",   "F");   
-        self.out.branch("ak8lsJet2_pt",            "F");
-        self.out.branch("ak8lsJet2_E",             "F");
-        self.out.branch("ak8lsJet2_eta",           "F");
-        self.out.branch("ak8lsJet2_phi",           "F");
-        self.out.branch("ak8lsJet2_msoftdrop",     "F");
-        self.out.branch("ak8lsJet2_btagHbb",       "F");
-        self.out.branch("ak8lsJet2_tau1",          "F");
-        self.out.branch("ak8lsJet2_tau2",          "F");
-	self.out.branch("ak8lsJet2_subjet0_pt",    "F");
-	self.out.branch("ak8lsJet2_subjet0_eta",   "F");
-	self.out.branch("ak8lsJet2_subjet0_phi",   "F");
-	self.out.branch("ak8lsJet2_subjet0_CSV",   "F");   
-	self.out.branch("ak8lsJet2_subjet1_pt",    "F");
-	self.out.branch("ak8lsJet2_subjet1_eta",   "F");
-	self.out.branch("ak8lsJet2_subjet1_phi",   "F");
-	self.out.branch("ak8lsJet2_subjet1_CSV",   "F");   
+	    out.branch("ak8lsJet1_pt",            "F");
+	    out.branch("ak8lsJet1_E",             "F");
+	    out.branch("ak8lsJet1_eta",           "F");
+	    out.branch("ak8lsJet1_phi",           "F");
+	    out.branch("ak8lsJet1_msoftdrop",     "F");
+	    out.branch("ak8lsJet1_tau1",          "F");
+	    out.branch("ak8lsJet1_tau2",          "F");
+	    out.branch("ak8lsJet1_btagHbb",       "F");
+	    out.branch("ak8lsJet1_subjet0_pt",    "F");
+	    out.branch("ak8lsJet1_subjet0_eta",   "F");
+	    out.branch("ak8lsJet1_subjet0_phi",   "F");
+	    out.branch("ak8lsJet1_subjet0_CSV",   "F");   
+	    out.branch("ak8lsJet1_subjet1_pt",    "F");
+	    out.branch("ak8lsJet1_subjet1_eta",   "F");
+	    out.branch("ak8lsJet1_subjet1_phi",   "F");
+	    out.branch("ak8lsJet1_subjet1_CSV",   "F");   
+	    out.branch("ak8lsJet2_pt",            "F");
+	    out.branch("ak8lsJet2_E",             "F");
+	    out.branch("ak8lsJet2_eta",           "F");
+	    out.branch("ak8lsJet2_phi",           "F");
+	    out.branch("ak8lsJet2_msoftdrop",     "F");
+	    out.branch("ak8lsJet2_btagHbb",       "F");
+	    out.branch("ak8lsJet2_tau1",          "F");
+	    out.branch("ak8lsJet2_tau2",          "F");
+	    out.branch("ak8lsJet2_subjet0_pt",    "F");
+	    out.branch("ak8lsJet2_subjet0_eta",   "F");
+	    out.branch("ak8lsJet2_subjet0_phi",   "F");
+	    out.branch("ak8lsJet2_subjet0_CSV",   "F");   
+	    out.branch("ak8lsJet2_subjet1_pt",    "F");
+	    out.branch("ak8lsJet2_subjet1_eta",   "F");
+	    out.branch("ak8lsJet2_subjet1_phi",   "F");
+	    out.branch("ak8lsJet2_subjet1_CSV",   "F");   
 
 
-	#self.out.branch("lepstype",  "F")
-        self.out.branch("mu1_pt",  "F");
-        self.out.branch("mu1_TrgObjfilterbits",  "I");
-        self.out.branch("mu1_E",  "F");
-        self.out.branch("mu1_eta",  "F");
-        self.out.branch("mu1_phi",  "F");
-        self.out.branch("mu1_pdgid",  "I");
-        self.out.branch("mu1_charge",  "F");
-        self.out.branch("mu1_sip3D",  "F");
-        self.out.branch("mu1_miniRelIso",  "F");
-        self.out.branch("mu1_dxy",  "F");
-        self.out.branch("mu1_dxyAbs",  "F");
-        self.out.branch("mu1_dz",  "F");
-        #self.out.branch("mu1_miniRelIso_chg",  "F");
-        self.out.branch("mu1_segmentCompatibility",  "F");
-        self.out.branch("mu1_leptonMVA",  "F");
-	self.out.branch("mu1_miniRelIsoCharged",        "F");
-	#self.out.branch("mu1_miniRelIsoNeutral",        "F");
-        self.out.branch("mu2_pt",  "F");
-        self.out.branch("mu2_E",  "F");
-        self.out.branch("mu2_eta",  "F");
-        self.out.branch("mu2_phi",  "F");
-        self.out.branch("mu2_pdgid",  "I");
-        self.out.branch("mu2_TrgObjfilterbits",  "I");
-        self.out.branch("mu2_charge",  "F");
-        self.out.branch("mu2_sip3D",  "F");
-        self.out.branch("mu2_miniRelIso",  "F");
-        self.out.branch("mu2_dxy",  "F");
-        self.out.branch("mu2_dxyAbs",  "F");
-        self.out.branch("mu2_dz",  "F");
-        #self.out.branch("mu2_miniRelIso_chg",  "F");
-        self.out.branch("mu2_segmentCompatibility",  "F");
-        self.out.branch("mu2_leptonMVA",  "F");
-	self.out.branch("mu2_miniRelIsoCharged",        "F");
-	#self.out.branch("mu2_miniRelIsoNeutral",        "F");
+	    out.branch("mu1_pt",  "F");
+	    out.branch("mu1_TrgObjfilterbits",  "I");
+	    out.branch("mu1_E",  "F");
+	    out.branch("mu1_eta",  "F");
+	    out.branch("mu1_phi",  "F");
+	    out.branch("mu1_pdgid",  "I");
+	    out.branch("mu1_charge",  "F");
+	    out.branch("mu1_sip3D",  "F");
+	    out.branch("mu1_miniRelIso",  "F");
+	    out.branch("mu1_dxy",  "F");
+	    out.branch("mu1_dxyAbs",  "F");
+	    out.branch("mu1_dz",  "F");
+	    out.branch("mu1_segmentCompatibility",  "F");
+	    out.branch("mu1_leptonMVA",  "F");
+	    out.branch("mu1_miniRelIsoCharged",        "F");
+	    out.branch("mu2_pt",  "F");
+	    out.branch("mu2_E",  "F");
+	    out.branch("mu2_eta",  "F");
+	    out.branch("mu2_phi",  "F");
+	    out.branch("mu2_pdgid",  "I");
+	    out.branch("mu2_TrgObjfilterbits",  "I");
+	    out.branch("mu2_charge",  "F");
+	    out.branch("mu2_sip3D",  "F");
+	    out.branch("mu2_miniRelIso",  "F");
+	    out.branch("mu2_dxy",  "F");
+	    out.branch("mu2_dxyAbs",  "F");
+	    out.branch("mu2_dz",  "F");
+	    out.branch("mu2_segmentCompatibility",  "F");
+	    out.branch("mu2_leptonMVA",  "F");
+	    out.branch("mu2_miniRelIsoCharged",        "F");
 
-        self.out.branch("ele1_pt",  "F");
-        self.out.branch("ele1_TrgObjfilterbits",  "I");
-        self.out.branch("ele1_E",  "F");
-        self.out.branch("ele1_eta",  "F");
-        self.out.branch("ele1_phi",  "F");
-        self.out.branch("ele1_pdgid",  "I");
-        self.out.branch("ele1_charge",  "F");
-        self.out.branch("ele1_sip3D",  "F");
-        self.out.branch("ele1_miniRelIso",  "F");
-        self.out.branch("ele1_dxy",  "F");
-        self.out.branch("ele1_dxyAbs",  "F");
-        self.out.branch("ele1_dz",  "F");
-        #self.out.branch("ele1_miniRelIso_chg",  "F");
-        self.out.branch("ele1_ntMVAeleID",  "F");
-        self.out.branch("ele1_leptonMVA",  "F");
-	self.out.branch("ele1_miniRelIsoCharged",        "F");
-	#self.out.branch("ele1_miniRelIsoNeutral",        "F");
-	self.out.branch("ele1_mvaIdFall17noIso",         "F");
-        self.out.branch("ele2_pt",  "F");
-        self.out.branch("ele2_E",  "F");
-        self.out.branch("ele2_eta",  "F");
-        self.out.branch("ele2_phi",  "F");
-        self.out.branch("ele2_pdgid",  "I");
-        self.out.branch("ele2_TrgObjfilterbits",  "I");
-        self.out.branch("ele2_charge",  "F");
-        self.out.branch("ele2_sip3D",  "F");
-        self.out.branch("ele2_miniRelIso",  "F");
-        self.out.branch("ele2_dxy",  "F");
-        self.out.branch("ele2_dxyAbs",  "F");
-        self.out.branch("ele2_dz",  "F");
-        #self.out.branch("ele2_miniRelIso_chg",  "F");
-        self.out.branch("ele2_leptonMVA",  "F");
-        self.out.branch("ele2_ntMVAeleID",  "F");
-	self.out.branch("ele2_miniRelIsoCharged",        "F");
-	self.out.branch("ele2_miniRelIsoNeutral",        "F");
-	self.out.branch("ele2_mvaIdFall17noIso",         "F");
+	    out.branch("ele1_pt",  "F");
+	    out.branch("ele1_TrgObjfilterbits",  "I");
+	    out.branch("ele1_E",  "F");
+	    out.branch("ele1_eta",  "F");
+	    out.branch("ele1_phi",  "F");
+	    out.branch("ele1_pdgid",  "I");
+	    out.branch("ele1_charge",  "F");
+	    out.branch("ele1_sip3D",  "F");
+	    out.branch("ele1_miniRelIso",  "F");
+	    out.branch("ele1_dxy",  "F");
+	    out.branch("ele1_dxyAbs",  "F");
+	    out.branch("ele1_dz",  "F");
+	    out.branch("ele1_ntMVAeleID",  "F");
+	    out.branch("ele1_leptonMVA",  "F");
+	    out.branch("ele1_miniRelIsoCharged",        "F");
+	    out.branch("ele1_mvaIdFall17noIso",         "F");
+	    out.branch("ele2_pt",  "F");
+	    out.branch("ele2_E",  "F");
+	    out.branch("ele2_eta",  "F");
+	    out.branch("ele2_phi",  "F");
+	    out.branch("ele2_pdgid",  "I");
+	    out.branch("ele2_TrgObjfilterbits",  "I");
+	    out.branch("ele2_charge",  "F");
+	    out.branch("ele2_sip3D",  "F");
+	    out.branch("ele2_miniRelIso",  "F");
+	    out.branch("ele2_dxy",  "F");
+	    out.branch("ele2_dxyAbs",  "F");
+	    out.branch("ele2_dz",  "F");
+	    out.branch("ele2_leptonMVA",  "F");
+	    out.branch("ele2_ntMVAeleID",  "F");
+	    out.branch("ele2_miniRelIsoCharged",        "F");
+	    out.branch("ele2_miniRelIsoNeutral",        "F");
+	    out.branch("ele2_mvaIdFall17noIso",         "F");
 
-	self.out.branch("PFMET",  "F")
-	self.out.branch("PFMETphi",  "F")
-        self.out.branch("PFMETCovXX", "F")
-        self.out.branch("PFMETCovXY", "F")
-        self.out.branch("PFMETCovYY", "F")
-	self.out.branch("n_presel_mu", "I")
-	self.out.branch("n_presel_ele", "I")
-	self.out.branch("n_presel_ak4Jet", "I")
-	self.out.branch("n_presel_ak8Jet", "I")
-	self.out.branch("n_presel_ak8lsJet", "I")
-	"""
-	self.out.branch("nJetsL",  "F")
-	self.out.branch("jj_M",  "F")
-	self.out.branch("el_hltsafeid", "F")
-	self.out.branch("llreco_weight",  "F")
-	self.out.branch("llid_weight",  "F")
-	self.out.branch("lliso_weight",  "F")
-	self.out.branch("lltrigger_weight",  "F")
-	self.out.branch("ht_jets",  "F")
-	self.out.branch("ht",  "F")
-	self.out.branch("ll_M",  "F")
-	self.out.branch("llmet_M",  "F")
-	self.out.branch("llmetjj_MT2",  "F")
-	self.out.branch("llmetjj_M",  "F")
-	self.out.branch("lljj_M",  "F")
-	self.out.branch("cosThetaStar",  "F")
-	self.out.branch("ll_DR_l_l",  "F")
-	self.out.branch("jj_DR_j_j",  "F")
-	self.out.branch("llmetjj_DPhi_ll_jj",  "F")
-	self.out.branch("llmetjj_DPhi_ll_met",  "F")
-	self.out.branch("llmetjj_DPhi_llmet_jj",  "F")
-	self.out.branch("ll_pt",  "F")
-	self.out.branch("ll_eta",  "F")
-	self.out.branch("jj_pt",  "F")
-	self.out.branch("jj_eta",  "F")
-	self.out.branch("llmetjj_minDR_l_j",  "F")
-	self.out.branch("llmetjj_MTformula",  "F")
-	self.out.branch("ll_DPhi_l_l",  "F")
-	self.out.branch("ll_DEta_l_l",  "F")
-	self.out.branch("event_pu_weight",  "F")
-	self.out.branch("event_lep_weight",  "F")
-	self.out.branch("event_btag_weight",  "F")
-	self.out.branch("jjbtag_heavy",  "F")
-	self.out.branch("jjbtag_light",  "F")
-	"""
-        self.out.branch("PU_weight",  "F");
-        self.out.branch("MC_weight",  "F");
-	self.out.branch("pu",  "F")
-	self.out.branch("run",  "I")
-	self.out.branch("ls",  "I")##lumiblocks
-	self.out.branch("event",  "I")
-	#self.out.branch("event_weight",  "F")
-	#self.out.branch("DY_BDT_flat",  "F")
-	#self.out.branch("dy_nobtag_to_btagM_weight",  "F")
-	#self.out.branch("mt2",  "F")
-	#self.out.branch("mt2_bb",  "F")
-	#self.out.branch("mt2_ll",  "F")
-	#self.out.branch("event_number",  "I")
-
-	"""
-	if self.isMC and self.addSystematic:
-	    for name in self.ll_sys_branchname:
-		self.out.branch("lep1%s"%name,"F")
-		self.out.branch("lep1%s_up"%name,"F")
-		self.out.branch("lep1%s_down"%name,"F")
-		self.out.branch("lep2%s"%name,"F")
-		self.out.branch("lep2%s_up"%name,"F")
-		self.out.branch("lep2%s_down"%name,"F")
-	    self.out.branch("ll_Tallintrgeff","F")
-	    self.out.branch("ll_Tallintrgeff_up","F")
-	    self.out.branch("ll_Tallintrgeff_down","F")
-	    for name in self.jjbtag_sys_branchname:
-		self.out.branch("%s"%name,"F")
-		self.out.branch("%s_up"%name,"F")
-		self.out.branch("%s_down"%name,"F")
-
-	    self.out.branch("event_pu_weight_up",  "F")
-	    self.out.branch("event_pu_weight_down",  "F")
-	    self.out.branch("event_pdf_weight_up",  "F")
-	    self.out.branch("event_pdf_weight_down",  "F")
-	    #self.out.branch("LHEScaleWeight", "F", lenVar = "nLHEScaleWeight")
-	    for i in range(0, 9):
-		self.out.branch("LHEScaleWeight_%d"%i, "F")
-	if self.DYestimation or self.addGenToTree:	
-	    self.out.branch("genjet1_partonFlavour",  "I");
-	    self.out.branch("genjet2_partonFlavour",  "I");
-	    self.out.branch("genmet_pt",  "F");
-	    self.out.branch("genmet_phi",  "F");
-	##how to add gen information???
-	if self.isMC and self.addGenToTree:
-	    self.out.branch("genb1_pt",  "F");##quark level
-	    self.out.branch("genjet1_pt",  "F");
-	    self.out.branch("genjet1_E",  "F");
-	    self.out.branch("genjet1_eta",  "F");
-	    self.out.branch("genjet1_phi",  "F");
-	    self.out.branch("genb2_pt",  "F");
-	    self.out.branch("genjet2_pt",  "F");
-	    self.out.branch("genjet2_E",  "F");
-	    self.out.branch("genjet2_eta",  "F");
-	    self.out.branch("genjet2_phi",  "F");
-	    #self.out.branch("genW1_pt",  "F");
-	    #self.out.branch("genW1_mass",  "F");
-	    #self.out.branch("genW2_pt",  "F");
-	    #self.out.branch("genW2_mass",  "F");
-	    #self.out.branch("gennu1_pt",  "F");##nu1 from W1
-	    #self.out.branch("gennu1_eta",  "F");
-	    #self.out.branch("gennu1_phi",  "F");
-	    #self.out.branch("gennu2_pt",  "F");
-	    #self.out.branch("gennu2_eta",  "F");
-	    #self.out.branch("gennu2_phi",  "F");
-	    self.out.branch("genl1_pt",  "F");##genl1 from lep1, leading 
-	    self.out.branch("genl1_E",  "F");
-	    self.out.branch("genl1_eta",  "F");
-	    self.out.branch("genl1_phi",  "F");
-	    self.out.branch("genl1_id",  "I");
-	    self.out.branch("genl2_pt",  "F");
-	    self.out.branch("genl2_E",  "F");
-	    self.out.branch("genl2_eta",  "F");
-	    self.out.branch("genl2_phi",  "F");
-	    self.out.branch("genl2_id",  "I");
-	    self.out.branch("dR_genb1_genjet1",  "F");
-	    self.out.branch("dR_genb1_genjet2",  "F");
-	    self.out.branch("dR_genb2_genjet1",  "F");
-	    self.out.branch("dR_genb2_genjet2",  "F");
-	    self.out.branch("dR_genl1_lepFromW1",  "F");
-	    self.out.branch("dR_genl1_lepFromW2",  "F");
-	    self.out.branch("dR_genl2_lepFromW1",  "F");
-	    self.out.branch("dR_genl2_lepFromW2",  "F");
-	    self.out.branch("met_diNuetrino_pt",  "F");
-	    self.out.branch("met_diNuetrino_phi",  "F");
-	    if self.CheckBtaggingEff:
-		self.out.branch("alljets_pt", "F", n=self.maxnjets)
-		self.out.branch("alljets_eta", "F", n=self.maxnjets)
-		self.out.branch("alljets_cMVAv2", "F", n=self.maxnjets)
-		self.out.branch("alljets_DeepCSV", "F", n=self.maxnjets)
-		#self.out.branch("alljets_partonFlavour", "I", n=self.maxnjets)
-		#self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
-		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
-	    """
+	    out.branch("PFMET",  "F")
+	    out.branch("PFMETphi",  "F")
+	    out.branch("PFMETCovXX", "F")
+	    out.branch("PFMETCovXY", "F")
+	    out.branch("PFMETCovYY", "F")
+	    out.branch("n_presel_mu", "I")
+	    out.branch("n_presel_ele", "I")
+	    out.branch("n_presel_ak4Jet", "I")
+	    out.branch("n_presel_ak8Jet", "I")
+	    out.branch("n_presel_ak8lsJet", "I")
+	    out.branch("PU_weight",  "F");
+	    out.branch("MC_weight",  "F");
+	    out.branch("pu",  "F")
+	    out.branch("run",  "I")
+	    out.branch("ls",  "I")##lumiblocks
+	    out.branch("event",  "I")
         #self.out.branch("category", "I")
 
         #Single_Signal = self.out.tree().Clone(0)
+	#self.out._tree.SetBranchStatus("*", 1)
+	#sstree = self.out._tree.Clone()
+        #sstree.SetName("syncTree_hhbb1l_SR")
+	#self.Single_Signal = FriendOutput(None, self.out._intree,  self.out._file, )
+	#self.Single_Signal = copy.copy(self.out)
+	
+        self.out = wrappedOutputTree
+	self.Single_Signal = copy.deepcopy(wrappedOutputTree)
+	#self.Single_Signal = copy.deepcopy(self.out)
+        self.Single_Signal._tree.SetName("syncTree_hhbb1l_SR")
+	self.Single_Signal._file = wrappedOutputTree._file
+	self.Single_Signal._intree = wrappedOutputTree._intree
+	self.Single_Signal._tree.SetDirectory(wrappedOutputTree._file)
+	print("current self.out outputfile ", self.out._file, " tree ", self.out._tree, " intree ", self.out._intree)
+	print("current self.Single_Signal outputfile ", self.Single_Signal._file, " tree ", self.Single_Signal._tree, " intree ", self.Single_Signal._intree)
+	addbranches(self.out)
+        addbranches(self.Single_Signal)
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_eventcounter.Write()
@@ -437,6 +326,8 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleEG"].Write()
 	self.h_cutflowlist["MuonEG"].Write()
 	self.h_cutflow_weight.Write()
+	
+	self.Single_Signal.write()
 	#inputTree.SetBranchStatus("Jet_btagSF_*", 0)
 	#c1 = ROOT.TCanvas("h_cutflow","h_cutflow")
 	#self.h_cutflowlist["MuonEG"].Draw("hist")
@@ -1596,6 +1487,97 @@ class HHbbWWProducer(Module):
 
 
 	"""
+	def fillBranches_muon(out, muon, index):
+	    mustr = "mu%d"%index
+	    if not isinstance(muon, type(None)):
+		lep1 = muon
+		lep1_p4 = ROOT.TLorentzVector()
+		lep1_p4.SetPtEtaPhiM(lep1.pt, lep1.eta, lep1.phi, lep1.mass)
+		out.fillBranch(mustr+"_pt",                     lep1.pt);
+		out.fillBranch(mustr+"_E",                      lep1_p4.E());
+		out.fillBranch(mustr+"_eta",                    lep1.eta);
+		out.fillBranch(mustr+"_phi",                    lep1.phi);
+		out.fillBranch(mustr+"_pdgid",                  lep1.pdgId);
+		out.fillBranch(mustr+"_charge",                 lep1.charge);
+		out.fillBranch(mustr+"_sip3D",                  lep1.sip3d);
+		out.fillBranch(mustr+"_miniRelIso",             lep1.miniPFRelIso_all);
+		out.fillBranch(mustr+"_miniRelIsoCharged",      lep1.miniPFRelIso_chg);
+		out.fillBranch(mustr+"_dxy",                    lep1.dxy);
+		out.fillBranch(mustr+"_dz",                     lep1.dz);
+		out.fillBranch(mustr+"_segmentCompatibility",   lep1.segmentComp);
+		out.fillBranch(mustr+"_leptonMVA",              lep1.mvaTTH);
+		out.fillBranch(mustr+"_dxyAbs",                 abs(lep1.dxy));
+	    else:
+		out.fillBranch(mustr+"_pt",                     -10000.0);
+		out.fillBranch(mustr+"_E",                      -10000.0);
+		out.fillBranch(mustr+"_eta",                    -10000.0);
+		out.fillBranch(mustr+"_phi",                    -10000.0);
+		out.fillBranch(mustr+"_pdgid",                  -100000);
+		out.fillBranch(mustr+"_charge",                 -10000.0);
+		out.fillBranch(mustr+"_sip3D",                  -10000.0);
+		out.fillBranch(mustr+"_miniRelIso",             -10000.0);
+		out.fillBranch(mustr+"_miniRelIsoCharged",      -10000.0);
+		out.fillBranch(mustr+"_dxy",                    -10000.0);
+		out.fillBranch(mustr+"_dxyAbs",                 -10000.0);
+		out.fillBranch(mustr+"_dz",                     -10000.0);
+		out.fillBranch(mustr+"_segmentCompatibility",   -10000.0);
+		out.fillBranch(mustr+"_leptonMVA",              -10000.0);
+	def fillBranches_ele(out, ele, index):
+	    elestr = "ele%d"%index
+	    if not isinstance(ele, type(None)):
+		lep1 = ele
+		lep1_p4 = ROOT.TLorentzVector()
+		lep1_p4.SetPtEtaPhiM(lep1.pt, lep1.eta, lep1.phi, lep1.mass)
+		out.fillBranch(elestr+"_pt",                    lep1.pt);
+		out.fillBranch(elestr+"_E",                     lep1_p4.E());
+		out.fillBranch(elestr+"_eta",                   lep1.eta);
+		out.fillBranch(elestr+"_phi",                   lep1.phi);
+		out.fillBranch(elestr+"_pdgid",                 lep1.pdgId);
+		out.fillBranch(elestr+"_charge",                lep1.charge);
+		out.fillBranch(elestr+"_sip3D",                 lep1.sip3d);
+		out.fillBranch(elestr+"_miniRelIso",            lep1.miniPFRelIso_all);
+		out.fillBranch(elestr+"_miniRelIsoCharged",     lep1.miniPFRelIso_chg);
+		out.fillBranch(elestr+"_dxy",                   lep1.dxy);
+		out.fillBranch(elestr+"_dz",                    lep1.dz);
+		out.fillBranch(elestr+"_leptonMVA",             lep1.mvaTTH);
+		out.fillBranch(elestr+"_dxyAbs",                abs(lep1.dxy));
+		out.fillBranch(elestr+"_ntMVAeleID",            0.0);##not available ?
+	    else:
+		out.fillBranch(elestr+"_pt",                    -10000.0);
+		out.fillBranch(elestr+"_E",                     -10000.0);
+		out.fillBranch(elestr+"_eta",                   -10000.0);
+		out.fillBranch(elestr+"_phi",                   -10000.0);
+		out.fillBranch(elestr+"_pdgid",                 -100000);
+		out.fillBranch(elestr+"_charge",                -10000.0);
+		out.fillBranch(elestr+"_sip3D",                 -10000.0);
+		out.fillBranch(elestr+"_miniRelIso",            -10000.0);
+		out.fillBranch(elestr+"_miniRelIsoCharged",     -10000.0);
+		out.fillBranch(elestr+"_dxy",                   -10000.0);
+		out.fillBranch(elestr+"_dxyAbs",                -10000.0);
+		out.fillBranch(elestr+"_dz",                    -10000.0);
+		out.fillBranch(elestr+"_ntMVAeleID",            -10000.0);
+		out.fillBranch(elestr+"_leptonMVA",             -10000.0);
+	def fillBranches_ak4jet(out, jet1, index):
+	    ak4Jetstr = "ak4Jet%d"%index
+            if not isinstance(jet1, type(None)):
+		#jet1 = jets[0]
+		jet1_p4 = ROOT.TLorentzVector()
+		jet1_p4.SetPtEtaPhiM(jet1.pt, jet1.eta, jet1.phi, jet1.mass)
+		out.fillBranch(ak4Jetstr+"_pt",                 jet1.pt);
+		out.fillBranch(ak4Jetstr+"_E",                  jet1_p4.E());
+		out.fillBranch(ak4Jetstr+"_eta",                jet1.eta);
+		out.fillBranch(ak4Jetstr+"_phi",                jet1.phi);
+		out.fillBranch(ak4Jetstr+"_cMVAv2",             jet1.btagCMVA);
+		out.fillBranch(ak4Jetstr+"_CSV",                jet1.btagDeepFlavB);
+	    else:
+		out.fillBranch(ak4Jetstr+"_pt",                 -10000.0);
+		out.fillBranch(ak4Jetstr+"_E",                  -10000.0);
+		out.fillBranch(ak4Jetstr+"_eta",                -10000.0);
+		out.fillBranch(ak4Jetstr+"_phi",                -10000.0);
+		out.fillBranch(ak4Jetstr+"_cMVAv2",             -10000.0);
+		out.fillBranch(ak4Jetstr+"_CSV",                -10000.0);
+
+	"""    
 	def fillBranches_muon(leptons):
 	    if (len(leptons) >= 1):
 		lep1 = leptons[0]
@@ -1981,43 +1963,62 @@ class HHbbWWProducer(Module):
 		self.out.fillBranch("ak8lsJet2_subjet1_eta",        -10000.0);
 		self.out.fillBranch("ak8lsJet2_subjet1_phi",        -10000.0);
 		self.out.fillBranch("ak8lsJet2_subjet1_CSV",        -10000.0);   
+	"""
 	    
 	        
 	        
 
         met_p4 = ROOT.TLorentzVector()## mass=0, eta=0
         met_p4.SetPtEtaPhiM(metPt,0.,metPhi,0.) # only use met vector to derive transverse quantities
-	self.out.fillBranch("n_presel_mu", len(muons_pre))
-	self.out.fillBranch("n_presel_ele", len(electrons_pre))
-	self.out.fillBranch("n_presel_ak4Jet", len(jets_clean))
-	self.out.fillBranch("n_presel_ak8Jet", len(ak8jets_clean))
-	self.out.fillBranch("n_presel_ak8lsJet", len(ak8lsjets_clean))
-	self.out.fillBranch("PFMET",  met_p4.Pt())
-	self.out.fillBranch("PFMETphi", met_p4.Phi())
-        self.out.fillBranch("PFMETCovXX", getattr(event, "MET_covXX"))
-        self.out.fillBranch("PFMETCovXY", getattr(event, "MET_covXY"))
-        self.out.fillBranch("PFMETCovYY", getattr(event, "MET_covYY"))
-	self.out.fillBranch("pu",  pu)
-	self.out.fillBranch("PU_weight",  event_pu_weight)
-        self.out.fillBranch("MC_weight",  genweight)
-	self.out.fillBranch("run",  run)
-	self.out.fillBranch("event",  ievent)
-	self.out.fillBranch("ls",  luminosityBlock)
-        #self.out.fillBranch("category",  event_category)
+	def fillrest(out):
+	    out.fillBranch("n_presel_mu", len(muons_pre))
+	    out.fillBranch("n_presel_ele", len(electrons_pre))
+	    out.fillBranch("n_presel_ak4Jet", len(jets_clean))
+	    out.fillBranch("n_presel_ak8Jet", len(ak8jets_clean))
+	    out.fillBranch("n_presel_ak8lsJet", len(ak8lsjets_clean))
+	    out.fillBranch("PFMET",  met_p4.Pt())
+	    out.fillBranch("PFMETphi", met_p4.Phi())
+	    out.fillBranch("PFMETCovXX", getattr(event, "MET_covXX"))
+	    out.fillBranch("PFMETCovXY", getattr(event, "MET_covXY"))
+	    out.fillBranch("PFMETCovYY", getattr(event, "MET_covYY"))
+	    out.fillBranch("pu",  pu)
+	    out.fillBranch("PU_weight",  event_pu_weight)
+	    out.fillBranch("MC_weight",  genweight)
+	    out.fillBranch("run",  run)
+	    out.fillBranch("event",  ievent)
+	    out.fillBranch("ls",  luminosityBlock)
+        #.out.fillBranch("category",  event_category)
 
-	if ievent == 191977:
-	    for jet in jets_clean:
-	        print "event id ",ievent, " jet pt ",jet.pt," eta ",jet.eta," phi ",jet.phi 
 
-	fillBranches_muon(muons_pre)
-	fillBranches_electron(electrons_pre)
-	fillBranches_jet(jets_clean)
-	fillBranches_ak8jet(ak8jets_clean, ak8subjets)
-	fillBranches_ak8lsjet(ak8lsjets_clean, ak8lssubjets)
+	#fillBranches_muon(muons_pre)
+	#fillBranches_electron(electrons_pre)
+	#fillBranches_jet(jets_clean)
+	#fillBranches_ak8jet(ak8jets_clean, ak8subjets)
+	#fillBranches_ak8lsjet(ak8lsjets_clean, ak8lssubjets)
+	def fillall(out):
+	    for i in range(2):
+		if len(muons_pre) > i:
+		    fillBranches_muon(out, muons_pre[i], i+1)
+		else:
+		    fillBranches_muon(out, None, i+1)
+		if len(electrons_pre) > i:
+		    fillBranches_ele(out, electrons_pre[i], i+1)
+		else:
+		    fillBranches_ele(out, None, i+1)
+	    for i in range(4):
+		if len(jets_clean) > i:
+		    fillBranches_ak4jet(out, jets_clean[i], i+1)
+		else:
+		    fillBranches_ak4jet(out, None, i+1)
+	    fillrest(out)
+	fillall(self.out)
+	fillall(self.Single_Signal)
 
-        if (("Single" in event_string) and ("Signal" in event_string)):
-          SS_TList = ROOT.TList(self.Single_Signal, self.out)
-          self.Single_Signal.MergeTrees(SS_TList)
+        
+
+        #if (("Single" in event_string) and ("Signal" in event_string)):
+        #  SS_TList = ROOT.TList(self.Single_Signal, self.out)
+        #  self.Single_Signal.MergeTrees(SS_TList)
         #self.Single_Fake   = wrappedOutputTree.Clone(0)
         #self.Double_Signal = wrappedOutputTree.Clone(0)
         #self.Double_Fake   = wrappedOutputTree.Clone(0)
