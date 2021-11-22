@@ -111,7 +111,12 @@ class HHbbWWProducer(Module):
 	self.h_cutflowlist["DoubleMuon"].SetLineColor(ROOT.kRed)
 	self.h_cutflowlist["DoubleEG"].SetLineColor(ROOT.kBlue)
 	self.h_cutflowlist["MuonEG"].SetLineColor(ROOT.kBlack)
-	
+
+        self.Single_Signal = ROOT.TTree("Single_Signal", "Single_Signal")
+        #self.Single_Fake   = ROOT.TTree("Single_Fake", "Single_Fake")
+        #self.Double_Signal = ROOT.TTree("Double_Signal", "Double_Signal")
+        #self.Double_Fake   = ROOT.TTree("Double_Fake", "Double_Fake")
+
         self.out = wrappedOutputTree
         self.out.branch("ak4Jet1_idx",  "I");
         self.out.branch("ak4Jet1_pt",  "F");
@@ -421,7 +426,9 @@ class HHbbWWProducer(Module):
 		#self.out.branch("alljets_hadronFlavour", "I", n=self.maxnjets)
 		self.out.branch("alljets_genpartonFlavour", "I", n=self.maxnjets)
 	    """
-        self.out.branch("category", "I")
+        #self.out.branch("category", "I")
+
+        #Single_Signal = self.out.tree().Clone(0)
 	
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
 	self.h_eventcounter.Write()
@@ -731,41 +738,64 @@ class HHbbWWProducer(Module):
 		self.h_cutflowlist[l1t].Fill( cutflow_bin, weight)
 	    cutflow_bin = cutflow_bin - 1
 	
-    def single_leptop(self, e_fake, e_tight, mu_fake, mu_tight, ak4_btagged, ak8_btagged, taus):
-        top_e_pt = 0; top_mu_pt = 0
-        if len(e_fake) > 0: top_e_pt = POGRecipesRun2.conept(e_fake[0])
-        if len(mu_fake) > 0: top_mu_pt = POGRecipesRun2.conept(mu_fake[0]) #at least 1 fakeable lepton
-        if top_e_pt > top_mu_pt:
-          if top_e_pt < 32: return False
-        else: 
-          if top_mu_pt < 25: return False #top lepton conept is fakeable AND passes GeV cuts
-        #Invariant mass of pair must be greater than 12GeV !!!!Not added yet!!!!
-        if (len(e_tight) + len(mu_tight)) > 1: return False #No more than 1 tight lepton
-        if (len(e_tight) == 1):
-          if e_tight[0] == e_fake[0]: return False
-        if (len(mu_tight) == 1):
-          if mu_tight[0] != mu_fake[0]: return False #Tight lepton should be highest conept
-        #Tau veto
-        #if (
 
-        #No pair of same-flavour, opposite-sign preselected leptons within 10GeV of Z mass !!!!Idk how to make pairs?!!!!
-        if not (len(ak8_btagged) >= 1 or len(ak4_btagged) >= 1): return False #at least one medium btag
-        #if not (len(ak8_btagged) == 0 and 
-        return True
+    def invar_mass_check(self, fake_leptons):
+        #The invariant mass of each pair of preselected leptons (electrons not cleaned wrt muons) must be greater than 12 GeV
+        invar_mass_cut = True
+        lep1_p4 = ROOT.TLorentzVector()
+        lep2_p4 = ROOT.TLorentzVector()
+        pair_p4 = ROOT.TLorentzVector()
+        for i in fake_leptons:
+          for j in fake_leptons:
+            if i == j: continue
+            lep1_p4.SetPtEtaPhiM(i.pt, i.eta, i.phi, i.mass)
+            lep2_p4.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)
+            pair_p4 = lep1_p4 + lep2_p4
+            pair_mass = pair_p4.M()
+            if (pair_mass < 12):
+              invar_mass_cut = False
+        return invar_mass_cut
 
-    def double_leptop(self, e_fake, e_tight, mu_fake, mu_tight, ak4_btagged, ak8_btagged):
-        if not((len(e_fake) + len(mu_fake)) >= 2): return False #at least 2 fakeable leptons
-        leptons_fake = e_fake + mu_fake
-        leptons_fake.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
-        #if ((leptons_fake[0] in e_fake) and (leptons_fake[1] in e_fake)) #must pass double E or single E
-        #if ((leptons_fake[0] in mu_fake) and (leptons_fake[1] in mu_fake)) #must pass double Mu or single Mu
-        #if (((leptons_fake[0] in e_fake) and (leptons_fake[1] in mu_fake)) or ((leptons_fake[0] in mu_fake) and (leptons_fake[1] in e_fake))) #must pass single E or single Mu or MuE
-        if ((POGRecipesRun2.conept(leptons_fake[0]) < 25) or (POGRecipesRun2.conept(leptons_fake[1]) < 15)): return False #conepT > 25 for leading, 15 for sub
-        if ((leptons_fake[0].charge * leptons_fake[1].charge != -1)): return False #must be opposite charge
-        #invariant mass of preselected lepton pair is greater than 12 GeV
-        if ((len(e_tight) + len(mu_tight)) > 2): return False #no more than 2 tight leptons
-        #no pair within 10GeV of Z
-        return True
+    def tau_veto_pass(self, taus,  muons_fakeable, electrons_fakeable):
+        tau_veto = False
+        #Tau veto: no tau passing pt>20, abs(eta) < 2.3, abs(dxy) <= 1000, abs(dz) <= 0.2, "decayModeFindingNewDMs", decay modes = {0, 1, 2, 10, 11}, and "byMediumDeepTau2017v2VSjet", "byVLooseDeepTau2017v2VSmu", "byVVVLooseDeepTau2017v2VSe". Taus overlapping with fakeable electrons or fakeable muons within dR < 0.3 are not considered for the tau veto
+        for i in taus:
+          if tau_veto:
+            #print("found at least one Tau passing the veto cuts")
+            break
+          if (i.pt > 20 and abs(i.eta) < 2.3 and  abs(i.dxy) <= 1000  and  abs(i.dxy) <= 1000 and i.idDecayModeNewDMs and i.decayMode in [0,1,2,10,11] and i.idDeepTau2017v2p1VSjet >= 16 and i.idDeepTau2017v2p1VSmu >= 1 and i.idDeepTau2017v2p1VSe >= 1):
+            for fake in (muons_fakeable + electrons_fakeable):
+              #print "dR = ", deltaR(fake.eta, fake.phi, i.eta, i.phi)
+              if deltaR(fake.eta, fake.phi, i.eta, i.phi) > 0.3:
+                #print("tau passing veto cuts and it is not overlappig with fakable leptons")
+                tau_veto = True
+                break
+        #if not tau_veto:
+          #print("event is not vetoed by Tau, keep it")
+        return not tau_veto
+
+    def Zmass_cut(self, muons_pre, electrons_pre):
+        #No pair of same-flavor, opposite-sign preselected leptons within  10GeV of the Z mass
+        presel_leptons = muons_pre + electrons_pre
+        pre1 = ROOT.TLorentzVector()
+        pre2 = ROOT.TLorentzVector()
+        pre_pair = ROOT.TLorentzVector()
+        Z_mass = 80
+        tmp_Zmass_pass = True
+        for i in presel_leptons:
+          for j in presel_leptons:
+            if i == j: continue
+            if not ((i in muons_pre and j in muons_pre) or (i in electrons_pre and j in electrons_pre)): continue
+            if (i.charge == j.charge): continue
+            pre1.SetPtEtaPhiM(i.pt, i.eta, i.phi, i.mass)
+            pre2.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)
+            pre_pair = pre1 + pre2
+            #print "Pre pair mass is ", pre_pair.M()
+            if (pre_pair.M() > Z_mass-10  and pre_pair.M() < Z_mass+10):
+              tmp_Zmass_pass = False
+              print "Failed Zmass check ", pre_pair.M()
+        return tmp_Zmass_pass
+
 
 
     def analyze(self, event):
@@ -910,92 +940,151 @@ class HHbbWWProducer(Module):
         #print "Is single? ", self.single_leptop(electrons_fakeable, electrons_tight, muons_fakeable, muons_tight, jets_btagged, ak8jets_btagged, taus)
         #print "Is double? ", self.double_lepton(electrons_fakeable, electrons_tight, muons_fakeable, muons_tight, jets_btagged, ak8jets_btagged)
 
-
+        #print "Checking event category"
         #event_category = "None"
-        event_category = 0
+        #Event Categories
+        # 0000 = None
+        # 1___ = Single
+        # 2___ = Double
+        # _1__ = Signal
+        # _2__ = Fake
+        # __1_ = Boosted
+        # __2_ = Resolved
+        # ___1 = AllReco
+        # ___2 = MissJet
+        event_string = "None"
+        event_category = [0,0,0,0]
         #Checking Single
-        #At least 1 fakebale lepton
+        #At least 1 fakeable lepton
         fake_leptons = muons_fakeable + electrons_fakeable
         fake_leptons.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
         tight_leptons = muons_tight + electrons_tight
         tight_leptons.sort(key = lambda x:POGRecipesRun2.conept(x), reverse=True)
         if len(fake_leptons) > 0:
           leading_lepton = fake_leptons[0]
-
           #Leading cone-pT passes single trigger and cone-pt cuts ####ADD THE TRIGGER STUFF
+          cone_pT_cut = False
           if ((leading_lepton in muons_fakeable and POGRecipesRun2.conept(leading_lepton) > 25) or (leading_lepton in electrons_fakeable and POGRecipesRun2.conept(leading_lepton) > 32)):
-
-            #Invariant mass of each pair of presel leptons must be greater than 12GeV
-            leading_lepton_p4 = ROOT.TLorentzVector()
-            sub_p4 = ROOT.TLorentzVector()
-            pair_p4 = ROOT.TLorentzVector()
-            tmp_invarMass = False
-            for i in range(1, len(fake_leptons)):
-              leading_lepton_p4.SetPtEtaPhiM(leading_lepton.pt, leading_lepton.eta, leading_lepton.phi, leading_lepton.mass)
-              sub_p4.SetPtEtaPhiM(fake_leptons[i].pt, fake_leptons[i].eta, fake_leptons[i].phi, fake_leptons[i].mass)
-              pair_p4 =  leading_lepton_p4 + sub_p4
-              pair_mass = pair_p4.M()
-              #print "Pair mass is ", pair_mass, " but lead/sub = ", leading_lepton_p4.M(), "/", sub_p4.M()
-              if (pair_mass > 12):  tmp_invarMass = True
-            if tmp_invarMass:
-
-
+            cone_pT_cut = True
+          if cone_pT_cut:
+            #The invariant mass of each pair of preselected leptons (electrons not cleaned wrt muons) must be greater than 12 GeV
+            if (self.invar_mass_check(fake_leptons)):
+              tight_lepton_cut = False
               #Not more than 1 tight  lepton in event and tight should be same as highest cone-pt fakeable lepton
               if (len(tight_leptons) <= 1):
                 if (len(tight_leptons) == 1):
                   if (tight_leptons[0] == leading_lepton):
+                    tight_lepton_cut = True
+                else:
+                  tight_lepton_cut = True
+              if tight_lepton_cut:
+                #Tau veto: no tau passing pt>20, abs(eta) < 2.3, abs(dxy) <= 1000, abs(dz) <= 0.2, "decayModeFindingNewDMs", decay modes = {0, 1, 2, 10, 11}, and "byMediumDeepTau2017v2VSjet", "byVLooseDeepTau2017v2VSmu", "byVVVLooseDeepTau2017v2VSe". Taus overlapping with fakeable electrons or fakeable muons within dR < 0.3 are not considered for the tau veto.
+                if self.tau_veto_pass(taus,  muons_fakeable, electrons_fakeable):
+                  #No pair of same-flavor, opposite-sign preselected leptons within  10GeV of the Z mass
+                  if self.Zmass_cut(muons_pre, electrons_pre):
+                    #At least one medium btag (that can be on a AK8 jet) :: (#selJetsAK8_b >= 1 || #b-medium >= 1) :: Where #b-medium is the number of AK4 jets with at least medium b-tag score and #selJetsAK8_b is the number of AK8 jets that have at least one subjet that passes medium b-tag score
+                    if (len(ak8jets_btagged) >= 1 or len(jets_btagged) >= 1):
+                      #The minimal number of jets to construct an Hbb and admit an hadronic W with a missing jet :: (#selJetsAK8_b == 0 && #selJetsAK4 >= 3) || (#selJetsAK8_b >= 1 && nJet_that_not_bb >= 1) :: Where "nJet_that_not_bb" is the number of AK4 jets that do not overlap with the leading selJetAK8_b within dR = 1.2
+                      nJet_that_not_bb = []
+                      if len(ak8jets_btagged) > 0:
+                        nJet_that_not_bb = [x for x in jets_pre if deltaR(x.eta, x.phi, ak8jets_btagged[0].eta, ak8jets_btagged[0].phi) > 1.2]
+                      #print "Len ak4pre not within ak8btag dR 1.2 ", len(nJet_that_not_bb)
+                      if ((len(ak8jets_btagged) == 0 and len(jets_pre) >= 3) or (len(ak8jets_btagged) >= 1 and len(nJet_that_not_bb) >= 1)):
+                        #event_category = "Single"
+                        event_category[0] = 1
+                        event_string = "Single"
+                        if len(ak8jets_btagged) >= 1:
+                          event_string += "_HbbFat_WjjRes"
+                          if len(nJet_that_not_bb) >= 2:
+                            event_string += "_allReco"
+                          else:
+                            event_string += "_MissJet"
+                        else:
+                          event_string += "_Res"
+                          if len(jets_pre) >= 4:
+                            event_string += "_allReco"
+                            if len(jets_btagged) >= 1:
+                              event_string += "_2b"
+                            else:
+                              event_string += "_1b"
+                          else:
+                            event_string += "_MissWJet"
+                            if len(jets_btagged) >= 1:
+                              event_string += "_2b"
+                            else:
+                              event_string += "_1b"
+                        #Signal
+                        #The leading fakeable lepton passes the tight lepton selection criteria
+                        #In MC, require MC matching of the leading fakeable lepton
+                        if (len(tight_leptons) == 1):
+                          event_string += "_Signal"
+                        #Fake
+                        #The leading fakeable lepton fails the tight lepton selection criteria
+                        #In MC, require MC matching of the leading fakeable lepton
+                        if (len(tight_leptons) == 0):
+                          event_string += "_Fake"
+
+        #Checking Double #Not done yet
+        #At least 2 fakeable leptons (choose the leading 2 in cone pT in the following)
+        fake_leptons = muons_fakeable + electrons_fakeable
+        fake_leptons.sort(key=lambda x:POGRecipesRun2.conept(x), reverse=True)
+        tight_leptons = muons_tight + electrons_tight
+        tight_leptons.sort(key = lambda x:POGRecipesRun2.conept(x), reverse=True)
+        if len(fake_leptons) > 1:
+          leading_lepton = fake_leptons[0]
+          subleading_lepton = fake_leptons[1]
+          #f both fakeable leptons are electrons, the event needs to pass either the single electron or the double electron trigger; if both fakeable leptons are muons, the event needs to pass either the single muon or the double muon trigger; if one fakeable lepton is an electron and the other fakeable lepton is a muon, the event needs to pass either the single electron or the single muon or the muon+electron trigger
+          #cone pT > 25 for the leading fakeable lepton and cone pT > 15 GeV for the subleading fakeable lepton
+          cone_pT_cut = False
+          if ((POGRecipesRun2.conept(leading_lepton) > 25) and POGRecipesRun2.conept(subleading_lepton) > 15):
+            cone_pT_cut = True
+          if cone_pT_cut:
+            #The 2 fakeable leptons must have opposite charge
+            opp_charge_cut = False
+            if (leading_lepton.charge != subleading_lepton.charge):
+              opp_charge_cut = True
+            if opp_charge_cut:
+              if (self.invar_mass_check(fake_leptons)):
+                tight_lepton_cut = False
+                #Not more than 2 tight leptons in the event
+                if (len(tight_leptons) <= 2):
+                  tight_lepton_cut = True
+                if tight_lepton_cut:
+                  #No pair of same-flavor, opposite-sign preselected leptons within 10 GeV of the Z mass
+                  if self.Zmass_cut(muons_pre, electrons_pre):
+                    #The event needs to pass the selection in either the boosted or the resolved category:
+
+                    #In order for the event to pass the selection in the boosted category, it needs to contain at least one b-tagged Ak8 jet (see object definition)
+
+                    #In order for the event to pass the selection in the resolved category, it needs to contain at least 2 AK4 jets, of which at least one passes the medium working-point of the DeepJet b-tagging algorithm
+
+                    #The two categories are mutually exclusive. The higher priority is given to the boosted category, i.e. events satisfying the criteria for the boosted category are not considered for the resolved category.
+
+                    event_string = "Double"
+                    if(len(ak8jets_btagged) >= 1):
+                      event_string += "_Boosted"
+                    elif(len(jets_pre) >= 2 and len(jets_btagged) >= 1):
+                      event_string += "_Resolved"
+
+                    #The leading and subleading fakeable lepton both pass the tight lepton selection criteria
+                    #In MC, require MC matching of the leading and subleading fakelable lepton
+                    if ((leading_lepton in tight_leptons) and (subleading_lepton in tight_leptons)):
+                      event_string += "_Signal"
+
+                    #Either the leading fakeable lepton, the subleading fakeable lepton or both fail the tight lepton selection criteria
+                    #In MC, require MC matching of the leading and subleading fakelable lepton
+                    else:
+                      event_string += "_Fake"
+
+                    if (("Boosted" not in event_string) and ("Resolved" not in event_string)):
+                      print "Bad event! throw it away!"
+                      print event_string
+                      event_string = "None"
 
 
-                    #Tau veto: no tau passing pt>20, abs(eta) < 2.3, abs(dxy) <= 1000, abs(dz) <= 0.2, "decayModeFindingNewDMs", decay modes = {0, 1, 2, 10, 11}, and "byMediumDeepTau2017v2VSjet", "byVLooseDeepTau2017v2VSmu", "byVVVLooseDeepTau2017v2VSe". Taus overlapping with fakeable electrons or fakeable muons within dR < 0.3 are not considered for the tau veto.
-                    tmp_TauVeto = True
-                    for i in taus:
-                      print "pt ", i.pt
-                      print "eta ", i.eta
-                      print "dxy ", i.dxy
-                      print "dz ", i.dz
-                      print "idDecayModeNewDMs ", i.idDecayModeNewDMs
-                      print "decayMode ", i.decayMode
-                      print "idDeepTau2017v2VSjet ", i.idDeepTau2017v2p1VSjet
-                      print "isDeepTau2017v2VSmu ", i.idDeepTau2017v2p1VSmu
-                      print "idDeepTau2017v2VSe ", i.idDeepTau2017v2p1VSe
-                      print "check if dR < 0.3 with fakeables"
-                      for fake in (muons_fakeable + electrons_fakeable):
-                        print "dR = ", deltaR(fake.eta, fake.phi, i.eta, i.phi)
 
-                      #if (i.pt > 20 or abs(i.eta) < 2.3 or abs(i.dxy) <= 1000 or abs(i.dz) <= 0.2 or i.idDecayModeNewDMs):
-                        #print "Bad Tau"
-                        #tmp_TauVeto = False
-                    if tmp_TauVeto:
-
-
-                      #No pair of same-flavor, opposite-sign preselected leptons within  10GeV of the Z mass
-                      presel_leptons = muons_pre + electrons_pre
-                      pre1 = ROOT.TLorentzVector()
-                      pre2 = ROOT.TLorentzVector()
-                      pre_pair = ROOT.TLorentzVector()
-                      Z_mass = 80
-                      tmp_Zmass_pass = True
-                      for i in presel_leptons:
-                        for j in presel_leptons:
-                          if i == j: continue
-                          if not ((i in muons_pre and j in muons_pre) or (i in electrons_pre and j in electrons_pre)): continue
-                          if (i.charge == j.charge): continue
-                          pre1.SetPtEtaPhiM(i.pt, i.eta, i.phi, i.mass)
-                          pre2.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)
-                          pre_pair = pre1 + pre2
-                          #print "Pre pair mass is ", pre_pair.M()
-                          if (pre_pair.M() > Z_mass-10  and pre_pair.M() < Z_mass+10):
-                            tmp_Zmass_pass = False
-                      if tmp_Zmass_pass:
-
-
-                        #At least one medium btag (that can be on a AK8 jet) :: (#selJetsAK8_b >= 1 || #b-medium >= 1) :: Where #b-medium is the number of AK4 jets with at least medium b-tag score and #selJetsAK8_b is the number of AK8 jets that have at least one subjet that passes medium b-tag score
-                        if (len(ak8jets_btagged) >= 1 or len(jets_btagged) >= 1):
-                          #The minimal number of jets to construct an Hbb and admit an hadronic W with a missing jet :: (#selJetsAK8_b == 0 && #selJetsAK4 >= 3) || (#selJetsAK8_b >= 1 && nJet_that_not_bb >= 1) :: Where "nJet_that_not_bb" is the number of AK4 jets that do not overlap with the leading selJetAK8_b within dR = 1.2
-                          #event_category = "Single"
-                          event_category = 1
-
-        #print "Category is ", event_category
+        if (event_string != "None"):
+          print event_string
 
 
         """
@@ -1914,7 +2003,7 @@ class HHbbWWProducer(Module):
 	self.out.fillBranch("run",  run)
 	self.out.fillBranch("event",  ievent)
 	self.out.fillBranch("ls",  luminosityBlock)
-        self.out.fillBranch("category",  event_category)
+        #self.out.fillBranch("category",  event_category)
 
 	if ievent == 191977:
 	    for jet in jets_clean:
@@ -1925,6 +2014,13 @@ class HHbbWWProducer(Module):
 	fillBranches_jet(jets_clean)
 	fillBranches_ak8jet(ak8jets_clean, ak8subjets)
 	fillBranches_ak8lsjet(ak8lsjets_clean, ak8lssubjets)
+
+        if (("Single" in event_string) and ("Signal" in event_string)):
+          SS_TList = ROOT.TList(self.Single_Signal, self.out)
+          self.Single_Signal.MergeTrees(SS_TList)
+        #self.Single_Fake   = wrappedOutputTree.Clone(0)
+        #self.Double_Signal = wrappedOutputTree.Clone(0)
+        #self.Double_Fake   = wrappedOutputTree.Clone(0)
 
         return True
                 
