@@ -17,7 +17,7 @@ tahuang1991/nanoAOD-tools is built based on cms-nanoAOD/nanoAOD-tools with minor
 MC:
 ```
 cd HhhAnalysis/python/NanoAOD
-cmsRun postproc_DY_local.py
+cmsRun postproc_local.py
 ```
 # NanoAOD data sheet: 
 https://cms-nanoaod-integration.web.cern.ch/integration/master-102X/mc102X_doc.html
