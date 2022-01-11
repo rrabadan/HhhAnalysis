@@ -6,10 +6,10 @@ mkdir myFolder
 cmsrel CMSSW_10_2_0   
 cd CMSSW_10_2_0/src   
 git clone https://github.com/lpernie/HhhAnalysis.git   
-git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools   
+git clone https://github.com/tahuang1991/nanoAOD-tools.git PhysicsTools/NanoAODTools   
 scram b -j 12   
 ```
-
+tahuang1991/nanoAOD-tools is built based on cms-nanoAOD/nanoAOD-tools with minor change
 # Running on data or simulation using NanoAOD sample to produce Ntuple with Dilepton and Single lepton selections:   
 
 MC:
