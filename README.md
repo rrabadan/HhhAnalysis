@@ -16,7 +16,6 @@ MC:
 ```
 cd HhhAnalysis/python/NanoAOD
 cmsRun postproc_DY_local.py
-vim README
 ```
 # NanoAOD data sheet: 
 https://cms-nanoaod-integration.web.cern.ch/integration/master-102X/mc102X_doc.html
