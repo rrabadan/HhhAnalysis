@@ -1,0 +1,10 @@
+# this is a comment
+drop *
+#keep * # start with all
+keep Gen*
+#keep GenPart_*
+#keep GenJet_*
+#keep genWeight
+#keep Generator_*
+keep event
+keep run
